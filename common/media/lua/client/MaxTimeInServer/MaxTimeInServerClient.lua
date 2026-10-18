@@ -10,7 +10,7 @@ is spent, it shows the numbers and drops the connection - immediately if the
 player dismisses the notice, and in any case once the grace period is up.
 ]]
 
-PlayerTimerClient = PlayerTimerClient or {}
+MaxTimeInServerClient = MaxTimeInServerClient or {}
 
 --- True only on a machine with a local player, i.e. not a dedicated server.
 -- Checked when an event fires rather than when this file loads, because the
@@ -42,15 +42,15 @@ local function defaultShowNotice(text)
     local x = (getCore():getScreenWidth() - width) / 2
     local y = (getCore():getScreenHeight() - height) / 2
     local modal = ISModalDialog:new(x, y, width, height, text, false, nil,
-        PlayerTimerClient.onNoticeDismissed)
+        MaxTimeInServerClient.onNoticeDismissed)
     modal:initialise()
     modal:addToUIManager()
     if modal.setAlwaysOnTop ~= nil then modal:setAlwaysOnTop(true) end
 end
 
-PlayerTimerClient.hooks = {
+MaxTimeInServerClient.hooks = {
     sendHello = function()
-        sendClientCommand(PlayerTimerConfig.netModule, PlayerTimerConfig.netHello, {})
+        sendClientCommand(MaxTimeInServerConfig.netModule, MaxTimeInServerConfig.netHello, {})
     end,
     showNotice = defaultShowNotice,
     disconnect = function() forceDisconnect() end,
@@ -58,48 +58,48 @@ PlayerTimerClient.hooks = {
 }
 
 --- Forgets any pending disconnect. Used by the tests and on a fresh session.
-function PlayerTimerClient.reset()
+function MaxTimeInServerClient.reset()
     disconnectAtMs = nil
     greeted = false
 end
 
 local function dropNow()
     disconnectAtMs = nil
-    pcall(PlayerTimerClient.hooks.disconnect)
+    pcall(MaxTimeInServerClient.hooks.disconnect)
 end
 
 --- OK on the notice: go straight away rather than waiting out the grace.
-function PlayerTimerClient.onNoticeDismissed()
+function MaxTimeInServerClient.onNoticeDismissed()
     dropNow()
 end
 
-function PlayerTimerClient.onCreatePlayer(playerIndex)
+function MaxTimeInServerClient.onCreatePlayer(playerIndex)
     if not actingAsClient() then return end
     -- Only the first local player greets; a split-screen second player is the
     -- same account as far as the quota is concerned.
     if playerIndex ~= 0 then return end
     if greeted then return end
     greeted = true
-    pcall(PlayerTimerClient.hooks.sendHello)
+    pcall(MaxTimeInServerClient.hooks.sendHello)
 end
 
-function PlayerTimerClient.onServerCommand(module, command, args)
+function MaxTimeInServerClient.onServerCommand(module, command, args)
     if not actingAsClient() then return end
-    if module ~= PlayerTimerConfig.netModule then return end
-    if command ~= PlayerTimerConfig.netBlocked then return end
+    if module ~= MaxTimeInServerConfig.netModule then return end
+    if command ~= MaxTimeInServerConfig.netBlocked then return end
 
     args = args or {}
     local minutes = tonumber(args.minutes) or 0
     local cap = tonumber(args.cap) or 0
-    local graceSeconds = tonumber(args.graceSeconds) or PlayerTimerConfig.graceSeconds or 10
+    local graceSeconds = tonumber(args.graceSeconds) or MaxTimeInServerConfig.graceSeconds or 10
 
     -- The disconnect is armed before the notice: a UI that refuses to open
     -- must not leave the player in a world they are not allowed to be in.
-    local clockOk, now = pcall(PlayerTimerClient.hooks.nowMs)
+    local clockOk, now = pcall(MaxTimeInServerClient.hooks.nowMs)
     now = clockOk and now or 0
     disconnectAtMs = now + graceSeconds * 1000
 
-    local shown = pcall(PlayerTimerClient.hooks.showNotice,
+    local shown = pcall(MaxTimeInServerClient.hooks.showNotice,
         noticeText(minutes, cap, args.resetsAt, graceSeconds))
     if not shown then
         -- Nothing was put on screen, so the grace period buys the player
@@ -107,28 +107,28 @@ function PlayerTimerClient.onServerCommand(module, command, args)
         disconnectAtMs = now + 2000
     end
 
-    print("[PlayerTimer] refused by the server: " .. tostring(minutes) ..
+    print("[MaxTimeInServer] refused by the server: " .. tostring(minutes) ..
         "/" .. tostring(cap) .. " minutes this week")
 end
 
-function PlayerTimerClient.update()
+function MaxTimeInServerClient.update()
     if disconnectAtMs == nil then return end
-    local ok, now = pcall(PlayerTimerClient.hooks.nowMs)
+    local ok, now = pcall(MaxTimeInServerClient.hooks.nowMs)
     if not ok or now == nil then return end
     if now >= disconnectAtMs then dropNow() end
 end
 
-function PlayerTimerClient.registerEvents()
+function MaxTimeInServerClient.registerEvents()
     -- Keyed to the event object so a Lua reload re-attaches us, instead of a
     -- boolean that would survive the reload and skip it.
-    if PlayerTimerClient.registeredOn == Events.OnServerCommand then return end
-    PlayerTimerClient.registeredOn = Events.OnServerCommand
-    Events.OnCreatePlayer.Add(PlayerTimerClient.onCreatePlayer)
-    Events.OnServerCommand.Add(PlayerTimerClient.onServerCommand)
-    Events.OnTick.Add(PlayerTimerClient.update)
+    if MaxTimeInServerClient.registeredOn == Events.OnServerCommand then return end
+    MaxTimeInServerClient.registeredOn = Events.OnServerCommand
+    Events.OnCreatePlayer.Add(MaxTimeInServerClient.onCreatePlayer)
+    Events.OnServerCommand.Add(MaxTimeInServerClient.onServerCommand)
+    Events.OnTick.Add(MaxTimeInServerClient.update)
 end
 
 -- Registered whatever side we are on; every handler checks for itself. A
 -- dedicated server runs this file too and stays silent because isClient() is
 -- false there when the events fire.
-PlayerTimerClient.registerEvents()
+MaxTimeInServerClient.registerEvents()

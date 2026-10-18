@@ -1,5 +1,5 @@
 --[[
-Reads and writes <Zomboid>/Lua/PlayerTimer.txt.
+Reads and writes <Zomboid>/Lua/MaxTimeInServer.txt.
 
 The format is deliberately plain so the server owner can edit it while the
 server runs: a header of key=value lines, then one [username] section per
@@ -7,7 +7,7 @@ player. Keys the mod does not know are carried through untouched, and nothing
 in here is allowed to raise - a hand-edited file must never take the mod down.
 ]]
 
-PlayerTimerStore = PlayerTimerStore or {}
+MaxTimeInServerStore = MaxTimeInServerStore or {}
 
 local KNOWN_HEADER = {
     version = true, capMinutes = true, weekStart = true,
@@ -27,7 +27,7 @@ local function toBoolean(value)
 end
 
 --- A brand new, empty state seeded with the configured cap.
-function PlayerTimerStore.newState(capMinutes)
+function MaxTimeInServerStore.newState(capMinutes)
     return {
         version = 1,
         capMinutes = capMinutes,
@@ -43,7 +43,7 @@ function PlayerTimerStore.newState(capMinutes)
 end
 
 --- The record for `username`, created with safe defaults if it is new.
-function PlayerTimerStore.player(state, username)
+function MaxTimeInServerStore.player(state, username)
     local record = state.players[username]
     if record then return record end
     record = {
@@ -78,8 +78,8 @@ local function parseNumber(state, where, key, value)
 end
 
 --- Parses the file's text. Always returns a usable state.
-function PlayerTimerStore.parse(text, defaultCapMinutes)
-    local state = PlayerTimerStore.newState(defaultCapMinutes or PlayerTimerConfig.capMinutes)
+function MaxTimeInServerStore.parse(text, defaultCapMinutes)
+    local state = MaxTimeInServerStore.newState(defaultCapMinutes or MaxTimeInServerConfig.capMinutes)
     state.version = nil
     local current = nil        -- nil while still in the header
     local currentName = nil
@@ -112,7 +112,7 @@ function PlayerTimerStore.parse(text, defaultCapMinutes)
             if section then
                 currentName = trim(section)
                 if currentName ~= "" then
-                    current = PlayerTimerStore.player(state, currentName)
+                    current = MaxTimeInServerStore.player(state, currentName)
                     recognised = recognised + 1
                 else
                     current = nil
@@ -149,18 +149,18 @@ function PlayerTimerStore.parse(text, defaultCapMinutes)
 
     state.recognised = recognised
     if state.capMinutes == nil then
-        state.capMinutes = defaultCapMinutes or PlayerTimerConfig.capMinutes
+        state.capMinutes = defaultCapMinutes or MaxTimeInServerConfig.capMinutes
     end
     if state.weekStartEpoch == nil then state.weekStartEpoch = 0 end
     return state
 end
 
 --- Renders the state back to text. Player order is preserved.
-function PlayerTimerStore.serialize(state)
+function MaxTimeInServerStore.serialize(state)
     local out = {}
     local function put(line) table.insert(out, line) end
 
-    put("# PlayerTimer - weekly connected-time quota. Minutes are real minutes.")
+    put("# MaxTimeInServer - weekly connected-time quota. Minutes are real minutes.")
     put("# A week runs from Monday 00:00:00 to Sunday 23:59:59, server timezone.")
     put("# Safe to edit while the server runs: changes are picked up within a minute.")
     put("#   minutes       real minutes spent on the server this week")
@@ -197,18 +197,18 @@ end
 --- Loads the data file. Returns (state, info); never raises.
 -- info.created is true when there was no file, info.corrupt when there was one
 -- but nothing in it could be understood (info.raw then holds the original text).
-function PlayerTimerStore.load(files, name, capMinutes)
+function MaxTimeInServerStore.load(files, name, capMinutes)
     local ok, text = pcall(files.read, files, name)
     if not ok then text = nil end
 
     if text == nil or trim(text) == "" then
-        local state = PlayerTimerStore.newState(capMinutes)
+        local state = MaxTimeInServerStore.newState(capMinutes)
         return state, { created = true, corrupt = false }
     end
 
-    local parsedOk, state = pcall(PlayerTimerStore.parse, text, capMinutes)
+    local parsedOk, state = pcall(MaxTimeInServerStore.parse, text, capMinutes)
     if not parsedOk or state == nil or (state.recognised or 0) == 0 then
-        local fallback = PlayerTimerStore.newState(capMinutes)
+        local fallback = MaxTimeInServerStore.newState(capMinutes)
         return fallback, { created = false, corrupt = true, raw = text }
     end
 
@@ -217,9 +217,9 @@ function PlayerTimerStore.load(files, name, capMinutes)
 end
 
 --- Writes the data file. Returns true on success, nil plus a message otherwise.
-function PlayerTimerStore.save(files, name, state, nowEpoch)
-    state.savedAt = PlayerTimerClock.formatIso(nowEpoch)
-    local ok, result = pcall(files.write, files, name, PlayerTimerStore.serialize(state))
+function MaxTimeInServerStore.save(files, name, state, nowEpoch)
+    state.savedAt = MaxTimeInServerClock.formatIso(nowEpoch)
+    local ok, result = pcall(files.write, files, name, MaxTimeInServerStore.serialize(state))
     if not ok then return nil, tostring(result) end
     if result == false then return nil, "writer refused " .. tostring(name) end
     return true

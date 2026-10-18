@@ -6,7 +6,7 @@ S.loadModules(S.CLIENT_MODULES, "client")
 local function wire(opts)
     opts = opts or {}
     local world = { nowMs = 1000, hellos = 0, notices = {}, disconnects = 0 }
-    PlayerTimerClient.hooks = {
+    MaxTimeInServerClient.hooks = {
         sendHello = function() world.hellos = world.hellos + 1 end,
         showNotice = function(text)
             if opts.noticeThrows then error("ui exploded") end
@@ -15,7 +15,7 @@ local function wire(opts)
         disconnect = function() world.disconnects = world.disconnects + 1 end,
         nowMs = function() return world.nowMs end,
     }
-    PlayerTimerClient.reset()
+    MaxTimeInServerClient.reset()
     return world
 end
 
@@ -23,15 +23,15 @@ local BLOCKED = { minutes = 612, cap = 600, resetsAt = "2026-10-19T00:00:00+0000
 
 H.test("the client greets the server once its player exists", function()
     local world = wire()
-    PlayerTimerClient.onCreatePlayer(0)
+    MaxTimeInServerClient.onCreatePlayer(0)
     H.assertEqual(world.hellos, 1, "one hello")
-    PlayerTimerClient.onCreatePlayer(1)
+    MaxTimeInServerClient.onCreatePlayer(1)
     H.assertEqual(world.hellos, 1, "split-screen players do not greet again")
 end)
 
 H.test("a refusal is shown with the numbers in it", function()
     local world = wire()
-    PlayerTimerClient.onServerCommand(PlayerTimerConfig.netModule, PlayerTimerConfig.netBlocked, BLOCKED)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule, MaxTimeInServerConfig.netBlocked, BLOCKED)
     H.assertEqual(#world.notices, 1, "one notice")
     H.assertMatch(world.notices[1], "612", "minutes used")
     H.assertMatch(world.notices[1], "600", "the cap")
@@ -40,42 +40,42 @@ end)
 
 H.test("the connection is dropped once the grace period is over", function()
     local world = wire()
-    PlayerTimerClient.onServerCommand(PlayerTimerConfig.netModule, PlayerTimerConfig.netBlocked, BLOCKED)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule, MaxTimeInServerConfig.netBlocked, BLOCKED)
     world.nowMs = world.nowMs + 11999
-    PlayerTimerClient.update()
+    MaxTimeInServerClient.update()
     H.assertEqual(world.disconnects, 0, "not yet")
     world.nowMs = world.nowMs + 1
-    PlayerTimerClient.update()
+    MaxTimeInServerClient.update()
     H.assertEqual(world.disconnects, 1, "dropped")
-    PlayerTimerClient.update()
+    MaxTimeInServerClient.update()
     H.assertEqual(world.disconnects, 1, "only once")
 end)
 
 H.test("a notice the UI refuses to show drops the connection almost at once", function()
     local world = wire({ noticeThrows = true })
-    PlayerTimerClient.onServerCommand(PlayerTimerConfig.netModule, PlayerTimerConfig.netBlocked, BLOCKED)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule, MaxTimeInServerConfig.netBlocked, BLOCKED)
     world.nowMs = world.nowMs + 1999
-    PlayerTimerClient.update()
+    MaxTimeInServerClient.update()
     H.assertEqual(world.disconnects, 0, "a moment to settle")
     world.nowMs = world.nowMs + 1
-    PlayerTimerClient.update()
+    MaxTimeInServerClient.update()
     H.assertEqual(world.disconnects, 1, "dropped without waiting out the grace")
 end)
 
 H.test("a refusal with no numbers still reads as a sentence", function()
     local world = wire()
-    PlayerTimerClient.onServerCommand(PlayerTimerConfig.netModule, PlayerTimerConfig.netBlocked, {})
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule, MaxTimeInServerConfig.netBlocked, {})
     H.assertEqual(#world.notices, 1, "one notice")
     H.assertTrue(#world.notices[1] > 20, "not empty")
 end)
 
 H.test("unrelated server commands are ignored", function()
     local world = wire()
-    PlayerTimerClient.onServerCommand("SomeOtherMod", PlayerTimerConfig.netBlocked, BLOCKED)
-    PlayerTimerClient.onServerCommand(PlayerTimerConfig.netModule, "whatever", BLOCKED)
+    MaxTimeInServerClient.onServerCommand("SomeOtherMod", MaxTimeInServerConfig.netBlocked, BLOCKED)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule, "whatever", BLOCKED)
     H.assertEqual(#world.notices, 0, "nothing shown")
     world.nowMs = world.nowMs + 60000
-    PlayerTimerClient.update()
+    MaxTimeInServerClient.update()
     H.assertEqual(world.disconnects, 0, "nothing dropped")
 end)
 

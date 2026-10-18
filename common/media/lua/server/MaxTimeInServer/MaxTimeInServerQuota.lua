@@ -12,7 +12,7 @@ is what lets the operator edit minutes, bonusMinutes, exempt or capMinutes by
 hand and have it take effect within one interval.
 ]]
 
-PlayerTimerQuota = PlayerTimerQuota or {}
+MaxTimeInServerQuota = MaxTimeInServerQuota or {}
 
 local SECONDS_PER_MINUTE = 60
 local SECONDS_PER_WEEK = 7 * 24 * 3600
@@ -47,16 +47,16 @@ local carriedSeconds = {}        -- username -> seconds not yet worth a minute
 
 local function defaultDeps()
     return {
-        config = PlayerTimerConfig,
-        clock = PlayerTimerClock,
-        store = PlayerTimerStore,
+        config = MaxTimeInServerConfig,
+        clock = MaxTimeInServerClock,
+        store = MaxTimeInServerStore,
         files = pzFiles,
-        players = PlayerTimerPlayers,
+        players = MaxTimeInServerPlayers,
     }
 end
 
 local function log(message)
-    print("[PlayerTimer] " .. message)
+    print("[MaxTimeInServer] " .. message)
 end
 
 --- True only on a machine acting as the server for other people.
@@ -69,7 +69,7 @@ local function actingAsServer()
 end
 
 --- Swaps in alternative collaborators and forgets all in-memory progress.
-function PlayerTimerQuota.configure(overrides)
+function MaxTimeInServerQuota.configure(overrides)
     deps = defaultDeps()
     for key, value in pairs(overrides or {}) do deps[key] = value end
     lastSweepEpoch = nil
@@ -82,7 +82,7 @@ local function dependencies()
 end
 
 --- Reads the data file and returns (state, info).
-function PlayerTimerQuota.loadState()
+function MaxTimeInServerQuota.loadState()
     local d = dependencies()
     return d.store.load(d.files, d.config.dataFile, d.config.capMinutes)
 end
@@ -103,7 +103,7 @@ end
 --- Whether `username` may play, and the numbers to tell them if not.
 -- Never raises, and errs towards letting people in: a quota that cannot read
 -- its own file must not lock the server.
-function PlayerTimerQuota.verdict(username, roleName)
+function MaxTimeInServerQuota.verdict(username, roleName)
     local d = dependencies()
     local exemptRoles = exemptRoleSet()
 
@@ -250,7 +250,7 @@ end
 
 --- One full pass. Swallows every error: an event handler that raises can take
 --- the rest of the server's Lua with it.
-function PlayerTimerQuota.sweep(now)
+function MaxTimeInServerQuota.sweep(now)
     local ok, err = pcall(sweepBody, now)
     if not ok then log("sweep failed: " .. tostring(err)) end
     lastSweepEpoch = now
@@ -259,19 +259,19 @@ end
 
 --- Runs a sweep if enough real time has passed. Returns true when it did.
 -- EveryOneMinute fires on clients too, so this checks which side it is on.
-function PlayerTimerQuota.tick()
+function MaxTimeInServerQuota.tick()
     if not actingAsServer() then return false end
     local d = dependencies()
     local now = d.clock.now()
     if lastSweepEpoch ~= nil and (now - lastSweepEpoch) < (d.config.sweepIntervalSeconds or 60) then
         return false
     end
-    PlayerTimerQuota.sweep(now)
+    MaxTimeInServerQuota.sweep(now)
     return true
 end
 
 --- Anchors the clock, so the time the server spent down is never credited.
-function PlayerTimerQuota.start()
+function MaxTimeInServerQuota.start()
     local d = dependencies()
     lastSweepEpoch = d.clock.now()
     carriedSeconds = {}
@@ -283,8 +283,8 @@ end
 local function onServerStarted()
     log("OnServerStarted fired (isServer=" .. tostring(isServer ~= nil and isServer()) ..
         " isClient=" .. tostring(isClient ~= nil and isClient()) ..
-        " store=" .. tostring(PlayerTimerStore ~= nil) ..
-        " config=" .. tostring(PlayerTimerConfig ~= nil) .. ")")
+        " store=" .. tostring(MaxTimeInServerStore ~= nil) ..
+        " config=" .. tostring(MaxTimeInServerConfig ~= nil) .. ")")
 
     if not actingAsServer() then
         log("not acting as the server, standing down")
@@ -292,14 +292,14 @@ local function onServerStarted()
     end
 
     local ok, err = pcall(function()
-        PlayerTimerQuota.start()
+        MaxTimeInServerQuota.start()
         local d = dependencies()
-        local state = PlayerTimerQuota.loadState()
+        local state = MaxTimeInServerQuota.loadState()
         log("ready: cap " .. tostring(state.capMinutes or 0) ..
             " minutes per week, week starting " .. tostring(state.weekStart) ..
             ", " .. tostring(#state.order) .. " accounts on record")
         -- Apply the week reset right away rather than waiting out the interval.
-        PlayerTimerQuota.sweep(d.clock.now())
+        MaxTimeInServerQuota.sweep(d.clock.now())
     end)
     if not ok then log("start-up failed: " .. tostring(err)) end
 end
@@ -307,20 +307,20 @@ end
 local function onSaving()
     if not actingAsServer() then return end
     local ok, err = pcall(function()
-        PlayerTimerQuota.sweep(dependencies().clock.now())
+        MaxTimeInServerQuota.sweep(dependencies().clock.now())
     end)
     if not ok then log("save-time sweep failed: " .. tostring(err)) end
 end
 
-function PlayerTimerQuota.registerEvents()
+function MaxTimeInServerQuota.registerEvents()
     -- The guard is keyed to the identity of the event object, not to a boolean.
     -- A plain flag kept on this table survives a Lua reload while the Events
     -- table does not, which would leave the mod loaded, flagged as registered,
     -- and attached to event objects nobody triggers any more.
-    if PlayerTimerQuota.registeredOn == Events.OnServerStarted then return end
-    PlayerTimerQuota.registeredOn = Events.OnServerStarted
+    if MaxTimeInServerQuota.registeredOn == Events.OnServerStarted then return end
+    MaxTimeInServerQuota.registeredOn = Events.OnServerStarted
     Events.OnServerStarted.Add(onServerStarted)
-    Events.EveryOneMinute.Add(PlayerTimerQuota.tick)
+    Events.EveryOneMinute.Add(MaxTimeInServerQuota.tick)
     Events.OnServerStartSaving.Add(onSaving)
 end
 
@@ -328,12 +328,12 @@ end
 -- OnServerStarted and OnServerStartSaving only ever fire on a server, and
 -- tick() checks the side itself, so there is nothing to gain from guessing at
 -- load time - and plenty to lose if the guess is wrong.
-PlayerTimerQuota.registerEvents()
+MaxTimeInServerQuota.registerEvents()
 
 -- One line per boot, so a silent mod is never mistaken for a working one. The
 -- side flags are printed because they are not reliable this early: that is why
 -- nothing here is decided at load time.
-print("[PlayerTimer] server half loaded (isServer=" ..
+print("[MaxTimeInServer] server half loaded (isServer=" ..
     tostring(isServer ~= nil and isServer()) ..
     " isClient=" .. tostring(isClient ~= nil and isClient()) ..
-    " config=" .. tostring(PlayerTimerConfig ~= nil) .. ")")
+    " config=" .. tostring(MaxTimeInServerConfig ~= nil) .. ")")

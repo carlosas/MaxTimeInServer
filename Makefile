@@ -1,18 +1,18 @@
-# PlayerTimer - weekly connected-time quota for a Project Zomboid B42 server.
+# MaxTimeInServer - weekly connected-time quota for a Project Zomboid B42 server.
 #
 # Nothing here ever restarts the game server on its own: `make restart` is a
 # separate, deliberate step.
 
 SERVER      ?= server-local
 SSH         ?= ssh -o BatchMode=yes -o ConnectTimeout=8 $(SERVER)
-MOD_ID      ?= PlayerTimer
+MOD_ID      ?= MaxTimeInServer
 ROUND       ?= round1
 WORLD       ?= Zomboides2
 
 ZOMBOID     ?= $$HOME/Zomboid
 MODS_DIR    ?= $(ZOMBOID)/mods
 CONSOLE     ?= $(ZOMBOID)/server-console.txt
-DATA_FILE   ?= $(ZOMBOID)/Lua/PlayerTimer.txt
+DATA_FILE   ?= $(ZOMBOID)/Lua/MaxTimeInServer.txt
 DB_FILE     ?= $(ZOMBOID)/db/$(WORLD).db
 SERVER_INI  ?= $(ZOMBOID)/Server/$(WORLD).ini
 
@@ -38,9 +38,9 @@ verify-sync: ## Check the server's copy of the mod matches this working tree
 	@# The server hashes the mod's Lua when it boots and kicks clients whose
 	@# copies disagree, so the zip handed to players must be the same bytes the
 	@# server actually booted with.
-	@find $(MOD_FILES) -type f | sort | xargs md5 -r | sed 's|^\([a-f0-9]*\) |\1  |' > /tmp/pt-local.txt
-	@$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | sort | xargs md5sum | sed "s|\./||"' > /tmp/pt-remote.txt
-	@if diff -u /tmp/pt-local.txt /tmp/pt-remote.txt; then echo "in sync"; else \
+	@find $(MOD_FILES) -type f | sort | xargs md5 -r | sed 's|^\([a-f0-9]*\) |\1  |' > /tmp/mts-local.txt
+	@$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | sort | xargs md5sum | sed "s|\./||"' > /tmp/mts-remote.txt
+	@if diff -u /tmp/mts-local.txt /tmp/mts-remote.txt; then echo "in sync"; else \
 		echo; echo "OUT OF SYNC - run 'make deploy' and restart, or the players' copies will"; \
 		echo "fail the server's Lua checksum and be kicked at the connection screen."; exit 1; fi
 
@@ -58,13 +58,13 @@ restart: ## Restart the game server (asks nothing, so run it on purpose)
 status: ## Service status
 	@$(SSH) 'systemctl --user is-active zomboid-panel zomboid zomboid-backup.timer'
 
-logs: ## Last PlayerTimer lines from the server console
-	@$(SSH) 'grep -a "\[PlayerTimer" $(CONSOLE) | tail -40 || echo "(no PlayerTimer lines yet)"'
+logs: ## Last MaxTimeInServer lines from the server console
+	@$(SSH) 'grep -a "\[MaxTimeInServer" $(CONSOLE) | tail -40 || echo "(no MaxTimeInServer lines yet)"'
 
 data: ## Show the counter file (wherever the engine put it)
-	@$(SSH) 'f=$$(find $(ZOMBOID) -maxdepth 2 -name "PlayerTimer*.txt" 2>/dev/null | head -5); \
+	@$(SSH) 'f=$$(find $(ZOMBOID) -maxdepth 2 -name "MaxTimeInServer*.txt" 2>/dev/null | head -5); \
 		if [ -n "$$f" ]; then for x in $$f; do echo "== $$x"; cat "$$x"; done; \
-		else echo "(no PlayerTimer*.txt under $(ZOMBOID) yet)"; fi'
+		else echo "(no MaxTimeInServer*.txt under $(ZOMBOID) yet)"; fi'
 
 roles: ## Show every account and the role it currently holds
 	@$(SSH) 'python3 -c "\

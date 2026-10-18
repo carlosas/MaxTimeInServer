@@ -11,17 +11,17 @@ local LUA_ROOT = "common/media/lua/"
 -- then server - GameServer.doMinimumInit runs all three): every module must be
 -- safe to load without its siblings being present yet.
 S.SERVER_MODULES = {
-    "shared/PlayerTimer/PlayerTimerConfig.lua",
-    "server/PlayerTimer/PlayerTimerClock.lua",
-    "server/PlayerTimer/PlayerTimerGate.lua",
-    "server/PlayerTimer/PlayerTimerPlayers.lua",
-    "server/PlayerTimer/PlayerTimerQuota.lua",
-    "server/PlayerTimer/PlayerTimerStore.lua",
+    "shared/MaxTimeInServer/MaxTimeInServerConfig.lua",
+    "server/MaxTimeInServer/MaxTimeInServerClock.lua",
+    "server/MaxTimeInServer/MaxTimeInServerGate.lua",
+    "server/MaxTimeInServer/MaxTimeInServerPlayers.lua",
+    "server/MaxTimeInServer/MaxTimeInServerQuota.lua",
+    "server/MaxTimeInServer/MaxTimeInServerStore.lua",
 }
 
 S.CLIENT_MODULES = {
-    "shared/PlayerTimer/PlayerTimerConfig.lua",
-    "client/PlayerTimer/PlayerTimerClient.lua",
+    "shared/MaxTimeInServer/MaxTimeInServerConfig.lua",
+    "client/MaxTimeInServer/MaxTimeInServerClient.lua",
 }
 
 S.MODULES = S.SERVER_MODULES
@@ -68,7 +68,7 @@ function S.logText()
 end
 
 -- A civil-time backend equivalent to java.util.Calendar on a UTC server.
--- dayOfWeek is 1 = Monday .. 7 = Sunday, matching PlayerTimerClock's contract.
+-- dayOfWeek is 1 = Monday .. 7 = Sunday, matching MaxTimeInServerClock's contract.
 function S.utcCalendarBackend()
     return {
         fields = function(epoch)
@@ -103,7 +103,7 @@ function S.fakeFiles(initial)
 end
 
 -- Stand-in for the connected players the server can see. Each entry is what
--- PlayerTimerPlayers.online() yields: a username and the role it holds.
+-- MaxTimeInServerPlayers.online() yields: a username and the role it holds.
 function S.fakePlayers(entries)
     local players = { entries = entries or {} }
     function players.online()

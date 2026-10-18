@@ -1,4 +1,4 @@
-# PlayerTimer
+# MaxTimeInServer
 
 A mod for **Project Zomboid Build 42** dedicated servers. It counts how many
 real minutes each account spends connected during the current week and turns
@@ -28,12 +28,12 @@ What the server *can* do is talk to a client that has just arrived. So:
    dismisses the notice, and in any case once a short grace period is up.
 
 ```
-client joins ──► sendClientCommand("PlayerTimer", "hello")
+client joins ──► sendClientCommand("MaxTimeInServer", "hello")
                             │
-server          PlayerTimerGate ──► PlayerTimerQuota.verdict("darkkz", "user")
+server          MaxTimeInServerGate ──► MaxTimeInServerQuota.verdict("darkkz", "user")
                             │        612 of 600 minutes this week
                             ▼
-                sendServerCommand(player, "PlayerTimer", "blocked",
+                sendServerCommand(player, "MaxTimeInServer", "blocked",
                                   {minutes=612, cap=600, resetsAt=…})
                             │
 client          notice ──► forceDisconnect()
@@ -62,43 +62,43 @@ live server — see `tools/layout-probe/`, which records the two probe rounds an
 their results.
 
 ```
-PlayerTimer/
+MaxTimeInServer/
   42/mod.info                                     <- the manifest must live here, with no versionMin
   42/poster.png
-  common/media/lua/shared/PlayerTimer/            <- config, needed by both sides
-  common/media/lua/client/PlayerTimer/            <- the notice and the disconnect
-  common/media/lua/server/PlayerTimer/            <- the counting and the decision
+  common/media/lua/shared/MaxTimeInServer/            <- config, needed by both sides
+  common/media/lua/client/MaxTimeInServer/            <- the notice and the disconnect
+  common/media/lua/server/MaxTimeInServer/            <- the counting and the decision
 ```
 
 ## Installing on the server
 
 ```sh
 make test      # the full suite, no server needed
-make deploy    # copies the mod to server-local:~/Zomboid/mods/PlayerTimer/
+make deploy    # copies the mod to server-local:~/Zomboid/mods/MaxTimeInServer/
 ```
 
 Then add the mod id to `~/Zomboid/Server/<World>.ini`:
 
 ```
-Mods=PlayerTimer
+Mods=MaxTimeInServer
 ```
 
 and restart the game server:
 
 ```sh
 make restart
-make logs      # [PlayerTimer] ready: cap 600 minutes per week, week starting ...
+make logs      # [MaxTimeInServer] ready: cap 600 minutes per week, week starting ...
 ```
 
 ## Installing for the players
 
-**Every player needs the identical `PlayerTimer` folder**, both because the
+**Every player needs the identical `MaxTimeInServer` folder**, both because the
 client half does the disconnecting and because the client runs
 `checkMissingMods` while loading — a player without it is turned away at the
 connection screen.
 
 ```sh
-make package    # runs the tests, checks the server is in sync, builds build/PlayerTimer.zip
+make package    # runs the tests, checks the server is in sync, builds build/MaxTimeInServer.zip
 ```
 
 `make package` refuses to build unless the server's copy of the mod matches this
@@ -119,7 +119,7 @@ drives it.
 
 ## The counter file
 
-`~/Zomboid/Lua/PlayerTimer.txt` on the server. Safe to edit while the server is
+`~/Zomboid/Lua/MaxTimeInServer.txt` on the server. Safe to edit while the server is
 running — every sweep re-reads it, so a change takes effect within a minute.
 
 ```
@@ -138,7 +138,7 @@ exempt=false
 
 | Field | Meaning |
 |---|---|
-| `capMinutes` | the weekly budget for everyone; this value wins over the one in `PlayerTimerConfig.lua` |
+| `capMinutes` | the weekly budget for everyone; this value wins over the one in `MaxTimeInServerConfig.lua` |
 | `weekStartEpoch` | start of the week the counters belong to; set it to `0` to force a reset |
 | `minutes` | real minutes spent on the server this week |
 | `bonusMinutes` | extra allowance for **this week only**, added to `capMinutes`; cleared at the next reset |
@@ -147,7 +147,7 @@ exempt=false
 
 Accounts holding `admin`, `moderator` or `gm` are never counted and never turned
 away, so an operator can always get in. The list lives in
-`PlayerTimerConfig.lua`.
+`MaxTimeInServerConfig.lua`.
 
 ### Recipes
 

@@ -16,15 +16,15 @@ disagree, so editing this mod locally gets you dropped by the base game before
 the quota is even consulted.
 ]]
 
-PlayerTimerGate = PlayerTimerGate or {}
+MaxTimeInServerGate = MaxTimeInServerGate or {}
 
 local deps = nil
 
 local function defaultDeps()
     return {
-        config = PlayerTimerConfig,
-        quota = PlayerTimerQuota,
-        players = PlayerTimerPlayers,
+        config = MaxTimeInServerConfig,
+        quota = MaxTimeInServerQuota,
+        players = MaxTimeInServerPlayers,
         net = {
             send = function(player, module, command, args)
                 sendServerCommand(player, module, command, args)
@@ -34,10 +34,10 @@ local function defaultDeps()
 end
 
 local function log(message)
-    print("[PlayerTimer] " .. message)
+    print("[MaxTimeInServer] " .. message)
 end
 
-function PlayerTimerGate.configure(overrides)
+function MaxTimeInServerGate.configure(overrides)
     deps = defaultDeps()
     for key, value in pairs(overrides or {}) do deps[key] = value end
 end
@@ -48,7 +48,7 @@ local function dependencies()
 end
 
 --- Server-side handler for the client's greeting.
-function PlayerTimerGate.onClientCommand(module, command, player)
+function MaxTimeInServerGate.onClientCommand(module, command, player)
     local d = dependencies()
     if module ~= d.config.netModule then return end
     if command ~= d.config.netHello then return end
@@ -84,13 +84,13 @@ function PlayerTimerGate.onClientCommand(module, command, player)
     if not ok then log("handshake failed: " .. tostring(err)) end
 end
 
-function PlayerTimerGate.registerEvents()
-    -- Keyed to the event object, not to a boolean: see PlayerTimerQuota.
-    if PlayerTimerGate.registeredOn == Events.OnClientCommand then return end
-    PlayerTimerGate.registeredOn = Events.OnClientCommand
-    Events.OnClientCommand.Add(PlayerTimerGate.onClientCommand)
+function MaxTimeInServerGate.registerEvents()
+    -- Keyed to the event object, not to a boolean: see MaxTimeInServerQuota.
+    if MaxTimeInServerGate.registeredOn == Events.OnClientCommand then return end
+    MaxTimeInServerGate.registeredOn = Events.OnClientCommand
+    Events.OnClientCommand.Add(MaxTimeInServerGate.onClientCommand)
 end
 
 -- Registered unconditionally: OnClientCommand only ever fires on a server, so
 -- there is no need to work out which side this is at load time.
-PlayerTimerGate.registerEvents()
+MaxTimeInServerGate.registerEvents()

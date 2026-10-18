@@ -7,11 +7,11 @@ namespace), so everything here comes off the IsoPlayer objects the engine hands
 out. That is enough: a quota only ever has to judge somebody who is connected.
 ]]
 
-PlayerTimerPlayers = PlayerTimerPlayers or {}
+MaxTimeInServerPlayers = MaxTimeInServerPlayers or {}
 
 --- Lower-cased role name of a connected player, or nil if it cannot be read.
 -- Falls back to the access level, which is what an older server reports.
-function PlayerTimerPlayers.roleOf(player)
+function MaxTimeInServerPlayers.roleOf(player)
     if player == nil then return nil end
 
     local ok, name = pcall(function()
@@ -33,7 +33,7 @@ function PlayerTimerPlayers.roleOf(player)
 end
 
 --- Everyone connected right now, as { username = ..., role = ... }.
-function PlayerTimerPlayers.online()
+function MaxTimeInServerPlayers.online()
     local out = {}
     local ok, players = pcall(getOnlinePlayers)
     if not ok or players == nil then return out end
@@ -46,7 +46,7 @@ function PlayerTimerPlayers.online()
                 if username ~= nil and tostring(username) ~= "" then
                     table.insert(out, {
                         username = tostring(username),
-                        role = PlayerTimerPlayers.roleOf(player),
+                        role = MaxTimeInServerPlayers.roleOf(player),
                         player = player,
                     })
                 end
@@ -54,7 +54,7 @@ function PlayerTimerPlayers.online()
         end
     end)
     if not walked then
-        print("[PlayerTimer] could not list the connected players: " .. tostring(err))
+        print("[MaxTimeInServer] could not list the connected players: " .. tostring(err))
     end
     return out
 end

@@ -3,11 +3,11 @@ Week boundaries. A week runs from Monday 00:00:00 inclusive to the next Monday
 00:00:00 exclusive, in the timezone the game server's JVM runs in (the host is
 Etc/UTC, so there is no DST to worry about).
 
-The civil-time lookup sits behind PlayerTimerClock.backend so the week maths can
+The civil-time lookup sits behind MaxTimeInServerClock.backend so the week maths can
 be exercised without a running game.
 ]]
 
-PlayerTimerClock = PlayerTimerClock or {}
+MaxTimeInServerClock = MaxTimeInServerClock or {}
 
 local SECONDS_PER_DAY = 86400
 
@@ -37,22 +37,22 @@ local javaBackend = {
     end,
 }
 
-PlayerTimerClock.backend = javaBackend
+MaxTimeInServerClock.backend = javaBackend
 
 --- Epoch second of the Monday 00:00:00 that opens the week containing `epoch`.
-function PlayerTimerClock.getWeekStartEpoch(epoch)
-    local fields = PlayerTimerClock.backend.fields(epoch)
+function MaxTimeInServerClock.getWeekStartEpoch(epoch)
+    local fields = MaxTimeInServerClock.backend.fields(epoch)
     local secondsIntoDay = fields.hour * 3600 + fields.minute * 60 + fields.second
     local daysIntoWeek = fields.dayOfWeek - 1
     return epoch - secondsIntoDay - daysIntoWeek * SECONDS_PER_DAY
 end
 
 --- Human-readable stamp for the data file and the log.
-function PlayerTimerClock.formatIso(epoch)
-    return PlayerTimerClock.backend.formatIso(epoch)
+function MaxTimeInServerClock.formatIso(epoch)
+    return MaxTimeInServerClock.backend.formatIso(epoch)
 end
 
 --- Current real time in epoch seconds.
-function PlayerTimerClock.now()
-    return PlayerTimerClock.backend.now()
+function MaxTimeInServerClock.now()
+    return MaxTimeInServerClock.backend.now()
 end

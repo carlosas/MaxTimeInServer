@@ -1,15 +1,15 @@
 --[[
-PlayerTimer - weekly connected-time quota.
+MaxTimeInServer - weekly connected-time quota.
 
 Lives in shared/ because both sides need it: the server reads the quota rules,
 the client needs the handshake names.
 
 The cap and the per-player allowances here are only seed values. Once
-<Zomboid>/Lua/PlayerTimer.txt exists, that file is authoritative, so the server
+<Zomboid>/Lua/MaxTimeInServer.txt exists, that file is authoritative, so the server
 owner can change them without redeploying the mod to everybody.
 ]]
 
-PlayerTimerConfig = {
+MaxTimeInServerConfig = {
     -- Weekly budget of real connected minutes, used only when the data file is
     -- first created. Afterwards the file's capMinutes wins.
     capMinutes = 600,
@@ -20,7 +20,7 @@ PlayerTimerConfig = {
     exemptRoles = { "admin", "moderator", "gm" },
 
     -- Lives in <Zomboid>/Lua/. The engine only accepts .lua, .txt and .bin.
-    dataFile = "PlayerTimer.txt",
+    dataFile = "MaxTimeInServer.txt",
 
     -- Real seconds between two sweeps. The sweep is driven by a game-time
     -- event, so it is checked far more often than this and returns early until
@@ -34,7 +34,7 @@ PlayerTimerConfig = {
     maxCreditSecondsPerSweep = 3600,
 
     -- Handshake between the client and the server.
-    netModule = "PlayerTimer",
+    netModule = "MaxTimeInServer",
     netHello = "hello",
     netBlocked = "blocked",
 
