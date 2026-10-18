@@ -191,14 +191,19 @@ No game install is needed. `tests/test_client_on_server.lua` covers the one
 thing easy to get wrong: a dedicated server runs client Lua too, so the client
 half must sit still there.
 
-Two rules the live server taught us, both worth keeping:
+Three rules the live server taught us, all of them the hard way:
 
-- **Never decide which side you are on at load time.** Mod Lua is loaded inside
-  `GameServer.doMinimumInit`, and `isServer()` / `isClient()` are not dependable
-  that early. Register handlers unconditionally and check the side when the
-  event fires.
-- **Always log one line on load.** A mod that registers nothing looks exactly
-  like a mod that is working fine, and the server logs no error for it.
+- **The engine runs Kahlua, not PUC-Lua.** A pattern that can match the empty
+  string — `gmatch("[^\n]*")` to split lines, say — never advances past the
+  empty match there and spins forever. The same code terminates under `luajit`,
+  so the tests were green while the server hung on every boot, silently, at 200%
+  CPU until systemd killed it. Split strings with `find` and `sub`;
+  `string.format` is likewise fussy (`%d` on a float is refused).
+- **Always log one line on entry.** A handler that hangs or returns early looks
+  exactly like a mod that is working fine, and the server logs nothing for it.
+- **Key a registration guard to the event object, not to a boolean.** A flag on
+  a global table survives a Lua reload while the `Events` table may not, which
+  would leave the mod flagged as registered and attached to nothing.
 
 ## Limitations
 

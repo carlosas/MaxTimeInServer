@@ -313,18 +313,21 @@ local function onSaving()
 end
 
 function PlayerTimerQuota.registerEvents()
-    -- The flag lives on the table, not in a local: if the game loads this file
-    -- from two mod media roots, both copies must see it.
-    if PlayerTimerQuota.registered then return end
-    PlayerTimerQuota.registered = true
+    -- The guard is keyed to the identity of the event object, not to a boolean.
+    -- A plain flag kept on this table survives a Lua reload while the Events
+    -- table does not, which would leave the mod loaded, flagged as registered,
+    -- and attached to event objects nobody triggers any more.
+    if PlayerTimerQuota.registeredOn == Events.OnServerStarted then return end
+    PlayerTimerQuota.registeredOn = Events.OnServerStarted
     Events.OnServerStarted.Add(onServerStarted)
     Events.EveryOneMinute.Add(PlayerTimerQuota.tick)
     Events.OnServerStartSaving.Add(onSaving)
 end
 
--- Registered unconditionally. OnServerStarted and OnServerStartSaving only ever
--- fire on a server, and tick() checks the side itself, so there is nothing to
--- gain from guessing at load time - and plenty to lose if the guess is wrong.
+-- Registered every time this file is executed, whatever side we are on:
+-- OnServerStarted and OnServerStartSaving only ever fire on a server, and
+-- tick() checks the side itself, so there is nothing to gain from guessing at
+-- load time - and plenty to lose if the guess is wrong.
 PlayerTimerQuota.registerEvents()
 
 -- One line per boot, so a silent mod is never mistaken for a working one. The

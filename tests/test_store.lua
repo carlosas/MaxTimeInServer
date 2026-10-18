@@ -52,6 +52,38 @@ H.test("parse tolerates comments, blank lines, CRLF and stray spaces", function(
     H.assertEqual(state.players.ragged.minutes, 7, "ragged minutes")
 end)
 
+H.test("parse handles every shape of line ending and never loops", function()
+    -- The engine's Lua spins forever on a pattern that can match the empty
+    -- string, so the parser splits lines with find/sub. These inputs are the
+    -- ones that produced empty matches: blank lines, no trailing newline, a
+    -- trailing newline, and a single line.
+    local cases = {
+        "version=1\ncapMinutes=7",                 -- no trailing newline
+        "version=1\ncapMinutes=7\n",               -- trailing newline
+        "version=1\n\n\n\ncapMinutes=7\n\n\n",     -- runs of blank lines
+        "capMinutes=7",                            -- one line, no newline
+        "\n\n\ncapMinutes=7",                      -- leading blank lines
+        "capMinutes=7\r\n\r\n",                    -- CRLF with a blank line
+    }
+    for index, text in ipairs(cases) do
+        local state = PlayerTimerStore.parse(text)
+        H.assertEqual(state.capMinutes, 7, "case " .. index)
+    end
+end)
+
+H.test("parse copes with a file of many accounts", function()
+    local parts = { "version=1", "capMinutes=600", "" }
+    for index = 1, 500 do
+        table.insert(parts, "[player" .. index .. "]")
+        table.insert(parts, "minutes=" .. index)
+        table.insert(parts, "")
+    end
+    local state = PlayerTimerStore.parse(table.concat(parts, "\n"))
+    H.assertEqual(state.players.player1.minutes, 1, "first")
+    H.assertEqual(state.players.player500.minutes, 500, "last")
+    H.assertEqual(#state.order, 500, "all of them")
+end)
+
 H.test("serialize then parse is a round trip", function()
     local original = PlayerTimerStore.parse(SAMPLE)
     local again = PlayerTimerStore.parse(PlayerTimerStore.serialize(original))

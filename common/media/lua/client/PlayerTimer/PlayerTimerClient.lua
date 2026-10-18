@@ -118,9 +118,17 @@ function PlayerTimerClient.update()
     if now >= disconnectAtMs then dropNow() end
 end
 
--- Registered unconditionally; every handler checks the side itself. A dedicated
--- server runs this file too and must stay silent, which it does because
--- isClient() is false there when the events actually fire.
-Events.OnCreatePlayer.Add(PlayerTimerClient.onCreatePlayer)
-Events.OnServerCommand.Add(PlayerTimerClient.onServerCommand)
-Events.OnTick.Add(PlayerTimerClient.update)
+function PlayerTimerClient.registerEvents()
+    -- Keyed to the event object so a Lua reload re-attaches us, instead of a
+    -- boolean that would survive the reload and skip it.
+    if PlayerTimerClient.registeredOn == Events.OnServerCommand then return end
+    PlayerTimerClient.registeredOn = Events.OnServerCommand
+    Events.OnCreatePlayer.Add(PlayerTimerClient.onCreatePlayer)
+    Events.OnServerCommand.Add(PlayerTimerClient.onServerCommand)
+    Events.OnTick.Add(PlayerTimerClient.update)
+end
+
+-- Registered whatever side we are on; every handler checks for itself. A
+-- dedicated server runs this file too and stays silent because isClient() is
+-- false there when the events fire.
+PlayerTimerClient.registerEvents()

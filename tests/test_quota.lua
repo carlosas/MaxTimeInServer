@@ -274,4 +274,23 @@ H.test("the mod registers itself on the server's events", function()
     H.assertTrue(#Events.OnServerStartSaving.handlers > 0, "OnServerStartSaving")
 end)
 
+H.test("registering twice against the same Events table does not duplicate", function()
+    local before = #Events.OnServerStarted.handlers
+    PlayerTimerQuota.registerEvents()
+    H.assertEqual(#Events.OnServerStarted.handlers, before, "no duplicate")
+end)
+
+H.test("a rebuilt Events table is registered on again", function()
+    -- A Lua reload gives the mod a fresh Events table while the globals it set
+    -- survive. A boolean guard would skip re-registration and leave the mod
+    -- attached to event objects nobody triggers any more.
+    local fresh = { handlers = {} }
+    fresh.Add = function(fn) table.insert(fresh.handlers, fn) end
+    local saved = Events.OnServerStarted
+    Events.OnServerStarted = fresh
+    PlayerTimerQuota.registerEvents()
+    H.assertTrue(#fresh.handlers > 0, "re-registered on the new table")
+    Events.OnServerStarted = saved
+end)
+
 H.run("quota")

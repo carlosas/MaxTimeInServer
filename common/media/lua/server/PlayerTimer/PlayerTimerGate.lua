@@ -85,8 +85,9 @@ function PlayerTimerGate.onClientCommand(module, command, player)
 end
 
 function PlayerTimerGate.registerEvents()
-    if PlayerTimerGate.registered then return end
-    PlayerTimerGate.registered = true
+    -- Keyed to the event object, not to a boolean: see PlayerTimerQuota.
+    if PlayerTimerGate.registeredOn == Events.OnClientCommand then return end
+    PlayerTimerGate.registeredOn = Events.OnClientCommand
     Events.OnClientCommand.Add(PlayerTimerGate.onClientCommand)
 end
 

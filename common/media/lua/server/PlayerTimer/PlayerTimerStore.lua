@@ -82,7 +82,25 @@ function PlayerTimerStore.parse(text, defaultCapMinutes)
     local currentName = nil
     local recognised = 0
 
-    for rawLine in tostring(text or ""):gmatch("[^\n]*") do
+    -- Split on newlines with find/sub rather than a pattern. The engine runs
+    -- Kahlua, not PUC-Lua, and there gmatch("[^\n]*") never advances past the
+    -- empty match it makes at the end of every line: it spins forever and takes
+    -- the whole server down with it, silently, because the hang is inside an
+    -- event handler. Any pattern that can match the empty string is a trap here.
+    local raw = tostring(text or "")
+    local length = #raw
+    local cursor = 1
+    while cursor <= length do
+        local rawLine
+        local newline = string.find(raw, "\n", cursor, true)
+        if newline == nil then
+            rawLine = string.sub(raw, cursor)
+            cursor = length + 1
+        else
+            rawLine = string.sub(raw, cursor, newline - 1)
+            cursor = newline + 1
+        end
+
         local line = trim((rawLine:gsub("\r", "")))
         if line == "" or line:sub(1, 1) == "#" or line:sub(1, 1) == ";" then
             -- comment or blank, nothing to do
