@@ -39,10 +39,13 @@ verify-sync: ## Check the server's copy of the mod matches this working tree
 	@# copies disagree, so the zip handed to players must be the same bytes the
 	@# server actually booted with.
 	@find $(MOD_FILES) -type f | sort | xargs md5 -r | sed 's|^\([a-f0-9]*\) |\1  |' > /tmp/mts-local.txt
-	@$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | sort | xargs md5sum | sed "s|\./||"' > /tmp/mts-remote.txt
-	@if diff -u /tmp/mts-local.txt /tmp/mts-remote.txt; then echo "in sync"; else \
-		echo; echo "OUT OF SYNC - run 'make deploy' and restart, or the players' copies will"; \
-		echo "fail the server's Lua checksum and be kicked at the connection screen."; exit 1; fi
+	@if ! $(SSH) 'test -d $(MODS_DIR)/$(MOD_ID)'; then \
+		echo "the server has no copy of the mod installed - nothing to compare against"; \
+		exit 0; fi; \
+		$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | sort | xargs md5sum | sed "s|\./||"' > /tmp/mts-remote.txt; \
+		if diff -u /tmp/mts-local.txt /tmp/mts-remote.txt; then echo "in sync"; else \
+			echo; echo "OUT OF SYNC - run 'make deploy' and restart, or the players' copies will"; \
+			echo "fail the server's Lua checksum and be kicked at the connection screen."; exit 1; fi
 
 package: test verify-sync ## Build the zip the players install into their own Zomboid/mods/
 	@rm -rf build && mkdir -p build/$(MOD_ID)
