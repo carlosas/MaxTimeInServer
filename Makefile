@@ -6,6 +6,7 @@
 SERVER      ?= server-local
 SSH         ?= ssh -o BatchMode=yes -o ConnectTimeout=8 $(SERVER)
 MOD_ID      ?= PlayerTimer
+ROUND       ?= round1
 WORLD       ?= Zomboides2
 
 ZOMBOID     ?= $$HOME/Zomboid
@@ -15,10 +16,10 @@ DATA_FILE   ?= $(ZOMBOID)/Lua/PlayerTimer.txt
 DB_FILE     ?= $(ZOMBOID)/db/$(WORLD).db
 SERVER_INI  ?= $(ZOMBOID)/Server/$(WORLD).ini
 
-MOD_FILES   = mod.info poster.png common
+MOD_FILES   = 42 common
 
-.PHONY: help test deploy restart status logs data roles ini \
-        probe-deploy probe-read probe-clean uninstall
+.PHONY: help test deploy package restart status logs data roles ini \
+        layout-probe-deploy layout-read layout-probe-clean uninstall
 
 help:
 	@grep -E '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t24
@@ -27,9 +28,18 @@ test: ## Run the Lua test suite locally
 	@./tests/run.sh
 
 deploy: test ## Copy the mod to the server (does not restart it)
-	@tar cf - $(MOD_FILES) | $(SSH) 'mkdir -p $(MODS_DIR)/$(MOD_ID) && tar xf - -C $(MODS_DIR)/$(MOD_ID)'
+	@# COPYFILE_DISABLE keeps macOS from shipping ._AppleDouble files, which the
+	@# game would try to load as Lua.
+	@COPYFILE_DISABLE=1 tar --no-xattrs -cf - $(MOD_FILES) | $(SSH) 'rm -rf $(MODS_DIR)/$(MOD_ID) && mkdir -p $(MODS_DIR)/$(MOD_ID) && tar xf - -C $(MODS_DIR)/$(MOD_ID) && find $(MODS_DIR)/$(MOD_ID) -name "._*" -delete'
 	@$(SSH) 'find $(MODS_DIR)/$(MOD_ID) -type f | sort'
 	@echo "Deployed. Add $(MOD_ID) to the Mods= line and restart when you are ready."
+
+package: test ## Build the zip the players install into their own Zomboid/mods/
+	@rm -rf build && mkdir -p build/$(MOD_ID)
+	@COPYFILE_DISABLE=1 tar --no-xattrs -cf - $(MOD_FILES) | tar xf - -C build/$(MOD_ID)
+	@cd build && zip -qr $(MOD_ID).zip $(MOD_ID)
+	@echo "build/$(MOD_ID).zip - players unzip this into their Zomboid/mods/ folder"
+	@unzip -l build/$(MOD_ID).zip | tail -3
 
 restart: ## Restart the game server (asks nothing, so run it on purpose)
 	@$(SSH) 'systemctl --user restart zomboid.service'
@@ -41,8 +51,10 @@ status: ## Service status
 logs: ## Last PlayerTimer lines from the server console
 	@$(SSH) 'grep -a "\[PlayerTimer" $(CONSOLE) | tail -40 || echo "(no PlayerTimer lines yet)"'
 
-data: ## Show the counter file
-	@$(SSH) 'cat $(DATA_FILE) 2>/dev/null || echo "(no $(DATA_FILE) yet)"'
+data: ## Show the counter file (wherever the engine put it)
+	@$(SSH) 'f=$$(find $(ZOMBOID) -maxdepth 2 -name "PlayerTimer*.txt" 2>/dev/null | head -5); \
+		if [ -n "$$f" ]; then for x in $$f; do echo "== $$x"; cat "$$x"; done; \
+		else echo "(no PlayerTimer*.txt under $(ZOMBOID) yet)"; fi'
 
 roles: ## Show every account and the role it currently holds
 	@$(SSH) 'python3 -c "\
@@ -55,17 +67,17 @@ print(\"%-20s %-12s %s\" % (\"username\",\"role\",\"last connection\")); \
 ini: ## Show the mod-related server ini lines
 	@$(SSH) 'grep -nE "^(Mods|WorkshopItems|Open|MaxPlayers)=" $(SERVER_INI)'
 
-probe-deploy: ## Copy the throwaway layout probes to the server
-	@cd tools/probe && tar cf - PlayerTimerProbeA PlayerTimerProbeB | $(SSH) 'mkdir -p $(MODS_DIR) && tar xf - -C $(MODS_DIR)'
-	@echo "Probes in place. Set Mods=PlayerTimerProbeA;PlayerTimerProbeB, restart, then 'make probe-read'."
+layout-probe-deploy: ## Install a round of throwaway layout probes (ROUND=round1|round2)
+	@cd tools/layout-probe/$(ROUND) && COPYFILE_DISABLE=1 tar --no-xattrs -cf - Pt* \
+		| $(SSH) 'tar xf - -C $(MODS_DIR) && find $(MODS_DIR) -name "._*" -delete'
+	@echo "Add every probe id to Mods=, restart, then 'make layout-read'."
 
-probe-read: ## Report which mod layouts actually loaded
-	@$(SSH) 'grep -a "\[PlayerTimerProbe\]" $(CONSOLE) | tail -20 || echo "(no probe lines - no layout loaded)"'
-	@$(SSH) 'grep -aiE "mod.*(not found|missing|error)" $(CONSOLE) | tail -10 || true'
+layout-read: ## Report which probe layouts the server discovered and loaded
+	@$(SSH) 'grep -a "\[PtProbe\]" $(CONSOLE) | tail -10 || echo "(no probe lines)"'
+	@$(SSH) 'grep -a "not found" $(CONSOLE) | grep -a "loadModAndRequired" | tail -10 || true'
 
-probe-clean: ## Remove the probe mods from the server
-	@$(SSH) 'rm -rf $(MODS_DIR)/PlayerTimerProbeA $(MODS_DIR)/PlayerTimerProbeB'
-	@echo "Probes removed. Remember to put the Mods= line back."
+layout-probe-clean: ## Remove every layout probe from the server
+	@$(SSH) 'cd $(MODS_DIR) && rm -rf Pt42 Pt42Common PtCommon PtRoot PtVmin PtVmin42 PtMver PtPoster PtAuthor PtSub'
 
 uninstall: ## Remove the mod from the server (leaves the counter file alone)
 	@$(SSH) 'rm -rf $(MODS_DIR)/$(MOD_ID)'

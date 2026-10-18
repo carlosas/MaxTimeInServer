@@ -1,17 +1,11 @@
 --[[
-The engine: counts connected time and keeps the block state in sync with it.
+The engine: counts connected time, and answers whether an account may play.
 
-Build 42's server-side Lua has no "a player is connecting" event, so the quota
-cannot be checked at login. Instead the mod keeps the block applied ahead of
-time: as soon as an account has spent its weekly budget it is moved to the
-banned role, and the server's own login check refuses it from then on. The role
-is handed back when the week rolls over, or as soon as the data file says the
-account is under its cap again.
-
-A sweep runs at most once per sweepIntervalSeconds of *real* time. It is driven
-by EveryOneMinute, which the engine fires on game time (roughly every 7.5 real
-seconds on this server), so the interval is enforced against getTimestamp()
-rather than against the event itself.
+Counting is driven by EveryOneMinute, which the engine fires on game time
+(roughly every 7.5 real seconds on this server, and not at all while the server
+is empty with PauseEmpty=true). The interval is therefore enforced against
+getTimestamp() rather than against the event, and nothing is credited for time
+the server spent empty or down.
 
 Every sweep re-reads the data file and rewrites it when something changed, which
 is what lets the operator edit minutes, bonusMinutes, exempt or capMinutes by
@@ -21,6 +15,7 @@ hand and have it take effect within one interval.
 PlayerTimerQuota = PlayerTimerQuota or {}
 
 local SECONDS_PER_MINUTE = 60
+local SECONDS_PER_WEEK = 7 * 24 * 3600
 
 -- Replaced wholesale in tests.
 local pzFiles = {
@@ -46,35 +41,17 @@ local pzFiles = {
     end,
 }
 
-local function pzOnline()
-    local out = {}
-    local players = getOnlinePlayers()
-    if players == nil then return out end
-    for index = 0, players:size() - 1 do
-        local player = players:get(index)
-        if player ~= nil then
-            local username = player:getUsername()
-            if username ~= nil and tostring(username) ~= "" then
-                table.insert(out, { username = tostring(username) })
-            end
-        end
-    end
-    return out
-end
-
 local deps = nil
 local lastSweepEpoch = nil
 local carriedSeconds = {}        -- username -> seconds not yet worth a minute
-local registered = false
 
 local function defaultDeps()
     return {
         config = PlayerTimerConfig,
         clock = PlayerTimerClock,
         store = PlayerTimerStore,
-        roles = PlayerTimerRoles,
         files = pzFiles,
-        online = pzOnline,
+        players = PlayerTimerPlayers,
     }
 end
 
@@ -95,56 +72,76 @@ local function dependencies()
     return deps
 end
 
---- Reads the data file and returns the state it describes.
+--- Reads the data file and returns (state, info).
 function PlayerTimerQuota.loadState()
     local d = dependencies()
-    local state, info = d.store.load(d.files, d.config.dataFile, d.config.capMinutes)
-    return state, info
+    return d.store.load(d.files, d.config.dataFile, d.config.capMinutes)
 end
 
 local function exemptRoleSet()
     local set = {}
     for _, name in ipairs(dependencies().config.exemptRoles or {}) do
-        set[tostring(name):lower()] = true
+        set[string.lower(tostring(name))] = true
     end
     return set
 end
 
--- The role an account would hold if the mod were not blocking it.
-local function underlyingRole(username, record)
-    if record.blockedRole ~= nil and record.blockedRole ~= "" then
-        return record.blockedRole
+local function roleIsExempt(roleName, exemptRoles)
+    if roleName == nil or roleName == "" then return false end
+    return exemptRoles[string.lower(tostring(roleName))] == true
+end
+
+--- Whether `username` may play, and the numbers to tell them if not.
+-- Never raises, and errs towards letting people in: a quota that cannot read
+-- its own file must not lock the server.
+function PlayerTimerQuota.verdict(username, roleName)
+    local d = dependencies()
+    local exemptRoles = exemptRoleSet()
+
+    local ok, result = pcall(function()
+        local state = d.store.load(d.files, d.config.dataFile, d.config.capMinutes)
+        local now = d.clock.now()
+        local weekStart = d.clock.getWeekStartEpoch(now)
+        local record = state.players[username]
+
+        local minutes, bonus, flagged = 0, 0, false
+        if record ~= nil then
+            flagged = record.exempt == true
+            -- Counters from a week that has already rolled over are spent, not
+            -- owed: the next sweep will zero them anyway.
+            if state.weekStartEpoch == weekStart then
+                minutes = record.minutes or 0
+                bonus = record.bonusMinutes or 0
+            end
+        end
+
+        local cap = (state.capMinutes or d.config.capMinutes) + bonus
+        local exempt = flagged or roleIsExempt(roleName, exemptRoles)
+        local resetsAtEpoch = weekStart + SECONDS_PER_WEEK
+
+        return {
+            allowed = exempt or minutes < cap,
+            exempt = exempt,
+            minutes = minutes,
+            cap = cap,
+            weekStartEpoch = weekStart,
+            resetsAtEpoch = resetsAtEpoch,
+            resetsAt = d.clock.formatIso(resetsAtEpoch),
+        }
+    end)
+
+    if not ok then
+        log("could not judge " .. tostring(username) .. ", letting them in: " .. tostring(result))
+        return { allowed = true, exempt = false, minutes = 0,
+                 cap = d.config.capMinutes, resetsAt = nil }
     end
-    return dependencies().roles.getRoleName(username)
+    return result
 end
 
-local function isExempt(username, record, exemptRoles)
-    if record.exempt then return true end
-    local roleName = underlyingRole(username, record)
-    return roleName ~= nil and exemptRoles[tostring(roleName):lower()] == true
-end
-
-local function effectiveCap(state, record)
-    return (state.capMinutes or 0) + (record.bonusMinutes or 0)
-end
-
--- Hands every role the mod is holding back to its owner and zeroes the week.
 local function startNewWeek(state, weekStart, d)
     for _, username in ipairs(state.order) do
         local record = state.players[username]
         if record ~= nil then
-            if record.blockedRole ~= nil and record.blockedRole ~= "" then
-                local ok, err = d.roles.setRole(username, record.blockedRole)
-                if ok then
-                    log(string.format("new week: unblocked %s, role back to %s",
-                        username, record.blockedRole))
-                    record.blockedRole = ""
-                else
-                    -- Keep the mark so the next sweep tries again.
-                    log(string.format("new week: could not unblock %s: %s",
-                        username, tostring(err)))
-                end
-            end
             record.minutes = 0
             record.bonusMinutes = 0
         end
@@ -154,97 +151,28 @@ local function startNewWeek(state, weekStart, d)
     log("new week starting " .. tostring(state.weekStart))
 end
 
--- Credits `seconds` of presence to everyone currently connected.
 local function creditOnlinePlayers(state, seconds, d, exemptRoles)
     local changed = false
-    if seconds <= 0 then return changed end
 
-    for _, player in ipairs(d.online() or {}) do
-        local username = player.username
+    for _, entry in ipairs(d.players.online() or {}) do
+        local username = entry.username
         local isNewAccount = state.players[username] == nil
         local record = d.store.player(state, username)
         if isNewAccount then changed = true end
 
-        if record.steamid == nil or record.steamid == "" then
-            local steamid = d.roles.getSteamId(username)
-            if steamid ~= nil and steamid ~= "" then
-                record.steamid = steamid
-                changed = true
-            end
+        if entry.role ~= nil and entry.role ~= "" and entry.role ~= record.role then
+            record.role = entry.role
+            changed = true
         end
 
-        local blocked = record.blockedRole ~= nil and record.blockedRole ~= ""
-        if not blocked then
-            local roleName = d.roles.getRoleName(username)
-            if roleName ~= nil and roleName ~= record.role then
-                record.role = roleName
-                changed = true
-            end
-        end
-
-        if not blocked and not isExempt(username, record, exemptRoles) then
+        local exempt = record.exempt == true or roleIsExempt(entry.role, exemptRoles)
+        if not exempt and seconds > 0 then
             local carried = (carriedSeconds[username] or 0) + seconds
             local wholeMinutes = math.floor(carried / SECONDS_PER_MINUTE)
             carriedSeconds[username] = carried - wholeMinutes * SECONDS_PER_MINUTE
             if wholeMinutes > 0 then
                 record.minutes = (record.minutes or 0) + wholeMinutes
                 changed = true
-            end
-        end
-    end
-
-    return changed
-end
-
--- Brings the block state in line with the counters.
-local function reconcileBlocks(state, d, exemptRoles)
-    local changed = false
-    local bannedRole = d.roles.bannedRoleName()
-
-    for _, username in ipairs(state.order) do
-        local record = state.players[username]
-        if record ~= nil then
-            local cap = effectiveCap(state, record)
-            local exempt = isExempt(username, record, exemptRoles)
-            local holdingRole = record.blockedRole ~= nil and record.blockedRole ~= ""
-
-            if holdingRole then
-                if exempt or (record.minutes or 0) < cap then
-                    local roleToRestore = record.blockedRole
-                    local ok, err = d.roles.setRole(username, roleToRestore)
-                    if ok then
-                        record.blockedRole = ""
-                        record.role = roleToRestore
-                        changed = true
-                        log(string.format("unblocked %s (%d/%d minutes), role back to %s",
-                            username, record.minutes or 0, cap, roleToRestore))
-                    else
-                        log(string.format("could not unblock %s: %s", username, tostring(err)))
-                    end
-                end
-            elseif not exempt and (record.minutes or 0) >= cap then
-                local currentRole = d.roles.getRoleName(username)
-                if currentRole == nil then
-                    log(string.format("cannot block %s: the server has no role for that account",
-                        username))
-                elseif tostring(currentRole):lower() == tostring(bannedRole):lower() then
-                    -- Someone else banned this account; leave it to them.
-                    log(string.format("%s is over the cap but already banned, leaving it alone",
-                        username))
-                elseif exemptRoles[tostring(currentRole):lower()] then
-                    log(string.format("%s is over the cap but holds the exempt role %s",
-                        username, currentRole))
-                else
-                    local ok, err = d.roles.setRole(username, bannedRole)
-                    if ok then
-                        record.blockedRole = currentRole
-                        changed = true
-                        log(string.format("blocked %s: %d/%d minutes this week, role %s -> %s",
-                            username, record.minutes or 0, cap, currentRole, bannedRole))
-                    else
-                        log(string.format("could not block %s: %s", username, tostring(err)))
-                    end
-                end
             end
         end
     end
@@ -297,7 +225,6 @@ local function sweepBody(now)
     end
 
     if creditOnlinePlayers(state, elapsed, d, exemptRoles) then changed = true end
-    if reconcileBlocks(state, d, exemptRoles) then changed = true end
 
     if changed then
         local ok, err = d.store.save(d.files, d.config.dataFile, state, now)
@@ -315,9 +242,7 @@ end
 --- the rest of the server's Lua with it.
 function PlayerTimerQuota.sweep(now)
     local ok, err = pcall(sweepBody, now)
-    if not ok then
-        log("sweep failed: " .. tostring(err))
-    end
+    if not ok then log("sweep failed: " .. tostring(err)) end
     lastSweepEpoch = now
     return ok
 end
@@ -333,13 +258,11 @@ function PlayerTimerQuota.tick()
     return true
 end
 
---- Called once when the server is up: anchors the clock so the time the server
---- spent down is never credited to anyone.
+--- Anchors the clock, so the time the server spent down is never credited.
 function PlayerTimerQuota.start()
     local d = dependencies()
     lastSweepEpoch = d.clock.now()
     carriedSeconds = {}
-    if d.roles.clearCache then d.roles.clearCache() end
 end
 
 local function onServerStarted()
@@ -348,8 +271,7 @@ local function onServerStarted()
     local state = PlayerTimerQuota.loadState()
     log(string.format("ready: cap %d minutes per week, week starting %s, %d accounts on record",
         state.capMinutes or 0, tostring(state.weekStart), #state.order))
-    -- Apply the week reset and any pending block right away rather than waiting
-    -- out the first interval.
+    -- Apply the week reset right away rather than waiting out the first interval.
     PlayerTimerQuota.sweep(d.clock.now())
 end
 
@@ -358,8 +280,10 @@ local function onSaving()
 end
 
 function PlayerTimerQuota.registerEvents()
-    if registered then return end
-    registered = true
+    -- The flag lives on the table, not in a local: if the game loads this file
+    -- from two mod media roots, both copies must see it.
+    if PlayerTimerQuota.registered then return end
+    PlayerTimerQuota.registered = true
     Events.OnServerStarted.Add(onServerStarted)
     Events.EveryOneMinute.Add(PlayerTimerQuota.tick)
     Events.OnServerStartSaving.Add(onSaving)

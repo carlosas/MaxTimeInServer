@@ -1,0 +1,94 @@
+--[[
+The join check.
+
+Build 42's server-side Lua cannot refuse a login: there is no connection event,
+GameServer is hidden from Lua, and the ban/role APIs are not in the server's Lua
+namespace. What the server can do is talk to a client that has just arrived.
+
+So the mod's client half greets the server as soon as its player exists, and
+this is what answers: if the account has spent its weekly budget, the server
+sends back the numbers and the client shows them and disconnects itself.
+
+That leans on the client cooperating, which the stock anti-cheat already
+enforces: with DoLuaChecksum=true the server hashes every Lua file both sides
+load - its own and the mods' client files - and kicks any client whose hashes
+disagree, so editing this mod locally gets you dropped by the base game before
+the quota is even consulted.
+]]
+
+PlayerTimerGate = PlayerTimerGate or {}
+
+local deps = nil
+
+local function defaultDeps()
+    return {
+        config = PlayerTimerConfig,
+        quota = PlayerTimerQuota,
+        players = PlayerTimerPlayers,
+        net = {
+            send = function(player, module, command, args)
+                sendServerCommand(player, module, command, args)
+            end,
+        },
+    }
+end
+
+local function log(message)
+    print("[PlayerTimer] " .. message)
+end
+
+function PlayerTimerGate.configure(overrides)
+    deps = defaultDeps()
+    for key, value in pairs(overrides or {}) do deps[key] = value end
+end
+
+local function dependencies()
+    if deps == nil then deps = defaultDeps() end
+    return deps
+end
+
+--- Server-side handler for the client's greeting.
+function PlayerTimerGate.onClientCommand(module, command, player)
+    local d = dependencies()
+    if module ~= d.config.netModule then return end
+    if command ~= d.config.netHello then return end
+
+    local ok, err = pcall(function()
+        if player == nil then return end
+        local username = player:getUsername()
+        if username == nil or tostring(username) == "" then return end
+        username = tostring(username)
+
+        local roleName = d.players.roleOf(player)
+        local verdict = d.quota.verdict(username, roleName)
+
+        if verdict.allowed then
+            if d.config.debug then
+                log(string.format("%s joined: %d/%d minutes this week",
+                    username, verdict.minutes or 0, verdict.cap or 0))
+            end
+            return
+        end
+
+        d.net.send(player, d.config.netModule, d.config.netBlocked, {
+            minutes = verdict.minutes,
+            cap = verdict.cap,
+            resetsAt = verdict.resetsAt,
+            graceSeconds = d.config.graceSeconds,
+        })
+        log(string.format("refused %s: %d/%d minutes this week, resets %s",
+            username, verdict.minutes or 0, verdict.cap or 0, tostring(verdict.resetsAt)))
+    end)
+
+    if not ok then log("handshake failed: " .. tostring(err)) end
+end
+
+function PlayerTimerGate.registerEvents()
+    if PlayerTimerGate.registered then return end
+    PlayerTimerGate.registered = true
+    Events.OnClientCommand.Add(PlayerTimerGate.onClientCommand)
+end
+
+if isServer == nil or isServer() then
+    PlayerTimerGate.registerEvents()
+end

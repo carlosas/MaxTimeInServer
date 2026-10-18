@@ -1,0 +1,3 @@
+name=Player Timer
+id=PlayerTimer
+description=Server-side weekly connected-time quota. Counts the real minutes each account spends connected during the current week and refuses the login of accounts that have spent their weekly budget.

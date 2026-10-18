@@ -3,23 +3,35 @@
 -- never call require), so loading them is just dofile.
 local S = {}
 
-local MOD_DIR = "common/media/lua/server/PlayerTimer/"
+local LUA_ROOT = "common/media/lua/"
 
 -- Loaded in the same order the dedicated server loads a mod folder: every
 -- module must be safe to load without its siblings being present yet.
-S.MODULES = {
-    "PlayerTimerConfig.lua",
-    "PlayerTimerClock.lua",
-    "PlayerTimerStore.lua",
-    "PlayerTimerRoles.lua",
-    "PlayerTimerQuota.lua",
+-- Loaded in the order a dedicated server loads them (shared, then client,
+-- then server - GameServer.doMinimumInit runs all three): every module must be
+-- safe to load without its siblings being present yet.
+S.SERVER_MODULES = {
+    "shared/PlayerTimer/PlayerTimerConfig.lua",
+    "server/PlayerTimer/PlayerTimerClock.lua",
+    "server/PlayerTimer/PlayerTimerGate.lua",
+    "server/PlayerTimer/PlayerTimerPlayers.lua",
+    "server/PlayerTimer/PlayerTimerQuota.lua",
+    "server/PlayerTimer/PlayerTimerStore.lua",
 }
+
+S.CLIENT_MODULES = {
+    "shared/PlayerTimer/PlayerTimerConfig.lua",
+    "client/PlayerTimer/PlayerTimerClient.lua",
+}
+
+S.MODULES = S.SERVER_MODULES
 
 -- Collects everything the mod logs, so tests can assert on it.
 S.logLines = {}
 
-function S.loadModules(moduleList)
+function S.loadModules(moduleList, side)
     moduleList = moduleList or S.MODULES
+    S.side = side or "server"
     S.logLines = {}
     -- PZ exposes print(); the mod uses it for its own log lines.
     local realPrint = print
@@ -38,9 +50,10 @@ function S.loadModules(moduleList)
             return event
         end,
     })
-    _G.isServer = function() return true end
+    _G.isServer = function() return S.side ~= "client" end
+    _G.isClient = function() return S.side == "client" end
     for _, name in ipairs(moduleList) do
-        local chunk, err = loadfile(MOD_DIR .. name)
+        local chunk, err = loadfile(LUA_ROOT .. name)
         if not chunk then
             _G.print = realPrint
             error("cannot load " .. name .. ": " .. tostring(err))
@@ -89,31 +102,40 @@ function S.fakeFiles(initial)
     }
 end
 
--- Stand-in for ServerWorldDatabase/Roles. Tracks every role change.
-function S.fakeRoles(roleByUser, steamIdByUser)
-    local backend = {
-        roles = roleByUser or {},
-        steamIds = steamIdByUser or {},
-        calls = {},
-        failSetRole = false,
-    }
-    function backend.bannedRoleName() return "banned" end
-    function backend.getRoleName(username) return backend.roles[username] end
-    function backend.getSteamId(username) return backend.steamIds[username] end
-    function backend.setRole(username, roleName)
-        table.insert(backend.calls, { username = username, role = roleName })
-        if backend.failSetRole then return nil, "db offline" end
-        backend.roles[username] = roleName
-        return true
-    end
-    function backend.setRoleCallsFor(username)
+-- Stand-in for the connected players the server can see. Each entry is what
+-- PlayerTimerPlayers.online() yields: a username and the role it holds.
+function S.fakePlayers(entries)
+    local players = { entries = entries or {} }
+    function players.online()
         local out = {}
-        for _, call in ipairs(backend.calls) do
-            if call.username == username then table.insert(out, call.role) end
+        for _, entry in ipairs(players.entries) do
+            table.insert(out, { username = entry.username, role = entry.role })
         end
         return out
     end
-    return backend
+    function players.find(username)
+        for _, entry in ipairs(players.entries) do
+            if entry.username == username then return entry end
+        end
+        return nil
+    end
+    return players
+end
+
+-- Records everything the server would send to a client.
+function S.fakeNetwork()
+    local net = { sent = {} }
+    function net.send(player, module, command, args)
+        table.insert(net.sent, { player = player, module = module, command = command, args = args })
+    end
+    function net.lastTo(username)
+        for index = #net.sent, 1, -1 do
+            local message = net.sent[index]
+            if message.player ~= nil and message.player.username == username then return message end
+        end
+        return nil
+    end
+    return net
 end
 
 -- Monday 2026-10-12 00:00:00 UTC, used as the anchor in most tests.

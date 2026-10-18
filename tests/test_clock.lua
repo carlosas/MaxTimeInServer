@@ -1,7 +1,7 @@
 local H = dofile("tests/harness.lua")
 local S = dofile("tests/pz_stubs.lua")
 
-S.loadModules({ "PlayerTimerConfig.lua", "PlayerTimerClock.lua" })
+S.loadModules({ "shared/PlayerTimer/PlayerTimerConfig.lua", "server/PlayerTimer/PlayerTimerClock.lua" })
 PlayerTimerClock.backend = S.utcCalendarBackend()
 
 local MONDAY = S.MONDAY           -- 2026-10-12 00:00:00 UTC

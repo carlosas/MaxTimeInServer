@@ -1,7 +1,0 @@
-name=Player Timer
-id=PlayerTimer
-description=Server-side weekly connected-time quota. Counts the real minutes each account spends on the server during the current week (Monday 00:00 to Sunday 23:59, server timezone) and refuses the login of accounts that have spent their weekly budget. Counters live in a plain text file the server owner can edit.
-author=Carlos Alandete Sastre
-modversion=1.0.0
-versionMin=42
-poster=poster.png

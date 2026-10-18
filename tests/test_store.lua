@@ -1,7 +1,7 @@
 local H = dofile("tests/harness.lua")
 local S = dofile("tests/pz_stubs.lua")
 
-S.loadModules({ "PlayerTimerConfig.lua", "PlayerTimerClock.lua", "PlayerTimerStore.lua" })
+S.loadModules({ "shared/PlayerTimer/PlayerTimerConfig.lua", "server/PlayerTimer/PlayerTimerClock.lua", "server/PlayerTimer/PlayerTimerStore.lua" })
 PlayerTimerClock.backend = S.utcCalendarBackend()
 
 local MONDAY = S.MONDAY
@@ -15,16 +15,15 @@ weekStart=2026-10-12T00:00:00+0000
 weekStartEpoch=1791763200
 
 [darkkz]
-steamid=76561197972620811
+role=user
 minutes=132
 bonusMinutes=30
 exempt=false
-blockedRole=
 
 [someone]
+role=priority
 minutes=600
 exempt=true
-blockedRole=user
 ]]
 
 H.test("a fresh state carries the seed cap and no players", function()
@@ -40,11 +39,10 @@ H.test("parse reads the header and every player section", function()
     H.assertEqual(state.weekStartEpoch, MONDAY, "weekStartEpoch")
     H.assertEqual(state.players.darkkz.minutes, 132, "darkkz minutes")
     H.assertEqual(state.players.darkkz.bonusMinutes, 30, "darkkz bonus")
-    H.assertEqual(state.players.darkkz.steamid, "76561197972620811", "darkkz steamid")
+    H.assertEqual(state.players.darkkz.role, "user", "darkkz role")
     H.assertFalse(state.players.darkkz.exempt, "darkkz exempt")
-    H.assertEqual(state.players.darkkz.blockedRole, "", "darkkz blockedRole")
     H.assertTrue(state.players.someone.exempt, "someone exempt")
-    H.assertEqual(state.players.someone.blockedRole, "user", "someone blockedRole")
+    H.assertEqual(state.players.someone.role, "priority", "someone role")
 end)
 
 H.test("parse tolerates comments, blank lines, CRLF and stray spaces", function()
@@ -65,8 +63,6 @@ H.test("serialize then parse is a round trip", function()
         H.assertEqual(copy.minutes, record.minutes, username .. " minutes")
         H.assertEqual(copy.bonusMinutes, record.bonusMinutes, username .. " bonus")
         H.assertEqual(copy.exempt, record.exempt, username .. " exempt")
-        H.assertEqual(copy.blockedRole, record.blockedRole, username .. " blockedRole")
-        H.assertEqual(copy.steamid, record.steamid, username .. " steamid")
         H.assertEqual(copy.role, record.role, username .. " role")
     end
 end)
@@ -100,7 +96,6 @@ H.test("player() creates a record with safe defaults", function()
     local record = PlayerTimerStore.player(state, "newbie")
     H.assertEqual(record.minutes, 0, "minutes")
     H.assertEqual(record.bonusMinutes, 0, "bonusMinutes")
-    H.assertEqual(record.blockedRole, "", "blockedRole")
     H.assertEqual(record.role, "", "role")
     H.assertFalse(record.exempt, "exempt")
     H.assertEqual(PlayerTimerStore.player(state, "newbie"), record, "same record on second call")

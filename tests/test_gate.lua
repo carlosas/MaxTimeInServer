@@ -1,0 +1,124 @@
+local H = dofile("tests/harness.lua")
+local S = dofile("tests/pz_stubs.lua")
+
+S.loadModules()
+PlayerTimerClock.backend = S.utcCalendarBackend()
+
+local MONDAY = S.MONDAY
+local DATA = "PlayerTimer.txt"
+
+-- A stand-in for the IsoPlayer the server hands to OnClientCommand.
+local function fakePlayer(username, role)
+    return {
+        username = username,
+        getUsername = function(self) return self.username end,
+        getRole = function(self)
+            if self.role == nil then return nil end
+            local name = self.role
+            return { getName = function() return name end }
+        end,
+        getAccessLevel = function(self) return self.accessLevel end,
+        role = role,
+    }
+end
+
+local function makeGate(opts)
+    opts = opts or {}
+    local gate = {}
+    PlayerTimerClock.backend = S.utcCalendarBackend()
+    local now = opts.startEpoch or (MONDAY + 3600)
+    PlayerTimerClock.backend.now = function() return now end
+
+    gate.files = S.fakeFiles(opts.files)
+    gate.net = S.fakeNetwork()
+    gate.config = {}
+    for key, value in pairs(PlayerTimerConfig) do gate.config[key] = value end
+    gate.config.capMinutes = opts.capMinutes or 600
+
+    PlayerTimerQuota.configure({
+        config = gate.config,
+        clock = PlayerTimerClock,
+        store = PlayerTimerStore,
+        files = gate.files,
+        players = S.fakePlayers({}),
+    })
+    PlayerTimerQuota.start()
+
+    PlayerTimerGate.configure({
+        config = gate.config,
+        quota = PlayerTimerQuota,
+        players = PlayerTimerPlayers,
+        net = gate.net,
+    })
+    return gate
+end
+
+local OVER_CAP = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+    "\n\n[darkkz]\nminutes=612\n"
+
+H.test("a player over the cap is told to leave, with the numbers", function()
+    local gate = makeGate({ files = { [DATA] = OVER_CAP } })
+    local player = fakePlayer("darkkz", "user")
+    PlayerTimerGate.onClientCommand(gate.config.netModule, gate.config.netHello, player)
+
+    local message = gate.net.lastTo("darkkz")
+    H.assertTrue(message ~= nil, "a message was sent")
+    H.assertEqual(message.command, gate.config.netBlocked, "command")
+    H.assertEqual(message.args.minutes, 612, "minutes")
+    H.assertEqual(message.args.cap, 600, "cap")
+    H.assertEqual(message.args.graceSeconds, gate.config.graceSeconds, "grace")
+    H.assertMatch(message.args.resetsAt, "2026%-10%-19", "reset stamp")
+    H.assertMatch(S.logText(), "refused darkkz", "logged")
+end)
+
+H.test("a player under the cap is left alone", function()
+    local gate = makeGate({ files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" ..
+        MONDAY .. "\n\n[darkkz]\nminutes=10\n" } })
+    PlayerTimerGate.onClientCommand(gate.config.netModule, gate.config.netHello,
+        fakePlayer("darkkz", "user"))
+    H.assertEqual(#gate.net.sent, 0, "nothing sent")
+end)
+
+H.test("an exempt role is left alone even over the cap", function()
+    local gate = makeGate({ files = { [DATA] = OVER_CAP } })
+    PlayerTimerGate.onClientCommand(gate.config.netModule, gate.config.netHello,
+        fakePlayer("darkkz", "moderator"))
+    H.assertEqual(#gate.net.sent, 0, "nothing sent")
+end)
+
+H.test("commands from other modules are ignored", function()
+    local gate = makeGate({ files = { [DATA] = OVER_CAP } })
+    PlayerTimerGate.onClientCommand("SomeOtherMod", gate.config.netHello, fakePlayer("darkkz", "user"))
+    PlayerTimerGate.onClientCommand(gate.config.netModule, "somethingElse", fakePlayer("darkkz", "user"))
+    H.assertEqual(#gate.net.sent, 0, "nothing sent")
+end)
+
+H.test("a player the server cannot name is ignored", function()
+    local gate = makeGate({ files = { [DATA] = OVER_CAP } })
+    PlayerTimerGate.onClientCommand(gate.config.netModule, gate.config.netHello, nil)
+    PlayerTimerGate.onClientCommand(gate.config.netModule, gate.config.netHello, fakePlayer("", "user"))
+    H.assertEqual(#gate.net.sent, 0, "nothing sent")
+end)
+
+H.test("the role falls back to the access level when there is no role object", function()
+    local gate = makeGate({ files = { [DATA] = OVER_CAP } })
+    local player = fakePlayer("darkkz", nil)
+    player.accessLevel = "Admin"
+    PlayerTimerGate.onClientCommand(gate.config.netModule, gate.config.netHello, player)
+    H.assertEqual(#gate.net.sent, 0, "an admin by access level is exempt too")
+end)
+
+H.test("a handshake never raises, however broken the player object is", function()
+    local gate = makeGate({ files = { [DATA] = OVER_CAP } })
+    local broken = { getUsername = function() error("no username for you") end }
+    H.assertTrue(pcall(PlayerTimerGate.onClientCommand,
+        gate.config.netModule, gate.config.netHello, broken), "survived")
+end)
+
+H.test("the gate registers itself on OnClientCommand", function()
+    makeGate({})
+    PlayerTimerGate.registerEvents()
+    H.assertTrue(#Events.OnClientCommand.handlers > 0, "OnClientCommand")
+end)
+
+H.run("gate")

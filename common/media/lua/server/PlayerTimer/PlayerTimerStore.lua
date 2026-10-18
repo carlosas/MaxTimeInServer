@@ -15,8 +15,7 @@ local KNOWN_HEADER = {
 }
 
 local KNOWN_RECORD = {
-    steamid = true, role = true, minutes = true, bonusMinutes = true,
-    exempt = true, blockedRole = true,
+    role = true, minutes = true, bonusMinutes = true, exempt = true,
 }
 
 local function trim(text)
@@ -48,12 +47,10 @@ function PlayerTimerStore.player(state, username)
     local record = state.players[username]
     if record then return record end
     record = {
-        steamid = "",
         role = "",
         minutes = 0,
         bonusMinutes = 0,
         exempt = false,
-        blockedRole = "",
         extra = {},
         extraOrder = {},
     }
@@ -148,8 +145,7 @@ function PlayerTimerStore.serialize(state)
     put("#   minutes       real minutes spent on the server this week")
     put("#   bonusMinutes  extra allowance for this week only (added to capMinutes)")
     put("#   exempt        true = never counted, never blocked")
-    put("#   blockedRole   set by the mod: the role to restore when unblocking")
-    put("#   role          informational: the account's role as last seen")
+    put("#   role          informational: the role the account was last seen holding")
     put("version=" .. tostring(state.version or 1))
     put("capMinutes=" .. tostring(state.capMinutes or 0))
     put("weekStart=" .. tostring(state.weekStart or ""))
@@ -164,12 +160,10 @@ function PlayerTimerStore.serialize(state)
         if record then
             put("")
             put("[" .. username .. "]")
-            put("steamid=" .. tostring(record.steamid or ""))
             put("role=" .. tostring(record.role or ""))
             put("minutes=" .. tostring(record.minutes or 0))
             put("bonusMinutes=" .. tostring(record.bonusMinutes or 0))
             put("exempt=" .. tostring(record.exempt and true or false))
-            put("blockedRole=" .. tostring(record.blockedRole or ""))
             for _, key in ipairs(record.extraOrder or {}) do
                 put(key .. "=" .. tostring(record.extra[key]))
             end
