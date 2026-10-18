@@ -98,8 +98,14 @@ client half does the disconnecting and because the client runs
 connection screen.
 
 ```sh
-make package    # build/PlayerTimer.zip
+make package    # runs the tests, checks the server is in sync, builds build/PlayerTimer.zip
 ```
+
+`make package` refuses to build unless the server's copy of the mod matches this
+working tree, and that check matters: the server hashes the mod's Lua **when it
+boots** and kicks clients whose copies disagree. Change a file, deploy it and
+forget to restart, and every player with the new zip is turned away at the
+connection screen. Deploy, restart, then package.
 
 They unzip it into their own Zomboid directory:
 

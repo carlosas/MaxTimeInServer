@@ -34,7 +34,17 @@ deploy: test ## Copy the mod to the server (does not restart it)
 	@$(SSH) 'find $(MODS_DIR)/$(MOD_ID) -type f | sort'
 	@echo "Deployed. Add $(MOD_ID) to the Mods= line and restart when you are ready."
 
-package: test ## Build the zip the players install into their own Zomboid/mods/
+verify-sync: ## Check the server's copy of the mod matches this working tree
+	@# The server hashes the mod's Lua when it boots and kicks clients whose
+	@# copies disagree, so the zip handed to players must be the same bytes the
+	@# server actually booted with.
+	@find $(MOD_FILES) -type f | sort | xargs md5 -r | sed 's|^\([a-f0-9]*\) |\1  |' > /tmp/pt-local.txt
+	@$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | sort | xargs md5sum | sed "s|\./||"' > /tmp/pt-remote.txt
+	@if diff -u /tmp/pt-local.txt /tmp/pt-remote.txt; then echo "in sync"; else \
+		echo; echo "OUT OF SYNC - run 'make deploy' and restart, or the players' copies will"; \
+		echo "fail the server's Lua checksum and be kicked at the connection screen."; exit 1; fi
+
+package: test verify-sync ## Build the zip the players install into their own Zomboid/mods/
 	@rm -rf build && mkdir -p build/$(MOD_ID)
 	@COPYFILE_DISABLE=1 tar --no-xattrs -cf - $(MOD_FILES) | tar xf - -C build/$(MOD_ID)
 	@cd build && zip -qr $(MOD_ID).zip $(MOD_ID)
