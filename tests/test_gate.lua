@@ -53,7 +53,7 @@ local function makeGate(opts)
     return gate
 end
 
-local OVER_CAP = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+local OVER_CAP = "version=1\nweekStartEpoch=" .. MONDAY ..
     "\n\n[darkkz]\nminutes=612\n"
 
 H.test("a player over the cap is told to leave, with the numbers", function()
@@ -72,7 +72,7 @@ H.test("a player over the cap is told to leave, with the numbers", function()
 end)
 
 H.test("a player under the cap is left alone", function()
-    local gate = makeGate({ files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" ..
+    local gate = makeGate({ files = { [DATA] = "version=1\nweekStartEpoch=" ..
         MONDAY .. "\n\n[darkkz]\nminutes=10\n" } })
     MaxTimeInServerGate.onClientCommand(gate.config.netModule, gate.config.netHello,
         fakePlayer("darkkz", "user"))

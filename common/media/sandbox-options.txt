@@ -1,0 +1,36 @@
+VERSION = 1,
+
+/*
+ * Server settings for MaxTimeInServer. They appear under their own page in the
+ * server's sandbox options, so they can be set from the admin panel or by
+ * editing <World>_SandboxVars.lua. Sandbox options are read when the server
+ * boots, so changing one takes a restart.
+ */
+
+option MaxTimeInServer.CapMinutes
+{
+    type = integer,
+    min = 1,
+    max = 100000,
+    default = 600,
+    page = MaxTimeInServer,
+    translation = MaxTimeInServer_CapMinutes,
+}
+
+option MaxTimeInServer.ExemptRoles
+{
+    type = string,
+    default = admin;moderator;gm,
+    page = MaxTimeInServer,
+    translation = MaxTimeInServer_ExemptRoles,
+}
+
+option MaxTimeInServer.GraceSeconds
+{
+    type = integer,
+    min = 0,
+    max = 300,
+    default = 12,
+    page = MaxTimeInServer,
+    translation = MaxTimeInServer_GraceSeconds,
+}

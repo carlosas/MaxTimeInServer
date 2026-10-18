@@ -8,8 +8,9 @@ getTimestamp() rather than against the event, and nothing is credited for time
 the server spent empty or down.
 
 Every sweep re-reads the data file and rewrites it when something changed, which
-is what lets the operator edit minutes, bonusMinutes, exempt or capMinutes by
-hand and have it take effect within one interval.
+is what lets the operator edit a player's minutes, bonus or exemption by hand
+and have it take effect within one interval. The weekly cap itself is not in
+that file: it is a server sandbox option, read once at start-up.
 ]]
 
 MaxTimeInServerQuota = MaxTimeInServerQuota or {}
@@ -84,7 +85,7 @@ end
 --- Reads the data file and returns (state, info).
 function MaxTimeInServerQuota.loadState()
     local d = dependencies()
-    return d.store.load(d.files, d.config.dataFile, d.config.capMinutes)
+    return d.store.load(d.files, d.config.dataFile)
 end
 
 local function exemptRoleSet()
@@ -108,7 +109,7 @@ function MaxTimeInServerQuota.verdict(username, roleName)
     local exemptRoles = exemptRoleSet()
 
     local ok, result = pcall(function()
-        local state = d.store.load(d.files, d.config.dataFile, d.config.capMinutes)
+        local state = d.store.load(d.files, d.config.dataFile)
         local now = d.clock.now()
         local weekStart = d.clock.getWeekStartEpoch(now)
         local record = state.players[username]
@@ -124,7 +125,7 @@ function MaxTimeInServerQuota.verdict(username, roleName)
             end
         end
 
-        local cap = (state.capMinutes or d.config.capMinutes) + bonus
+        local cap = d.config.capMinutes + bonus
         local exempt = flagged or roleIsExempt(roleName, exemptRoles)
         local resetsAtEpoch = weekStart + SECONDS_PER_WEEK
 
@@ -198,7 +199,7 @@ local function sweepBody(now)
     local d = dependencies()
     local exemptRoles = exemptRoleSet()
 
-    local state, info = d.store.load(d.files, d.config.dataFile, d.config.capMinutes)
+    local state, info = d.store.load(d.files, d.config.dataFile)
     local changed = info.created == true
 
     if info.corrupt then
@@ -294,9 +295,14 @@ local function onServerStarted()
     local ok, err = pcall(function()
         MaxTimeInServerQuota.start()
         local d = dependencies()
+        -- Sandbox options are only readable once the world is up, so this is
+        -- the first moment the real settings are known.
+        if not d.config.applySandboxOptions() then
+            log("no sandbox settings page found; using the built-in defaults")
+        end
         local state = MaxTimeInServerQuota.loadState()
-        log("ready: cap " .. tostring(state.capMinutes or 0) ..
-            " minutes per week, week starting " .. tostring(state.weekStart) ..
+        log("ready: " .. d.config.describe() ..
+            ", week starting " .. tostring(state.weekStart) ..
             ", " .. tostring(#state.order) .. " accounts on record")
         -- Apply the week reset right away rather than waiting out the interval.
         MaxTimeInServerQuota.sweep(d.clock.now())

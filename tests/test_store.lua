@@ -10,7 +10,6 @@ local DATA = "MaxTimeInServer.txt"
 local SAMPLE = [[
 # MaxTimeInServer
 version=1
-capMinutes=600
 weekStart=2026-10-12T00:00:00+0000
 weekStartEpoch=1791763200
 
@@ -26,16 +25,23 @@ minutes=600
 exempt=true
 ]]
 
-H.test("a fresh state carries the seed cap and no players", function()
-    local state = MaxTimeInServerStore.newState(600)
-    H.assertEqual(state.capMinutes, 600, "capMinutes")
+H.test("a fresh state has no week and no players", function()
+    local state = MaxTimeInServerStore.newState()
     H.assertEqual(state.weekStartEpoch, 0, "weekStartEpoch")
     H.assertNil(next(state.players), "players")
 end)
 
+H.test("capMinutes left over in an old file is ignored, and says so", function()
+    local state = MaxTimeInServerStore.parse("version=1\ncapMinutes=42\n\n[someone]\nminutes=3\n")
+    H.assertNil(state.capMinutes, "not carried as a setting")
+    H.assertEqual(state.players.someone.minutes, 3, "the rest still parses")
+    H.assertMatch(table.concat(state.warnings, " "), "sandbox option", "explains itself")
+    H.assertFalse(MaxTimeInServerStore.serialize(state):find("capMinutes") ~= nil,
+        "and is not written back")
+end)
+
 H.test("parse reads the header and every player section", function()
     local state = MaxTimeInServerStore.parse(SAMPLE)
-    H.assertEqual(state.capMinutes, 600, "capMinutes")
     H.assertEqual(state.weekStartEpoch, MONDAY, "weekStartEpoch")
     H.assertEqual(state.players.darkkz.minutes, 132, "darkkz minutes")
     H.assertEqual(state.players.darkkz.bonusMinutes, 30, "darkkz bonus")
@@ -46,9 +52,9 @@ H.test("parse reads the header and every player section", function()
 end)
 
 H.test("parse tolerates comments, blank lines, CRLF and stray spaces", function()
-    local text = "; a comment\r\n\r\n  version = 1  \r\n capMinutes=90\r\n\r\n [ ragged ] \r\n  minutes = 7 \r\n"
+    local text = "; a comment\r\n\r\n  version = 1  \r\n\r\n [ ragged ] \r\n  minutes = 7 \r\n"
     local state = MaxTimeInServerStore.parse(text)
-    H.assertEqual(state.capMinutes, 90, "capMinutes")
+    H.assertEqual(state.version, 1, "version")
     H.assertEqual(state.players.ragged.minutes, 7, "ragged minutes")
 end)
 
@@ -58,21 +64,21 @@ H.test("parse handles every shape of line ending and never loops", function()
     -- ones that produced empty matches: blank lines, no trailing newline, a
     -- trailing newline, and a single line.
     local cases = {
-        "version=1\ncapMinutes=7",                 -- no trailing newline
-        "version=1\ncapMinutes=7\n",               -- trailing newline
-        "version=1\n\n\n\ncapMinutes=7\n\n\n",     -- runs of blank lines
-        "capMinutes=7",                            -- one line, no newline
-        "\n\n\ncapMinutes=7",                      -- leading blank lines
-        "capMinutes=7\r\n\r\n",                    -- CRLF with a blank line
+        "version=1\nweekStartEpoch=7",                 -- no trailing newline
+        "version=1\nweekStartEpoch=7\n",               -- trailing newline
+        "version=1\n\n\n\nweekStartEpoch=7\n\n\n",     -- runs of blank lines
+        "weekStartEpoch=7",                            -- one line, no newline
+        "\n\n\nweekStartEpoch=7",                      -- leading blank lines
+        "weekStartEpoch=7\r\n\r\n",                    -- CRLF with a blank line
     }
     for index, text in ipairs(cases) do
         local state = MaxTimeInServerStore.parse(text)
-        H.assertEqual(state.capMinutes, 7, "case " .. index)
+        H.assertEqual(state.weekStartEpoch, 7, "case " .. index)
     end
 end)
 
 H.test("parse copes with a file of many accounts", function()
-    local parts = { "version=1", "capMinutes=600", "" }
+    local parts = { "version=1", "" }
     for index = 1, 500 do
         table.insert(parts, "[player" .. index .. "]")
         table.insert(parts, "minutes=" .. index)
@@ -87,7 +93,6 @@ end)
 H.test("serialize then parse is a round trip", function()
     local original = MaxTimeInServerStore.parse(SAMPLE)
     local again = MaxTimeInServerStore.parse(MaxTimeInServerStore.serialize(original))
-    H.assertEqual(again.capMinutes, original.capMinutes, "capMinutes")
     H.assertEqual(again.weekStartEpoch, original.weekStartEpoch, "weekStartEpoch")
     for username, record in pairs(original.players) do
         local copy = again.players[username]
@@ -124,7 +129,7 @@ H.test("nonsense numbers become zero and are reported", function()
 end)
 
 H.test("player() creates a record with safe defaults", function()
-    local state = MaxTimeInServerStore.newState(600)
+    local state = MaxTimeInServerStore.newState()
     local record = MaxTimeInServerStore.player(state, "newbie")
     H.assertEqual(record.minutes, 0, "minutes")
     H.assertEqual(record.bonusMinutes, 0, "bonusMinutes")
@@ -135,23 +140,23 @@ end)
 
 H.test("load of a missing file yields defaults and says it is new", function()
     local files = S.fakeFiles()
-    local state, info = MaxTimeInServerStore.load(files, DATA, 600)
-    H.assertEqual(state.capMinutes, 600, "capMinutes")
+    local state, info = MaxTimeInServerStore.load(files, DATA)
     H.assertTrue(info.created, "created")
     H.assertFalse(info.corrupt, "corrupt")
+    H.assertNil(next(state.players), "no players")
 end)
 
 H.test("load of an unparseable file does not throw and flags the content", function()
     local files = S.fakeFiles({ [DATA] = "\0\1\2 not a data file at all" })
-    local state, info = MaxTimeInServerStore.load(files, DATA, 600)
+    local state, info = MaxTimeInServerStore.load(files, DATA)
     H.assertTrue(info.corrupt, "corrupt")
     H.assertEqual(info.raw, "\0\1\2 not a data file at all", "raw kept for the rescue copy")
-    H.assertEqual(state.capMinutes, 600, "usable state")
+    H.assertNil(next(state.players), "usable state")
 end)
 
 H.test("save writes the file and stamps it", function()
     local files = S.fakeFiles()
-    local state = MaxTimeInServerStore.newState(600)
+    local state = MaxTimeInServerStore.newState()
     state.weekStartEpoch = MONDAY
     MaxTimeInServerStore.player(state, "darkkz").minutes = 5
     H.assertTrue(MaxTimeInServerStore.save(files, DATA, state, MONDAY + 60), "save returns ok")

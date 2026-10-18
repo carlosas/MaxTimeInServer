@@ -18,7 +18,7 @@ SERVER_INI  ?= $(ZOMBOID)/Server/$(WORLD).ini
 MOD_FILES   = 42 common
 
 .PHONY: help test deploy package restart status logs data roles ini \
-        demo-block demo-restore uninstall
+        demo-block demo-restore sandbox uninstall
 
 help:
 	@grep -E '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t24
@@ -79,13 +79,24 @@ print(\"%-20s %-12s %s\" % (\"username\",\"role\",\"last connection\")); \
 ini: ## Show the mod-related server ini lines
 	@$(SSH) 'grep -nE "^(Mods|WorkshopItems|Open|MaxPlayers)=" $(SERVER_INI)'
 
-demo-block: ## Set the cap to 1 minute so the next join is refused (for testing)
-	@$(SSH) 'f=$(DATA_FILE); [ -f "$$f" ] || { echo "no $$f yet - connect once first"; exit 1; }; \
-		sed -i "s/^capMinutes=.*/capMinutes=1/" "$$f" && grep -n "^capMinutes=" "$$f"'
-	@echo "Within a minute the server will refuse anyone whose counter is >= 1 minute."
+demo-block: ## Push a player over the cap so their next join is refused (PLAYER=name)
+	@test -n "$(PLAYER)" || { echo "usage: make demo-block PLAYER=<account name>"; exit 1; }
+	@$(SSH) 'f=$(DATA_FILE); \
+		grep -q "^\[$(PLAYER)\]$$" "$$f" 2>/dev/null || { \
+			echo "$(PLAYER) is not in $$f yet - they have to connect once first"; exit 1; }; \
+		sed -i "/^\[$(PLAYER)\]$$/,/^$$/ s/^minutes=.*/minutes=999999/" "$$f" && \
+		sed -n "/^\[$(PLAYER)\]$$/,/^$$/p" "$$f"'
+	@echo "Within a minute the server will refuse $(PLAYER) on their next join."
 
-demo-restore: ## Put the cap back to 600 minutes
-	@$(SSH) 'sed -i "s/^capMinutes=.*/capMinutes=600/" $(DATA_FILE) && grep -n "^capMinutes=" $(DATA_FILE)'
+demo-restore: ## Put a player's counter back to zero (PLAYER=name)
+	@test -n "$(PLAYER)" || { echo "usage: make demo-restore PLAYER=<account name>"; exit 1; }
+	@$(SSH) 'f=$(DATA_FILE); \
+		sed -i "/^\[$(PLAYER)\]$$/,/^$$/ s/^minutes=.*/minutes=0/" "$$f" && \
+		sed -n "/^\[$(PLAYER)\]$$/,/^$$/p" "$$f"'
+
+sandbox: ## Show the mod's settings as the server has them
+	@$(SSH) 'grep -nA1 "MaxTimeInServer" $(ZOMBOID)/Server/$(WORLD)_SandboxVars.lua 2>/dev/null \
+		|| echo "(no MaxTimeInServer settings in $(WORLD)_SandboxVars.lua - the server writes them on its first boot with the mod enabled)"'
 
 uninstall: ## Remove the mod from the server (leaves the counter file alone)
 	@$(SSH) 'rm -rf $(MODS_DIR)/$(MOD_ID)'

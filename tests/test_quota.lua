@@ -97,7 +97,7 @@ end)
 H.test("exempt=true in the file is honoured", function()
     local world = makeWorld({
         online = { { username = "darkkz", role = "user" } },
-        files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=0\nexempt=true\n" },
     })
     world.sweepAfter(600)
@@ -119,7 +119,7 @@ H.test("a new week zeroes the counters and the bonuses", function()
     local world = makeWorld({
         online = { { username = "darkkz", role = "user" } },
         startEpoch = MONDAY + WEEK - 120,
-        files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=300\nbonusMinutes=60\n" },
     })
     world.sweepAfter(60)
@@ -146,7 +146,7 @@ end)
 H.test("a week that passed while the server was down resets on the next sweep", function()
     local world = makeWorld({
         online = {}, startEpoch = MONDAY + WEEK + 3600,
-        files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=600\n" },
     })
     world.sweepAfter(60)
@@ -158,7 +158,7 @@ end)
 H.test("a player under the cap is allowed", function()
     local world = makeWorld({
         capMinutes = 600,
-        files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=599\n" },
     })
     local verdict = MaxTimeInServerQuota.verdict("darkkz", "user")
@@ -170,7 +170,7 @@ end)
 H.test("a player at the cap is denied and told when it resets", function()
     local world = makeWorld({
         capMinutes = 600,
-        files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=600\n" },
     })
     local verdict = MaxTimeInServerQuota.verdict("darkkz", "user")
@@ -183,7 +183,7 @@ end)
 H.test("bonusMinutes raises the threshold for one player", function()
     local world = makeWorld({
         capMinutes = 600,
-        files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=620\nbonusMinutes=60\n" },
     })
     local verdict = MaxTimeInServerQuota.verdict("darkkz", "user")
@@ -194,7 +194,7 @@ end)
 H.test("an exempt role is always allowed", function()
     local world = makeWorld({
         capMinutes = 600,
-        files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=9000\n" },
     })
     H.assertTrue(MaxTimeInServerQuota.verdict("darkkz", "moderator").allowed, "moderator")
@@ -205,7 +205,7 @@ end)
 H.test("exempt=true is always allowed", function()
     local world = makeWorld({
         capMinutes = 600,
-        files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=9000\nexempt=true\n" },
     })
     H.assertTrue(MaxTimeInServerQuota.verdict("darkkz", "user").allowed, "allowed")
@@ -221,7 +221,7 @@ end)
 H.test("a verdict for a week that has rolled over treats the counter as spent", function()
     local world = makeWorld({
         capMinutes = 600, startEpoch = MONDAY + WEEK + 3600,
-        files = { [DATA] = "version=1\ncapMinutes=600\nweekStartEpoch=" .. MONDAY ..
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=600\n" },
     })
     local verdict = MaxTimeInServerQuota.verdict("darkkz", "user")

@@ -10,9 +10,12 @@ in here is allowed to raise - a hand-edited file must never take the mod down.
 MaxTimeInServerStore = MaxTimeInServerStore or {}
 
 local KNOWN_HEADER = {
-    version = true, capMinutes = true, weekStart = true,
-    weekStartEpoch = true, savedAt = true,
+    version = true, weekStart = true, weekStartEpoch = true, savedAt = true,
 }
+
+-- Was a header key until the cap became a sandbox option. Recognised only so
+-- that an old file can be told it no longer does anything.
+local RETIRED_HEADER = { capMinutes = true }
 
 local KNOWN_RECORD = {
     role = true, minutes = true, bonusMinutes = true, exempt = true,
@@ -27,10 +30,9 @@ local function toBoolean(value)
 end
 
 --- A brand new, empty state seeded with the configured cap.
-function MaxTimeInServerStore.newState(capMinutes)
+function MaxTimeInServerStore.newState()
     return {
         version = 1,
-        capMinutes = capMinutes,
         weekStart = "",
         weekStartEpoch = 0,
         savedAt = "",
@@ -78,8 +80,8 @@ local function parseNumber(state, where, key, value)
 end
 
 --- Parses the file's text. Always returns a usable state.
-function MaxTimeInServerStore.parse(text, defaultCapMinutes)
-    local state = MaxTimeInServerStore.newState(defaultCapMinutes or MaxTimeInServerConfig.capMinutes)
+function MaxTimeInServerStore.parse(text)
+    local state = MaxTimeInServerStore.newState()
     state.version = nil
     local current = nil        -- nil while still in the header
     local currentName = nil
@@ -132,7 +134,11 @@ function MaxTimeInServerStore.parse(text, defaultCapMinutes)
                             setExtra(current, key, value)
                         end
                     else
-                        if key == "capMinutes" or key == "weekStartEpoch" or key == "version" then
+                        if RETIRED_HEADER[key] then
+                            table.insert(state.warnings, "capMinutes is a server " ..
+                                "sandbox option now and is ignored here")
+                            recognised = recognised + 1
+                        elseif key == "weekStartEpoch" or key == "version" then
                             state[key] = parseNumber(state, "header", key, value)
                             recognised = recognised + 1
                         elseif KNOWN_HEADER[key] then
@@ -148,9 +154,6 @@ function MaxTimeInServerStore.parse(text, defaultCapMinutes)
     end
 
     state.recognised = recognised
-    if state.capMinutes == nil then
-        state.capMinutes = defaultCapMinutes or MaxTimeInServerConfig.capMinutes
-    end
     if state.weekStartEpoch == nil then state.weekStartEpoch = 0 end
     return state
 end
@@ -162,13 +165,13 @@ function MaxTimeInServerStore.serialize(state)
 
     put("# MaxTimeInServer - weekly connected-time quota. Minutes are real minutes.")
     put("# A week runs from Monday 00:00:00 to Sunday 23:59:59, server timezone.")
+    put("# The weekly cap is a server sandbox option, not a setting in here.")
     put("# Safe to edit while the server runs: changes are picked up within a minute.")
     put("#   minutes       real minutes spent on the server this week")
-    put("#   bonusMinutes  extra allowance for this week only (added to capMinutes)")
+    put("#   bonusMinutes  extra allowance for this week only, on top of the cap")
     put("#   exempt        true = never counted, never blocked")
     put("#   role          informational: the role the account was last seen holding")
     put("version=" .. tostring(state.version or 1))
-    put("capMinutes=" .. tostring(state.capMinutes or 0))
     put("weekStart=" .. tostring(state.weekStart or ""))
     put("weekStartEpoch=" .. tostring(state.weekStartEpoch or 0))
     put("savedAt=" .. tostring(state.savedAt or ""))
@@ -197,18 +200,17 @@ end
 --- Loads the data file. Returns (state, info); never raises.
 -- info.created is true when there was no file, info.corrupt when there was one
 -- but nothing in it could be understood (info.raw then holds the original text).
-function MaxTimeInServerStore.load(files, name, capMinutes)
+function MaxTimeInServerStore.load(files, name)
     local ok, text = pcall(files.read, files, name)
     if not ok then text = nil end
 
     if text == nil or trim(text) == "" then
-        local state = MaxTimeInServerStore.newState(capMinutes)
-        return state, { created = true, corrupt = false }
+        return MaxTimeInServerStore.newState(), { created = true, corrupt = false }
     end
 
-    local parsedOk, state = pcall(MaxTimeInServerStore.parse, text, capMinutes)
+    local parsedOk, state = pcall(MaxTimeInServerStore.parse, text)
     if not parsedOk or state == nil or (state.recognised or 0) == 0 then
-        local fallback = MaxTimeInServerStore.newState(capMinutes)
+        local fallback = MaxTimeInServerStore.newState()
         return fallback, { created = false, corrupt = true, raw = text }
     end
 
