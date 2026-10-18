@@ -1,91 +1,61 @@
 # MaxTimeInServer
 
-A mod for **Project Zomboid Build 42** dedicated servers. It counts how many
-real minutes each account spends connected during the current week and turns
-away accounts that have used up their weekly budget. The default budget is
-**600 minutes (10 hours)** per week, Monday 00:00 to Sunday 23:59 in the
-server's timezone.
+A mod for **Project Zomboid Build 42** dedicated servers. It counts the real
+minutes each account spends connected during the week and turns away accounts
+that have used up their budget. The default is **600 minutes (10 hours)** per
+week, Monday 00:00 to Sunday 23:59 in the server's timezone.
 
-It exists to keep the pace of a server fair: when a few players put in many more
-hours than the rest, the world is already picked clean by the time everyone else
-logs in.
+It is there to keep the pace of a server shared. When a few players put in many
+more hours than everyone else, the map around the group's base is already picked
+clean by the time the others log in, and their evening is dull.
 
-## How it blocks, and why it works that way
+## How the block works
 
-Build 42's server-side Lua cannot refuse a login. There is no connection event
-at all (the full event list in `zombie/Lua/LuaEventManager` has no
-`OnPlayerConnect`), `zombie.network.GameServer` is annotated `@HiddenFromLua`,
-and `ServerWorldDatabase`, `Roles` and `BanSystem` are simply absent from the
-server's Lua namespace — all three come back `nil`. There is no reachable way to
-ban, kick or change a role from a server mod.
-
-What the server *can* do is talk to a client that has just arrived. So:
-
-1. The mod's client half greets the server as soon as its player exists.
-2. The server looks up the account's counter and, if the budget is spent, sends
-   back the numbers.
-3. The client shows them and disconnects itself — straight away if the player
-   dismisses the notice, and in any case once a short grace period is up.
+Build 42 gives a server-side mod no way to refuse a login: there is no connection
+event, and the ban, kick and role APIs are not reachable from the server's Lua at
+all. What the server *can* do is talk to a client that has just arrived, so the
+mod has two halves:
 
 ```
-client joins ──► sendClientCommand("MaxTimeInServer", "hello")
-                            │
-server          MaxTimeInServerGate ──► MaxTimeInServerQuota.verdict("darkkz", "user")
-                            │        612 of 600 minutes this week
-                            ▼
-                sendServerCommand(player, "MaxTimeInServer", "blocked",
-                                  {minutes=612, cap=600, resetsAt=…})
-                            │
-client          notice ──► forceDisconnect()
+client joins ──► "hello"
+                    │
+server        looks up the account: 612 of 600 minutes this week
+                    │
+                    └──► "blocked", with the numbers
+                                │
+client        shows them, then disconnects itself
 ```
 
-That leans on the client cooperating, and the base game already enforces it.
-`DoLuaChecksum=true` makes the server MD5 every Lua file both sides load —
-`GameServer.doMinimumInit` runs `initChecksum()`, then `LoadDirBase("shared")`,
-`LoadDirBase("client")`, `LoadDirBase("server")`, then `finishChecksum()`, so
-the server hashes the **client** Lua of every mod too. A client whose hashes
-disagree is dropped by vanilla ("*incorrect checksum … will be kicked in N ms
-because Lua/script checksums do not match*") before the quota is even
-consulted. Only roles holding the `BypassLuaChecksum` capability are exempt from
-that, which on this server is `admin` alone.
-Editing this mod locally therefore gets you kicked; defeating the quota means
-patching the game's Java, not editing a `.lua`.
+The player gets a notice saying how much they have used and when it resets, and a
+few seconds to read it. They are gone before they can do anything.
 
-A player who crosses the cap *while connected* is not kicked — they keep playing
-until they disconnect and simply cannot get back in. That is deliberate; the
-mid-session case is a later iteration.
+That leans on the client cooperating, which is why `DoLuaChecksum=true` matters in
+your server config — check that line is enabled. With it on, the server hashes the
+Lua both sides load, including the client half of every mod, and the base game
+kicks anyone whose copy differs. Editing this mod to dodge the quota gets you
+kicked by vanilla before the quota is even consulted. (Roles holding the
+`BypassLuaChecksum` capability are exempt from that check.)
 
-## Build 42 folder layout
-
-Build 42 discovers a mod by its **version directory**, and `versionMin` in the
-manifest makes it skip the mod entirely — a mod with `mod.info` at its root, or
-with `versionMin=42` in the manifest, is never found at all. Both were measured
-against a live server by listing several one-line mods in `Mods=` at once, each
-printing a distinct line, and seeing which ones loaded.
-
-```
-MaxTimeInServer/
-  42/mod.info                               <- the manifest must live here, with no versionMin
-  42/poster.png
-  common/media/lua/shared/MaxTimeInServer/  <- config, needed by both sides
-  common/media/lua/client/MaxTimeInServer/  <- the notice and the disconnect
-  common/media/lua/server/MaxTimeInServer/  <- the counting and the decision
-```
+A player who crosses the cap *while connected* is not kicked. They finish their
+session and simply cannot get back in. That is deliberate.
 
 ## Installing on the server
 
 ```sh
 make test      # the full suite, no server needed
-make deploy    # copies the mod to server-local:~/Zomboid/mods/MaxTimeInServer/
+make deploy    # copies the mod to ~/Zomboid/mods/MaxTimeInServer/ on your server
 ```
 
-Then add the mod id to `~/Zomboid/Server/<World>.ini`:
+`make deploy` reaches the server over SSH. Set `SERVER` and `WORLD` at the top of
+the Makefile to your own host and world name first.
+
+Then add the mod id to the server's `.ini`, keeping any mods already listed:
 
 ```
 Mods=MaxTimeInServer
 ```
 
-and restart the game server:
+and restart:
 
 ```sh
 make restart
@@ -94,36 +64,29 @@ make logs      # [MaxTimeInServer] ready: cap 600 minutes per week, week startin
 
 ## Installing for the players
 
-**Every player needs the identical `MaxTimeInServer` folder**, both because the
-client half does the disconnecting and because the client runs
-`checkMissingMods` while loading — a player without it is turned away at the
-connection screen.
+**Every player needs the identical `MaxTimeInServer` folder.** Not optional: the
+client half is what shows the notice and disconnects, and a client missing a mod
+the server lists is turned away at the connection screen anyway.
 
 ```sh
-make package    # runs the tests, checks the server is in sync, builds build/MaxTimeInServer.zip
+make package   # builds build/MaxTimeInServer.zip
 ```
 
-`make package` runs `make verify-sync` first, and that check matters: the server
-hashes the mod's Lua **when it boots** and kicks clients whose copies disagree.
-Change a file, deploy it, forget to restart, and every player with the new zip is
-turned away at the connection screen. So: deploy, restart, then package. If the
-server has no copy of the mod installed at all there is nothing to compare
-against, and packaging goes ahead.
+They unzip it into their own Zomboid directory — `%UserProfile%\Zomboid\mods\` on
+Windows, `~/Zomboid/mods/` on Linux and macOS. Nothing to enable in the mod menu;
+the server's mod list drives it.
 
-They unzip it into their own Zomboid directory:
-
-| OS | Path |
-|---|---|
-| Windows | `%UserProfile%\Zomboid\mods\` |
-| Linux / macOS | `~/Zomboid/mods/` |
-
-They do not need to enable anything in the mod menu: the server's mod list
-drives it.
+One trap worth knowing: the server hashes the mod's Lua **when it boots**. Change
+a file, deploy it, forget to restart, and every player with the new zip gets
+kicked on the checksum. The order is deploy, restart, package. `make package`
+compares your working tree against the copy sitting on the server and refuses to
+build when they differ, which catches a forgotten deploy — it has no way to know
+whether the server has restarted since, so that part is on you.
 
 ## The counter file
 
-`~/Zomboid/Lua/MaxTimeInServer.txt` on the server. Safe to edit while the server is
-running — every sweep re-reads it, so a change takes effect within a minute.
+`~/Zomboid/Lua/MaxTimeInServer.txt` on the server. Safe to edit while the server
+is running: it is re-read every minute, so changes take effect by themselves.
 
 ```
 version=1
@@ -132,7 +95,7 @@ weekStart=2026-10-12T00:00:00+0000
 weekStartEpoch=1791763200
 savedAt=2026-10-18T16:22:07+0000
 
-[darkkz]
+[someplayer]
 role=user
 minutes=132
 bonusMinutes=0
@@ -141,38 +104,36 @@ exempt=false
 
 | Field | Meaning |
 |---|---|
-| `capMinutes` | the weekly budget for everyone; this value wins over the one in `MaxTimeInServerConfig.lua` |
-| `weekStartEpoch` | start of the week the counters belong to; set it to `0` to force a reset |
+| `capMinutes` | the weekly budget for everyone; this wins over the value in `MaxTimeInServerConfig.lua` |
 | `minutes` | real minutes spent on the server this week |
 | `bonusMinutes` | extra allowance for **this week only**, added to `capMinutes`; cleared at the next reset |
-| `exempt` | `true` = never counted, never turned away (a manual override that survives resets) |
-| `role` | informational: the role the account was last seen holding |
+| `exempt` | `true` means never counted and never turned away; a manual override that survives resets |
+| `weekStartEpoch` | start of the week these counters belong to; set it to `0` to force a reset |
+| `role` | informational, the role the account was last seen holding |
 
 Accounts holding `admin`, `moderator` or `gm` are never counted and never turned
-away, so an operator can always get in. The list lives in
+away, so you can always get in yourself. That list lives in
 `MaxTimeInServerConfig.lua`.
 
-### Recipes
+### Things you will actually want to do
 
 ```sh
 make data     # read the counters
 make roles    # every account and the role it holds right now
 make logs     # what the mod has been doing
-make help     # every target, including the layout probes and uninstall
+make help     # the rest of the targets
 ```
 
-- **Give someone two more hours this week**: set `bonusMinutes=120` in their
-  section.
+- **Give someone two more hours this week**: set their `bonusMinutes=120`.
 - **Let someone back in now**: lower their `minutes`, or set `exempt=true`.
-- **Raise the cap for everyone**: change `capMinutes`.
+- **Change the cap for everyone**: edit `capMinutes`.
 - **Start the week over**: set `weekStartEpoch=0`.
 
-### Seeing the block happen
+### Seeing a refusal for yourself
 
-Everything above is covered by the test suite, but the refusal itself needs a
-real client, because it is the client that shows the notice and disconnects.
-Once the mod is installed and somebody has connected long enough to appear in
-the counter file:
+The refusal is the one thing no test can cover, because it is the client that
+shows the notice and disconnects. Once the mod is installed and somebody has
+connected long enough to appear in the counter file:
 
 ```sh
 make demo-block     # drops capMinutes to 1, so the next join is refused
@@ -181,25 +142,21 @@ make logs           # [MaxTimeInServer] refused <name>: 1/1 minutes this week, r
 make demo-restore   # puts capMinutes back to 600
 ```
 
-## Timing: the server has no real-time tick
+## How the counting behaves
 
-`GameServer` triggers only `OnClientCommand`, `OnGameBoot`, `OnGameTimeLoaded`,
-`OnReceiveItemListNet` and `OnServerStarted`. `OnTick` comes from `IngameState`,
-which a dedicated server never runs. The only periodic driver is
-`EveryOneMinute`, fired by `GameTime` — and with `PauseEmpty=true` (the stock
-setting, and this server's) game time stops while nobody is on.
+- Time counts only while somebody is connected. Hours the server spent empty, or
+  down, are never charged to anyone.
+- The join check happens during the handshake, so it does not depend on the game
+  clock and is never late.
+- The weekly reset runs on the first pass after the boundary: the server starting
+  up, or the first player connecting. Nobody is kept out in the meantime, because
+  a counter belonging to a week that has already rolled over is ignored.
 
-That is fine for this design:
-
-- Minutes are counted only while somebody is connected, which is exactly what
-  the quota is about, and the time the server spent empty or down is never
-  credited.
-- The join check runs on the handshake, not on a timer, so it does not depend on
-  game time at all.
-- The weekly reset happens on the first sweep after the boundary: the server
-  starting up, or the first player connecting. A player who is over the cap is
-  judged against the live week either way, because the verdict ignores counters
-  belonging to a week that has already rolled over.
+That last point matters because a dedicated server has no real-time clock tick in
+Lua. The only periodic event available runs on game time, which stops entirely
+while the server is empty if `PauseEmpty` is on. The mod is built around that
+rather than against it: it measures elapsed real time whenever it does get a tick,
+and never trusts the game clock for anything.
 
 ## Development
 
@@ -207,33 +164,44 @@ That is fine for this design:
 ./tests/run.sh      # or: make test
 ```
 
-The tests run under any Lua 5.1-compatible interpreter (`luajit` is what the
-runner looks for first) against `tests/pz_stubs.lua`, which fakes the parts of
-the game the mod touches: `Events`, `getFileReader`/`getFileWriter`,
-`getOnlinePlayers`, `java.util.Calendar`, the connected players and the network.
-No game install is needed. `tests/test_client_on_server.lua` covers the one
-thing easy to get wrong: a dedicated server runs client Lua too, so the client
-half must sit still there.
+The tests need no game install. `tests/pz_stubs.lua` fakes the parts of the engine
+the mod touches — events, file reading and writing, the connected players, the
+calendar and the network — so the whole suite runs under any Lua 5.1 compatible
+interpreter. `luajit` is what the runner looks for first.
 
-Three rules the live server taught us, all of them the hard way:
+Three traps in Project Zomboid's Lua, all of which cost real time to find:
 
-- **The engine runs Kahlua, not PUC-Lua.** A pattern that can match the empty
-  string — `gmatch("[^\n]*")` to split lines, say — never advances past the
-  empty match there and spins forever. The same code terminates under `luajit`,
-  so the tests were green while the server hung on every boot, silently, at 200%
-  CPU until systemd killed it. Split strings with `find` and `sub`;
-  `string.format` is likewise fussy (`%d` on a float is refused).
-- **Always log one line on entry.** A handler that hangs or returns early looks
-  exactly like a mod that is working fine, and the server logs nothing for it.
-- **Key a registration guard to the event object, not to a boolean.** A flag on
-  a global table survives a Lua reload while the `Events` table may not, which
-  would leave the mod flagged as registered and attached to nothing.
+- **It is Kahlua, not standard Lua.** A pattern that can match the empty string,
+  `gmatch("[^\n]*")` for splitting lines being the obvious one, never advances
+  past the empty match and loops forever. The same code terminates under
+  `luajit`, so the tests stay green while the server hangs on every boot with no
+  error at all. Split strings with `find` and `sub`. `string.format` is fussy
+  too: `%d` on a float is refused.
+- **Log one line when a handler runs.** A handler that hangs, or returns early,
+  is indistinguishable from a mod that is working fine. The server reports
+  nothing for either.
+- **Work out which side you are on when an event fires, not when the file
+  loads.** A dedicated server loads and runs client Lua as well as its own, and
+  the flags that tell you which side you are on are not dependable that early.
+
+The folder layout is not a matter of taste. Build 42 finds a mod by its version
+directory, so `mod.info` must live in `42/`, and a `versionMin` line in the
+manifest makes the server skip the mod entirely.
+
+```
+MaxTimeInServer/
+  42/mod.info                               <- here, and with no versionMin
+  42/poster.png
+  common/media/lua/shared/MaxTimeInServer/  <- config, both sides need it
+  common/media/lua/client/MaxTimeInServer/  <- the notice and the disconnect
+  common/media/lua/server/MaxTimeInServer/  <- the counting and the decision
+```
 
 ## Limitations
 
-- A player who crosses the cap while connected is not kicked.
-- The quota is enforced by the client on the server's instruction. The stock Lua
+- A player who crosses the cap mid-session is not kicked.
+- The quota is enforced by the client on the server's instruction. The Lua
   checksum makes editing the mod a kickable offence, but a patched game binary
-  could still ignore it. For a tamper-proof version the counter file would have
-  to be read by something outside the game that can issue real bans.
-- Minutes are counted per **username**, not per character or per Steam account.
+  could still ignore it. Enforcement that cannot be tampered with would need
+  something outside the game reading the counter file and issuing real bans.
+- Minutes are counted per account name, not per character.
