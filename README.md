@@ -46,7 +46,8 @@ That leans on the client cooperating, and the base game already enforces it.
 the server hashes the **client** Lua of every mod too. A client whose hashes
 disagree is dropped by vanilla ("*incorrect checksum … will be kicked in N ms
 because Lua/script checksums do not match*") before the quota is even
-consulted, and only the `admin` role holds the `BypassLuaChecksum` capability.
+consulted. Only roles holding the `BypassLuaChecksum` capability are exempt from
+that, which on this server is `admin` alone.
 Editing this mod locally therefore gets you kicked; defeating the quota means
 patching the game's Java, not editing a `.lua`.
 
@@ -63,11 +64,11 @@ their results.
 
 ```
 MaxTimeInServer/
-  42/mod.info                                     <- the manifest must live here, with no versionMin
+  42/mod.info                               <- the manifest must live here, with no versionMin
   42/poster.png
-  common/media/lua/shared/MaxTimeInServer/            <- config, needed by both sides
-  common/media/lua/client/MaxTimeInServer/            <- the notice and the disconnect
-  common/media/lua/server/MaxTimeInServer/            <- the counting and the decision
+  common/media/lua/shared/MaxTimeInServer/  <- config, needed by both sides
+  common/media/lua/client/MaxTimeInServer/  <- the notice and the disconnect
+  common/media/lua/server/MaxTimeInServer/  <- the counting and the decision
 ```
 
 ## Installing on the server
@@ -101,11 +102,12 @@ connection screen.
 make package    # runs the tests, checks the server is in sync, builds build/MaxTimeInServer.zip
 ```
 
-`make package` refuses to build unless the server's copy of the mod matches this
-working tree, and that check matters: the server hashes the mod's Lua **when it
-boots** and kicks clients whose copies disagree. Change a file, deploy it and
-forget to restart, and every player with the new zip is turned away at the
-connection screen. Deploy, restart, then package.
+`make package` runs `make verify-sync` first, and that check matters: the server
+hashes the mod's Lua **when it boots** and kicks clients whose copies disagree.
+Change a file, deploy it, forget to restart, and every player with the new zip is
+turned away at the connection screen. So: deploy, restart, then package. If the
+server has no copy of the mod installed at all there is nothing to compare
+against, and packaging goes ahead.
 
 They unzip it into their own Zomboid directory:
 
@@ -155,6 +157,7 @@ away, so an operator can always get in. The list lives in
 make data     # read the counters
 make roles    # every account and the role it holds right now
 make logs     # what the mod has been doing
+make help     # every target, including the layout probes and uninstall
 ```
 
 - **Give someone two more hours this week**: set `bonusMinutes=120` in their
@@ -162,6 +165,20 @@ make logs     # what the mod has been doing
 - **Let someone back in now**: lower their `minutes`, or set `exempt=true`.
 - **Raise the cap for everyone**: change `capMinutes`.
 - **Start the week over**: set `weekStartEpoch=0`.
+
+### Seeing the block happen
+
+Everything above is covered by the test suite, but the refusal itself needs a
+real client, because it is the client that shows the notice and disconnects.
+Once the mod is installed and somebody has connected long enough to appear in
+the counter file:
+
+```sh
+make demo-block     # drops capMinutes to 1, so the next join is refused
+# reconnect: the notice appears and the client disconnects itself
+make logs           # [MaxTimeInServer] refused <name>: 1/1 minutes this week, resets ...
+make demo-restore   # puts capMinutes back to 600
+```
 
 ## Timing: the server has no real-time tick
 
