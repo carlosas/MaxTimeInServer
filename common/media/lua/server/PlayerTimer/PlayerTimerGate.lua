@@ -89,6 +89,6 @@ function PlayerTimerGate.registerEvents()
     Events.OnClientCommand.Add(PlayerTimerGate.onClientCommand)
 end
 
-if isServer == nil or isServer() then
-    PlayerTimerGate.registerEvents()
-end
+-- Registered unconditionally: OnClientCommand only ever fires on a server, so
+-- there is no need to work out which side this is at load time.
+PlayerTimerGate.registerEvents()

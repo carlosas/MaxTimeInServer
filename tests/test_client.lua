@@ -51,12 +51,15 @@ H.test("the connection is dropped once the grace period is over", function()
     H.assertEqual(world.disconnects, 1, "only once")
 end)
 
-H.test("a notice the UI refuses to show still drops the connection", function()
+H.test("a notice the UI refuses to show drops the connection almost at once", function()
     local world = wire({ noticeThrows = true })
     PlayerTimerClient.onServerCommand(PlayerTimerConfig.netModule, PlayerTimerConfig.netBlocked, BLOCKED)
-    world.nowMs = world.nowMs + 12000
+    world.nowMs = world.nowMs + 1999
     PlayerTimerClient.update()
-    H.assertEqual(world.disconnects, 1, "dropped anyway")
+    H.assertEqual(world.disconnects, 0, "a moment to settle")
+    world.nowMs = world.nowMs + 1
+    PlayerTimerClient.update()
+    H.assertEqual(world.disconnects, 1, "dropped without waiting out the grace")
 end)
 
 H.test("a refusal with no numbers still reads as a sentence", function()

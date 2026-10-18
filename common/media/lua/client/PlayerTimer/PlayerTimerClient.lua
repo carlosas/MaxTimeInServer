@@ -11,7 +11,13 @@ player dismisses the notice, and in any case once the grace period is up.
 ]]
 
 PlayerTimerClient = PlayerTimerClient or {}
-PlayerTimerClient.active = false
+
+--- True only on a machine with a local player, i.e. not a dedicated server.
+-- Checked when an event fires rather than when this file loads, because the
+-- engine sets GameClient.client around the Lua load.
+local function actingAsClient()
+    return isClient ~= nil and isClient()
+end
 
 local disconnectAtMs = nil
 local greeted = false
@@ -66,6 +72,7 @@ function PlayerTimerClient.onNoticeDismissed()
 end
 
 function PlayerTimerClient.onCreatePlayer(playerIndex)
+    if not actingAsClient() then return end
     -- Only the first local player greets; a split-screen second player is the
     -- same account as far as the quota is concerned.
     if playerIndex ~= 0 then return end
@@ -75,6 +82,7 @@ function PlayerTimerClient.onCreatePlayer(playerIndex)
 end
 
 function PlayerTimerClient.onServerCommand(module, command, args)
+    if not actingAsClient() then return end
     if module ~= PlayerTimerConfig.netModule then return end
     if command ~= PlayerTimerConfig.netBlocked then return end
 
@@ -85,11 +93,17 @@ function PlayerTimerClient.onServerCommand(module, command, args)
 
     -- The disconnect is armed before the notice: a UI that refuses to open
     -- must not leave the player in a world they are not allowed to be in.
-    local ok, now = pcall(PlayerTimerClient.hooks.nowMs)
-    disconnectAtMs = (ok and now or 0) + graceSeconds * 1000
+    local clockOk, now = pcall(PlayerTimerClient.hooks.nowMs)
+    now = clockOk and now or 0
+    disconnectAtMs = now + graceSeconds * 1000
 
-    pcall(PlayerTimerClient.hooks.showNotice,
+    local shown = pcall(PlayerTimerClient.hooks.showNotice,
         noticeText(minutes, cap, args.resetsAt, graceSeconds))
+    if not shown then
+        -- Nothing was put on screen, so the grace period buys the player
+        -- nothing but confusion. Go almost immediately instead.
+        disconnectAtMs = now + 2000
+    end
 
     print(string.format("[PlayerTimer] refused by the server: %d/%d minutes this week",
         minutes, cap))
@@ -102,9 +116,9 @@ function PlayerTimerClient.update()
     if now >= disconnectAtMs then dropNow() end
 end
 
-if isClient ~= nil and isClient() then
-    PlayerTimerClient.active = true
-    Events.OnCreatePlayer.Add(PlayerTimerClient.onCreatePlayer)
-    Events.OnServerCommand.Add(PlayerTimerClient.onServerCommand)
-    Events.OnTick.Add(PlayerTimerClient.update)
-end
+-- Registered unconditionally; every handler checks the side itself. A dedicated
+-- server runs this file too and must stay silent, which it does because
+-- isClient() is false there when the events actually fire.
+Events.OnCreatePlayer.Add(PlayerTimerClient.onCreatePlayer)
+Events.OnServerCommand.Add(PlayerTimerClient.onServerCommand)
+Events.OnTick.Add(PlayerTimerClient.update)

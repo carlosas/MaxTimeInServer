@@ -19,7 +19,7 @@ SERVER_INI  ?= $(ZOMBOID)/Server/$(WORLD).ini
 MOD_FILES   = 42 common
 
 .PHONY: help test deploy package restart status logs data roles ini \
-        layout-probe-deploy layout-read layout-probe-clean uninstall
+        layout-probe-deploy layout-read layout-probe-clean demo-block demo-restore uninstall
 
 help:
 	@grep -E '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t24
@@ -78,6 +78,14 @@ layout-read: ## Report which probe layouts the server discovered and loaded
 
 layout-probe-clean: ## Remove every layout probe from the server
 	@$(SSH) 'cd $(MODS_DIR) && rm -rf Pt42 Pt42Common PtCommon PtRoot PtVmin PtVmin42 PtMver PtPoster PtAuthor PtSub'
+
+demo-block: ## Set the cap to 1 minute so the next join is refused (for testing)
+	@$(SSH) 'f=$(DATA_FILE); [ -f "$$f" ] || { echo "no $$f yet - connect once first"; exit 1; }; \
+		sed -i "s/^capMinutes=.*/capMinutes=1/" "$$f" && grep -n "^capMinutes=" "$$f"'
+	@echo "Within a minute the server will refuse anyone whose counter is >= 1 minute."
+
+demo-restore: ## Put the cap back to 600 minutes
+	@$(SSH) 'sed -i "s/^capMinutes=.*/capMinutes=600/" $(DATA_FILE) && grep -n "^capMinutes=" $(DATA_FILE)'
 
 uninstall: ## Remove the mod from the server (leaves the counter file alone)
 	@$(SSH) 'rm -rf $(MODS_DIR)/$(MOD_ID)'

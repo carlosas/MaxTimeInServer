@@ -191,6 +191,15 @@ No game install is needed. `tests/test_client_on_server.lua` covers the one
 thing easy to get wrong: a dedicated server runs client Lua too, so the client
 half must sit still there.
 
+Two rules the live server taught us, both worth keeping:
+
+- **Never decide which side you are on at load time.** Mod Lua is loaded inside
+  `GameServer.doMinimumInit`, and `isServer()` / `isClient()` are not dependable
+  that early. Register handlers unconditionally and check the side when the
+  event fires.
+- **Always log one line on load.** A mod that registers nothing looks exactly
+  like a mod that is working fine, and the server logs no error for it.
+
 ## Limitations
 
 - A player who crosses the cap while connected is not kicked.

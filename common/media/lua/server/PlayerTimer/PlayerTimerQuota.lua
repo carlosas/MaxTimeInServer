@@ -59,6 +59,15 @@ local function log(message)
     print("[PlayerTimer] " .. message)
 end
 
+--- True only on a machine acting as the server for other people.
+-- Checked when an event fires rather than when this file loads: the engine sets
+-- GameServer.server / GameClient.client around the Lua load, so a load-time
+-- check is not something to rely on.
+local function actingAsServer()
+    if isClient ~= nil and isClient() then return false end
+    return isServer == nil or isServer()
+end
+
 --- Swaps in alternative collaborators and forgets all in-memory progress.
 function PlayerTimerQuota.configure(overrides)
     deps = defaultDeps()
@@ -248,7 +257,9 @@ function PlayerTimerQuota.sweep(now)
 end
 
 --- Runs a sweep if enough real time has passed. Returns true when it did.
+-- EveryOneMinute fires on clients too, so this checks which side it is on.
 function PlayerTimerQuota.tick()
+    if not actingAsServer() then return false end
     local d = dependencies()
     local now = d.clock.now()
     if lastSweepEpoch ~= nil and (now - lastSweepEpoch) < (d.config.sweepIntervalSeconds or 60) then
@@ -266,6 +277,7 @@ function PlayerTimerQuota.start()
 end
 
 local function onServerStarted()
+    if not actingAsServer() then return end
     PlayerTimerQuota.start()
     local d = dependencies()
     local state = PlayerTimerQuota.loadState()
@@ -276,6 +288,7 @@ local function onServerStarted()
 end
 
 local function onSaving()
+    if not actingAsServer() then return end
     PlayerTimerQuota.sweep(dependencies().clock.now())
 end
 
@@ -289,6 +302,16 @@ function PlayerTimerQuota.registerEvents()
     Events.OnServerStartSaving.Add(onSaving)
 end
 
-if isServer == nil or isServer() then
-    PlayerTimerQuota.registerEvents()
-end
+-- Registered unconditionally. OnServerStarted and OnServerStartSaving only ever
+-- fire on a server, and tick() checks the side itself, so there is nothing to
+-- gain from guessing at load time - and plenty to lose if the guess is wrong.
+PlayerTimerQuota.registerEvents()
+
+-- One line per boot, so a silent mod is never mistaken for a working one. The
+-- side flags are printed because they are not reliable this early: that is why
+-- nothing here is decided at load time.
+print(string.format("[PlayerTimer] server half loaded (isServer=%s isClient=%s config=%s store=%s)",
+    tostring(isServer ~= nil and isServer()),
+    tostring(isClient ~= nil and isClient()),
+    tostring(PlayerTimerConfig ~= nil),
+    tostring(PlayerTimerStore ~= nil)))
