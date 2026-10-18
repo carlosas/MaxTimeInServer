@@ -64,8 +64,8 @@ function PlayerTimerGate.onClientCommand(module, command, player)
 
         if verdict.allowed then
             if d.config.debug then
-                log(string.format("%s joined: %d/%d minutes this week",
-                    username, verdict.minutes or 0, verdict.cap or 0))
+                log(username .. " joined: " .. tostring(verdict.minutes or 0) ..
+                    "/" .. tostring(verdict.cap or 0) .. " minutes this week")
             end
             return
         end
@@ -76,8 +76,9 @@ function PlayerTimerGate.onClientCommand(module, command, player)
             resetsAt = verdict.resetsAt,
             graceSeconds = d.config.graceSeconds,
         })
-        log(string.format("refused %s: %d/%d minutes this week, resets %s",
-            username, verdict.minutes or 0, verdict.cap or 0, tostring(verdict.resetsAt)))
+        log("refused " .. username .. ": " .. tostring(verdict.minutes or 0) ..
+            "/" .. tostring(verdict.cap or 0) .. " minutes this week, resets " ..
+            tostring(verdict.resetsAt))
     end)
 
     if not ok then log("handshake failed: " .. tostring(err)) end

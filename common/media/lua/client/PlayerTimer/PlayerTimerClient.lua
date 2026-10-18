@@ -24,12 +24,14 @@ local greeted = false
 
 local function noticeText(minutes, cap, resetsAt, graceSeconds)
     if cap and cap > 0 then
-        return string.format(
-            "Weekly play limit reached.\n\n" ..
-            "You have used %d of your %d minutes this week.\n" ..
-            "Your allowance resets on %s.\n\n" ..
-            "Disconnecting in %d seconds.",
-            minutes or 0, cap, tostring(resetsAt or "the next Monday"), graceSeconds or 0)
+        -- Concatenation rather than string.format: the engine's Lua is not
+        -- fussy about much, but %d on a float is one of the things it refuses,
+        -- and this text is the only thing a blocked player ever sees.
+        return "Weekly play limit reached.\n\n" ..
+            "You have used " .. tostring(math.floor(minutes or 0)) ..
+            " of your " .. tostring(math.floor(cap)) .. " minutes this week.\n" ..
+            "Your allowance resets on " .. tostring(resetsAt or "the next Monday") .. ".\n\n" ..
+            "Disconnecting in " .. tostring(math.floor(graceSeconds or 0)) .. " seconds."
     end
     return "Weekly play limit reached. Your allowance resets at the start of " ..
            "next week. Disconnecting shortly."
@@ -105,8 +107,8 @@ function PlayerTimerClient.onServerCommand(module, command, args)
         disconnectAtMs = now + 2000
     end
 
-    print(string.format("[PlayerTimer] refused by the server: %d/%d minutes this week",
-        minutes, cap))
+    print("[PlayerTimer] refused by the server: " .. tostring(minutes) ..
+        "/" .. tostring(cap) .. " minutes this week")
 end
 
 function PlayerTimerClient.update()

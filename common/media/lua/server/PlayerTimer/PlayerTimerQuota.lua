@@ -202,8 +202,8 @@ local function sweepBody(now)
     local changed = info.created == true
 
     if info.corrupt then
-        log(string.format("%s could not be read; keeping a copy in %s and starting a fresh one",
-            d.config.dataFile, rescueName(d.config.dataFile)))
+        log(tostring(d.config.dataFile) .. " could not be read; keeping a copy in " ..
+            rescueName(d.config.dataFile) .. " and starting a fresh one")
         pcall(d.files.write, d.files, rescueName(d.config.dataFile), info.raw)
         changed = true
     end
@@ -217,8 +217,8 @@ local function sweepBody(now)
         if elapsed < 0 then elapsed = 0 end
         local maximum = d.config.maxCreditSecondsPerSweep or 3600
         if elapsed > maximum then
-            log(string.format("clock moved %d seconds since the last sweep; crediting %d",
-                elapsed, maximum))
+            log("clock moved " .. tostring(elapsed) ..
+                " seconds since the last sweep; crediting " .. tostring(maximum))
             elapsed = maximum
         end
     end
@@ -243,7 +243,8 @@ local function sweepBody(now)
     end
 
     if d.config.debug then
-        log(string.format("sweep at %s credited %d seconds", d.clock.formatIso(now), elapsed))
+        log("sweep at " .. tostring(d.clock.formatIso(now)) ..
+            " credited " .. tostring(elapsed) .. " seconds")
     end
 end
 
@@ -276,20 +277,39 @@ function PlayerTimerQuota.start()
     carriedSeconds = {}
 end
 
+-- Every handler says it ran and reports its own failure. An error escaping an
+-- event handler is swallowed by the engine, and a mod that silently does
+-- nothing looks exactly like one that is working.
 local function onServerStarted()
-    if not actingAsServer() then return end
-    PlayerTimerQuota.start()
-    local d = dependencies()
-    local state = PlayerTimerQuota.loadState()
-    log(string.format("ready: cap %d minutes per week, week starting %s, %d accounts on record",
-        state.capMinutes or 0, tostring(state.weekStart), #state.order))
-    -- Apply the week reset right away rather than waiting out the first interval.
-    PlayerTimerQuota.sweep(d.clock.now())
+    log("OnServerStarted fired (isServer=" .. tostring(isServer ~= nil and isServer()) ..
+        " isClient=" .. tostring(isClient ~= nil and isClient()) ..
+        " store=" .. tostring(PlayerTimerStore ~= nil) ..
+        " config=" .. tostring(PlayerTimerConfig ~= nil) .. ")")
+
+    if not actingAsServer() then
+        log("not acting as the server, standing down")
+        return
+    end
+
+    local ok, err = pcall(function()
+        PlayerTimerQuota.start()
+        local d = dependencies()
+        local state = PlayerTimerQuota.loadState()
+        log("ready: cap " .. tostring(state.capMinutes or 0) ..
+            " minutes per week, week starting " .. tostring(state.weekStart) ..
+            ", " .. tostring(#state.order) .. " accounts on record")
+        -- Apply the week reset right away rather than waiting out the interval.
+        PlayerTimerQuota.sweep(d.clock.now())
+    end)
+    if not ok then log("start-up failed: " .. tostring(err)) end
 end
 
 local function onSaving()
     if not actingAsServer() then return end
-    PlayerTimerQuota.sweep(dependencies().clock.now())
+    local ok, err = pcall(function()
+        PlayerTimerQuota.sweep(dependencies().clock.now())
+    end)
+    if not ok then log("save-time sweep failed: " .. tostring(err)) end
 end
 
 function PlayerTimerQuota.registerEvents()
@@ -310,8 +330,7 @@ PlayerTimerQuota.registerEvents()
 -- One line per boot, so a silent mod is never mistaken for a working one. The
 -- side flags are printed because they are not reliable this early: that is why
 -- nothing here is decided at load time.
-print(string.format("[PlayerTimer] server half loaded (isServer=%s isClient=%s config=%s store=%s)",
-    tostring(isServer ~= nil and isServer()),
-    tostring(isClient ~= nil and isClient()),
-    tostring(PlayerTimerConfig ~= nil),
-    tostring(PlayerTimerStore ~= nil)))
+print("[PlayerTimer] server half loaded (isServer=" ..
+    tostring(isServer ~= nil and isServer()) ..
+    " isClient=" .. tostring(isClient ~= nil and isClient()) ..
+    " config=" .. tostring(PlayerTimerConfig ~= nil) .. ")")
