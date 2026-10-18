@@ -4,10 +4,10 @@ MaxTimeInServer - weekly connected-time quota.
 Lives in shared/ because both sides need it: the server reads the quota rules,
 the client needs the handshake names.
 
-The three settings an operator is expected to change - the weekly budget, who is
-exempt from it, and how long a refused player gets to read the notice - come
-from the server's sandbox options, declared in media/sandbox-options.txt. The
-values below are only the fallbacks used when those are unavailable: in
+The settings an operator is expected to change - the weekly budget, who is
+exempt from it, what a refused player is told, and how long they get to read it
+- come from the server's sandbox options, declared in media/sandbox-options.txt.
+The values below are only the fallbacks used when those are unavailable: in
 single-player, or if the sandbox file failed to parse.
 
 Sandbox options are read once when the server boots, so changing one takes a
@@ -17,12 +17,14 @@ server restart.
 local DEFAULT_CAP_MINUTES = 600
 local DEFAULT_EXEMPT_ROLES = { "admin", "moderator", "gm" }
 local DEFAULT_GRACE_SECONDS = 12
+local DEFAULT_BLOCKED_MESSAGE = "Weekly play limit reached."
 
 MaxTimeInServerConfig = {
     -- Set from the sandbox options; see applySandboxOptions below.
     capMinutes = DEFAULT_CAP_MINUTES,
     exemptRoles = { "admin", "moderator", "gm" },
     graceSeconds = DEFAULT_GRACE_SECONDS,
+    blockedMessage = DEFAULT_BLOCKED_MESSAGE,
 
     -- Not worth a server setting: changing either breaks the data file or the
     -- handshake rather than tuning anything.
@@ -95,6 +97,7 @@ end
 function MaxTimeInServerConfig.applySandboxOptions(vars)
     MaxTimeInServerConfig.capMinutes = DEFAULT_CAP_MINUTES
     MaxTimeInServerConfig.graceSeconds = DEFAULT_GRACE_SECONDS
+    MaxTimeInServerConfig.blockedMessage = DEFAULT_BLOCKED_MESSAGE
     MaxTimeInServerConfig.exemptRoles = {}
     for _, role in ipairs(DEFAULT_EXEMPT_ROLES) do
         table.insert(MaxTimeInServerConfig.exemptRoles, role)
@@ -118,6 +121,12 @@ function MaxTimeInServerConfig.applySandboxOptions(vars)
         if seconds ~= nil then MaxTimeInServerConfig.graceSeconds = seconds end
     end
 
+    -- An empty message is a deliberate answer too: show the numbers alone.
+    if page.BlockedMessage ~= nil then
+        MaxTimeInServerConfig.blockedMessage =
+            (tostring(page.BlockedMessage):gsub("^%s+", ""):gsub("%s+$", ""))
+    end
+
     -- An empty list is a deliberate answer: limit everybody, operators too.
     if page.ExemptRoles ~= nil then
         MaxTimeInServerConfig.exemptRoles = parseRoleList(page.ExemptRoles)
@@ -130,8 +139,10 @@ end
 function MaxTimeInServerConfig.describe()
     local roles = table.concat(MaxTimeInServerConfig.exemptRoles, ", ")
     if roles == "" then roles = "none" end
+    local wording = MaxTimeInServerConfig.blockedMessage
+    if wording == nil or wording == "" then wording = "(numbers only)" end
     return "cap " .. tostring(MaxTimeInServerConfig.capMinutes) ..
         " minutes per week, exempt roles: " .. roles ..
         ", " .. tostring(MaxTimeInServerConfig.graceSeconds) ..
-        " seconds to read the notice"
+        " seconds to read the notice, refusal reads: " .. wording
 end

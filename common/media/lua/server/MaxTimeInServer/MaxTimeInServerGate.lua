@@ -71,6 +71,7 @@ function MaxTimeInServerGate.onClientCommand(module, command, player)
         end
 
         d.net.send(player, d.config.netModule, d.config.netBlocked, {
+            message = d.config.blockedMessage,
             minutes = verdict.minutes,
             cap = verdict.cap,
             resetsAt = verdict.resetsAt,

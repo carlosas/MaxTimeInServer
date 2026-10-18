@@ -93,13 +93,27 @@ a page called *Max Time In Server*. Set them from your admin panel, or by editin
 |---|---|---|
 | Weekly minutes per account | `600` | the budget, in real minutes, per account per week |
 | Roles that are never limited | `admin;moderator;gm` | semicolon-separated; these accounts are never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included |
+| What a refused player is told | `Weekly play limit reached.` | the wording of the notice. It cannot contain a comma, because the sandbox file splits on them. Empty shows the numbers alone |
 | Seconds to read the notice | `12` | how long a refused player gets before their game disconnects itself |
+
+The wording is only the explanation. The minutes used, the cap and the reset day
+are added by the mod underneath, on their own lines, so rewriting the message
+cannot accidentally hide what the player needs to know:
+
+```
+No more for you this week.
+
+You have used 612 of your 600 minutes this week.
+Your allowance resets on 2026-10-19.
+
+Disconnecting in 12 seconds.
+```
 
 Sandbox options are read once when the server boots, so a change takes a
 restart. On start-up the mod prints the settings it is actually enforcing:
 
 ```
-[MaxTimeInServer] ready: cap 600 minutes per week, exempt roles: admin, moderator, gm, 12 seconds to read the notice, week starting ...
+[MaxTimeInServer] ready: cap 600 minutes per week, exempt roles: admin, moderator, gm, 12 seconds to read the notice, refusal reads: Weekly play limit reached., week starting ...
 ```
 
 If the mod cannot find its settings page it says so and falls back to those same

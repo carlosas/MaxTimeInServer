@@ -22,19 +22,27 @@ end
 local disconnectAtMs = nil
 local greeted = false
 
-local function noticeText(minutes, cap, resetsAt, graceSeconds)
+-- The operator's wording comes first, on its own. The numbers are the mod's
+-- and always follow in the same shape, so an operator rewriting the message
+-- cannot accidentally hide what the player needs to know.
+local function noticeText(message, minutes, cap, resetsAt, graceSeconds)
+    local blocks = {}
+
+    local wording = tostring(message or "")
+    wording = (wording:gsub("^%s+", ""):gsub("%s+$", ""))
+    if wording ~= "" then table.insert(blocks, wording) end
+
     if cap and cap > 0 then
-        -- Concatenation rather than string.format: the engine's Lua is not
-        -- fussy about much, but %d on a float is one of the things it refuses,
-        -- and this text is the only thing a blocked player ever sees.
-        return "Weekly play limit reached.\n\n" ..
+        table.insert(blocks,
             "You have used " .. tostring(math.floor(minutes or 0)) ..
             " of your " .. tostring(math.floor(cap)) .. " minutes this week.\n" ..
-            "Your allowance resets on " .. tostring(resetsAt or "the next Monday") .. ".\n\n" ..
-            "Disconnecting in " .. tostring(math.floor(graceSeconds or 0)) .. " seconds."
+            "Your allowance resets on " .. tostring(resetsAt or "the next Monday") .. ".")
     end
-    return "Weekly play limit reached. Your allowance resets at the start of " ..
-           "next week. Disconnecting shortly."
+
+    table.insert(blocks, "Disconnecting in " ..
+        tostring(math.floor(graceSeconds or 0)) .. " seconds.")
+
+    return table.concat(blocks, "\n\n")
 end
 
 local function defaultShowNotice(text)
@@ -100,7 +108,7 @@ function MaxTimeInServerClient.onServerCommand(module, command, args)
     disconnectAtMs = now + graceSeconds * 1000
 
     local shown = pcall(MaxTimeInServerClient.hooks.showNotice,
-        noticeText(minutes, cap, args.resetsAt, graceSeconds))
+        noticeText(args.message, minutes, cap, args.resetsAt, graceSeconds))
     if not shown then
         -- Nothing was put on screen, so the grace period buys the player
         -- nothing but confusion. Go almost immediately instead.

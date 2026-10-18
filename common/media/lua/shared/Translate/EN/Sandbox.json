@@ -7,6 +7,9 @@
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roles that are never limited",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Semicolon-separated role names. Accounts holding one of these are never counted and never turned away, so an operator can always get in. Leave empty to limit everybody.",
 
+    "Sandbox_MaxTimeInServer_BlockedMessage": "What a refused player is told",
+    "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "The explanation shown to a player who has run out of time for the week. The minutes used, the cap and the reset day are added underneath on their own lines, so this is just the wording. It cannot contain a comma. Leave it empty to show only the numbers.",
+
     "Sandbox_MaxTimeInServer_GraceSeconds": "Seconds to read the notice",
     "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "How long a player who has run out of time is given to read the notice before their game disconnects itself. They can dismiss it to leave sooner."
 }

@@ -19,7 +19,8 @@ local function wire(opts)
     return world
 end
 
-local BLOCKED = { minutes = 612, cap = 600, resetsAt = "2026-10-19T00:00:00+0000", graceSeconds = 12 }
+local BLOCKED = { message = "No more for you this week.", minutes = 612, cap = 600,
+                  resetsAt = "2026-10-19T00:00:00+0000", graceSeconds = 12 }
 
 H.test("the client greets the server once its player exists", function()
     local world = wire()
@@ -36,6 +37,30 @@ H.test("a refusal is shown with the numbers in it", function()
     H.assertMatch(world.notices[1], "612", "minutes used")
     H.assertMatch(world.notices[1], "600", "the cap")
     H.assertMatch(world.notices[1], "2026%-10%-19", "when it resets")
+end)
+
+H.test("the operator's wording is what the player reads first", function()
+    local world = wire()
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netBlocked, BLOCKED)
+    local notice = world.notices[1]
+    H.assertMatch(notice, "No more for you this week%.", "the wording")
+    H.assertTrue(notice:find("No more for you") < notice:find("612"),
+        "and it comes before the numbers")
+end)
+
+H.test("the numbers are the mod's own, whatever the operator writes", function()
+    local world = wire()
+    local silent = {}
+    for key, value in pairs(BLOCKED) do silent[key] = value end
+    silent.message = ""
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netBlocked, silent)
+    local notice = world.notices[1]
+    H.assertMatch(notice, "612", "minutes used")
+    H.assertMatch(notice, "600", "the cap")
+    H.assertMatch(notice, "2026%-10%-19", "when it resets")
+    H.assertFalse(notice:find("^%s") ~= nil, "no empty line where the wording would be")
 end)
 
 H.test("the connection is dropped once the grace period is over", function()

@@ -25,6 +25,19 @@ option MaxTimeInServer.ExemptRoles
     translation = MaxTimeInServer_ExemptRoles,
 }
 
+/*
+ * The parser splits a block on commas, so this value cannot contain one. The
+ * numbers - minutes used, the cap, when it resets - are added by the mod on
+ * their own lines underneath, so this is only the explanation.
+ */
+option MaxTimeInServer.BlockedMessage
+{
+    type = string,
+    default = Weekly play limit reached.,
+    page = MaxTimeInServer,
+    translation = MaxTimeInServer_BlockedMessage,
+}
+
 option MaxTimeInServer.GraceSeconds
 {
     type = integer,
