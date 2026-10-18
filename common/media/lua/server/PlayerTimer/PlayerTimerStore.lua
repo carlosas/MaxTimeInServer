@@ -67,8 +67,11 @@ end
 local function parseNumber(state, where, key, value)
     local number = tonumber(value)
     if number == nil then
+        -- Plain concatenation: the engine's Lua is picky about format specifiers
+        -- and this warning must never be the thing that breaks the parser.
         table.insert(state.warnings,
-            string.format("%s: %s=%q is not a number, using 0", where, key, value))
+            tostring(where) .. ": " .. tostring(key) .. "=\"" .. tostring(value) ..
+            "\" is not a number, using 0")
         return 0
     end
     return math.floor(number)
