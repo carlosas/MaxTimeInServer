@@ -58,9 +58,10 @@ mid-session case is a later iteration.
 ## Build 42 folder layout
 
 Build 42 discovers a mod by its **version directory**, and `versionMin` in the
-manifest makes it skip the mod entirely. Both facts were measured against the
-live server — see `tools/layout-probe/`, which records the two probe rounds and
-their results.
+manifest makes it skip the mod entirely — a mod with `mod.info` at its root, or
+with `versionMin=42` in the manifest, is never found at all. Both were measured
+against a live server by listing several one-line mods in `Mods=` at once, each
+printing a distinct line, and seeing which ones loaded.
 
 ```
 MaxTimeInServer/

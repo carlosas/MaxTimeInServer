@@ -6,7 +6,6 @@
 SERVER      ?= server-local
 SSH         ?= ssh -o BatchMode=yes -o ConnectTimeout=8 $(SERVER)
 MOD_ID      ?= MaxTimeInServer
-ROUND       ?= round1
 WORLD       ?= Zomboides2
 
 ZOMBOID     ?= $$HOME/Zomboid
@@ -19,7 +18,7 @@ SERVER_INI  ?= $(ZOMBOID)/Server/$(WORLD).ini
 MOD_FILES   = 42 common
 
 .PHONY: help test deploy package restart status logs data roles ini \
-        layout-probe-deploy layout-read layout-probe-clean demo-block demo-restore uninstall
+        demo-block demo-restore uninstall
 
 help:
 	@grep -E '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t24
@@ -79,18 +78,6 @@ print(\"%-20s %-12s %s\" % (\"username\",\"role\",\"last connection\")); \
 
 ini: ## Show the mod-related server ini lines
 	@$(SSH) 'grep -nE "^(Mods|WorkshopItems|Open|MaxPlayers)=" $(SERVER_INI)'
-
-layout-probe-deploy: ## Install a round of throwaway layout probes (ROUND=round1|round2)
-	@cd tools/layout-probe/$(ROUND) && COPYFILE_DISABLE=1 tar --no-xattrs -cf - Pt* \
-		| $(SSH) 'tar xf - -C $(MODS_DIR) && find $(MODS_DIR) -name "._*" -delete'
-	@echo "Add every probe id to Mods=, restart, then 'make layout-read'."
-
-layout-read: ## Report which probe layouts the server discovered and loaded
-	@$(SSH) 'grep -a "\[PtProbe\]" $(CONSOLE) | tail -10 || echo "(no probe lines)"'
-	@$(SSH) 'grep -a "not found" $(CONSOLE) | grep -a "loadModAndRequired" | tail -10 || true'
-
-layout-probe-clean: ## Remove every layout probe from the server
-	@$(SSH) 'cd $(MODS_DIR) && rm -rf Pt42 Pt42Common PtCommon PtRoot PtVmin PtVmin42 PtMver PtPoster PtAuthor PtSub'
 
 demo-block: ## Set the cap to 1 minute so the next join is refused (for testing)
 	@$(SSH) 'f=$(DATA_FILE); [ -f "$$f" ] || { echo "no $$f yet - connect once first"; exit 1; }; \
