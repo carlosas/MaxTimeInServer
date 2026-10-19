@@ -145,16 +145,15 @@ function MaxTimeInServerConfig.applySandboxOptions(vars)
     return true
 end
 
---- One line naming the settings in force, for the start-up log.
+--- One line naming the settings that decide who may play, for the start-up log.
+-- The refusal wording is deliberately not here: it changes nothing about who
+-- gets in, it is already visible in the world's sandbox file, and when it is
+-- left empty each client words the notice itself anyway.
 function MaxTimeInServerConfig.describe()
     local roles = table.concat(MaxTimeInServerConfig.exemptRoles, ", ")
     if roles == "" then roles = "none" end
-    local wording = MaxTimeInServerConfig.blockedMessage
-    if wording == nil or wording == "" then
-        wording = "(the mod's own wording, in each player's language)"
-    end
     return "cap " .. tostring(MaxTimeInServerConfig.capMinutes) ..
         " minutes per week, exempt roles: " .. roles ..
         ", " .. tostring(MaxTimeInServerConfig.graceSeconds) ..
-        " seconds to read the notice, refusal reads: " .. wording
+        " seconds to read the notice"
 end

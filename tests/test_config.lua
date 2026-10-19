@@ -70,12 +70,15 @@ H.test("a float from the sandbox is rounded rather than refused", function()
     H.assertEqual(C.graceSeconds, 7, "graceSeconds")
 end)
 
-H.test("it describes itself for the log", function()
-    C.applySandboxOptions({ MaxTimeInServer = { CapMinutes = 42, ExemptRoles = "gm", GraceSeconds = 5 } })
+H.test("it describes the settings that decide who may play", function()
+    C.applySandboxOptions({ MaxTimeInServer = { CapMinutes = 42, ExemptRoles = "gm",
+        GraceSeconds = 5, BlockedMessage = "go away" } })
     local summary = C.describe()
     H.assertMatch(summary, "42", "the cap")
     H.assertMatch(summary, "gm", "the roles")
     H.assertMatch(summary, "5", "the grace")
+    H.assertFalse(summary:find("go away") ~= nil,
+        "and not the wording, which decides nothing")
 end)
 
 H.run("config")
