@@ -57,8 +57,11 @@ local function defaultShowNotice(text)
 end
 
 MaxTimeInServerClient.hooks = {
-    sendHello = function()
-        sendClientCommand(MaxTimeInServerConfig.netModule, MaxTimeInServerConfig.netHello, {})
+    -- The character matters: the base game always sends client commands with
+    -- one, and the form without it does not reach the server from here.
+    sendHello = function(character)
+        sendClientCommand(character, MaxTimeInServerConfig.netModule,
+            MaxTimeInServerConfig.netHello, { version = 1 })
     end,
     showNotice = defaultShowNotice,
     disconnect = function() forceDisconnect() end,
@@ -81,14 +84,43 @@ function MaxTimeInServerClient.onNoticeDismissed()
     dropNow()
 end
 
+-- Greets the server once, as soon as there is a local character to greet it
+-- with. Called from two events because neither is guaranteed to be the one that
+-- arrives with a usable character.
+local function greet(character)
+    if greeted then return false end
+    if character == nil then
+        local ok, player = pcall(getPlayer)
+        if ok then character = player end
+    end
+    if character == nil then return false end
+
+    greeted = true
+    local ok, err = pcall(MaxTimeInServerClient.hooks.sendHello, character)
+    if ok then
+        print("[MaxTimeInServer] greeted the server, waiting to hear whether we may play")
+    else
+        greeted = false
+        print("[MaxTimeInServer] could not greet the server: " .. tostring(err))
+    end
+    return ok
+end
+
 function MaxTimeInServerClient.onCreatePlayer(playerIndex)
     if not actingAsClient() then return end
     -- Only the first local player greets; a split-screen second player is the
     -- same account as far as the quota is concerned.
     if playerIndex ~= 0 then return end
-    if greeted then return end
-    greeted = true
-    pcall(MaxTimeInServerClient.hooks.sendHello)
+    local character = nil
+    local ok, player = pcall(getSpecificPlayer, playerIndex)
+    if ok then character = player end
+    greet(character)
+end
+
+function MaxTimeInServerClient.onGameStart()
+    if not actingAsClient() then return end
+    -- Second chance: by the time the world is up, getPlayer() is reliable.
+    greet(nil)
 end
 
 function MaxTimeInServerClient.onServerCommand(module, command, args)
@@ -127,11 +159,15 @@ function MaxTimeInServerClient.update()
 end
 
 function MaxTimeInServerClient.registerEvents()
+
+print("[MaxTimeInServer] client half loaded (isClient=" ..
+    tostring(isClient ~= nil and isClient()) .. ")")
     -- Keyed to the event object so a Lua reload re-attaches us, instead of a
     -- boolean that would survive the reload and skip it.
     if MaxTimeInServerClient.registeredOn == Events.OnServerCommand then return end
     MaxTimeInServerClient.registeredOn = Events.OnServerCommand
     Events.OnCreatePlayer.Add(MaxTimeInServerClient.onCreatePlayer)
+    Events.OnGameStart.Add(MaxTimeInServerClient.onGameStart)
     Events.OnServerCommand.Add(MaxTimeInServerClient.onServerCommand)
     Events.OnTick.Add(MaxTimeInServerClient.update)
 end
@@ -140,3 +176,6 @@ end
 -- dedicated server runs this file too and stays silent because isClient() is
 -- false there when the events fire.
 MaxTimeInServerClient.registerEvents()
+
+print("[MaxTimeInServer] client half loaded (isClient=" ..
+    tostring(isClient ~= nil and isClient()) .. ")")

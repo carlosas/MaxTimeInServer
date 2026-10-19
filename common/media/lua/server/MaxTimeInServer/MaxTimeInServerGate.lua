@@ -62,13 +62,13 @@ function MaxTimeInServerGate.onClientCommand(module, command, player)
         local roleName = d.players.roleOf(player)
         local verdict = d.quota.verdict(username, roleName)
 
-        if verdict.allowed then
-            if d.config.debug then
-                log(username .. " joined: " .. tostring(verdict.minutes or 0) ..
-                    "/" .. tostring(verdict.cap or 0) .. " minutes this week")
-            end
-            return
-        end
+        -- One line per join. It is the only proof that the two halves are
+        -- talking to each other at all.
+        log(username .. " joined as " .. tostring(roleName or "?") .. ": " ..
+            tostring(verdict.minutes or 0) .. "/" .. tostring(verdict.cap or 0) ..
+            " minutes this week")
+
+        if verdict.allowed then return end
 
         d.net.send(player, d.config.netModule, d.config.netBlocked, {
             message = d.config.blockedMessage,

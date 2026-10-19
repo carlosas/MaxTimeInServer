@@ -52,6 +52,14 @@ function S.loadModules(moduleList, side)
     })
     _G.isServer = function() return S.side ~= "client" end
     _G.isClient = function() return S.side == "client" end
+    -- OnCreatePlayer hands over an index, and the game resolves the character
+    -- with these. Tests set S.localPlayer to decide what they get back.
+    S.localPlayer = { username = "someplayer", isLocalPlayer = function() return true end }
+    _G.getSpecificPlayer = function(index)
+        if index == 0 then return S.localPlayer end
+        return nil
+    end
+    _G.getPlayer = function() return S.localPlayer end
     for _, name in ipairs(moduleList) do
         local chunk, err = loadfile(LUA_ROOT .. name)
         if not chunk then

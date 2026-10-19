@@ -7,7 +7,10 @@ local function wire(opts)
     opts = opts or {}
     local world = { nowMs = 1000, hellos = 0, notices = {}, disconnects = 0 }
     MaxTimeInServerClient.hooks = {
-        sendHello = function() world.hellos = world.hellos + 1 end,
+        sendHello = function(character)
+            world.hellos = world.hellos + 1
+            world.greetedAs = character
+        end,
         showNotice = function(text)
             if opts.noticeThrows then error("ui exploded") end
             table.insert(world.notices, text)
@@ -26,8 +29,33 @@ H.test("the client greets the server once its player exists", function()
     local world = wire()
     MaxTimeInServerClient.onCreatePlayer(0)
     H.assertEqual(world.hellos, 1, "one hello")
+    H.assertEqual(world.greetedAs, S.localPlayer, "greeted with the local character")
     MaxTimeInServerClient.onCreatePlayer(1)
     H.assertEqual(world.hellos, 1, "split-screen players do not greet again")
+end)
+
+H.test("OnGameStart greets too, in case OnCreatePlayer had no character yet", function()
+    local world = wire()
+    S.localPlayer = nil
+    MaxTimeInServerClient.onCreatePlayer(0)
+    H.assertEqual(world.hellos, 0, "nothing to greet with yet")
+
+    S.localPlayer = { username = "someplayer" }
+    MaxTimeInServerClient.onGameStart()
+    H.assertEqual(world.hellos, 1, "greeted on the second chance")
+    MaxTimeInServerClient.onGameStart()
+    H.assertEqual(world.hellos, 1, "and only once")
+end)
+
+H.test("a greeting the engine refuses is retried rather than swallowed", function()
+    local world = wire()
+    S.localPlayer = { username = "someplayer" }
+    MaxTimeInServerClient.hooks.sendHello = function() error("no connection yet") end
+    MaxTimeInServerClient.onCreatePlayer(0)
+
+    MaxTimeInServerClient.hooks.sendHello = function() world.hellos = world.hellos + 1 end
+    MaxTimeInServerClient.onGameStart()
+    H.assertEqual(world.hellos, 1, "the second chance got through")
 end)
 
 H.test("a refusal is shown with the numbers in it", function()
