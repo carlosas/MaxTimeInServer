@@ -301,9 +301,11 @@ local function onServerStarted()
             log("no sandbox settings page found; using the built-in defaults")
         end
         local state = MaxTimeInServerQuota.loadState()
+        local accounts = #state.order
         log("ready: " .. d.config.describe() ..
             ", week starting " .. tostring(state.weekStart) ..
-            ", " .. tostring(#state.order) .. " accounts on record")
+            ", " .. tostring(accounts) ..
+            (accounts == 1 and " account" or " accounts") .. " on record")
         -- Apply the week reset right away rather than waiting out the interval.
         MaxTimeInServerQuota.sweep(d.clock.now())
     end)
