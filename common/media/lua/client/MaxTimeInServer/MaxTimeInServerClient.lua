@@ -2,15 +2,25 @@
 The client half of the join check.
 
 A dedicated server loads and runs client Lua as well (GameServer.doMinimumInit
-walks shared, client and server), so everything here is behind isClient() and
-the module does nothing at all on a server.
+walks shared, client and server), so every handler checks which side it is on
+before doing anything, and this module stays silent on a server.
 
-On arrival it greets the server. If the server answers that the weekly budget
-is spent, it shows the numbers and drops the connection - immediately if the
-player dismisses the notice, and in any case once the grace period is up.
+On arrival it greets the server and keeps greeting until the server answers. A
+client command sent before the connection can carry it is dropped with no error
+at all, so a single attempt is not something to rely on. The server always
+answers - "you may play" or "you may not" - which is what stops the retries.
+
+If the answer is no, the player is shown the numbers and the game disconnects
+itself: immediately if they dismiss the notice, and in any case once the grace
+period is up.
 ]]
 
 MaxTimeInServerClient = MaxTimeInServerClient or {}
+
+local acknowledged = false
+local attempts = 0
+local nextHelloMs = nil
+local disconnectAtMs = nil
 
 --- True only on a machine with a local player, i.e. not a dedicated server.
 -- Checked when an event fires rather than when this file loads, because the
@@ -18,9 +28,6 @@ MaxTimeInServerClient = MaxTimeInServerClient or {}
 local function actingAsClient()
     return isClient ~= nil and isClient()
 end
-
-local disconnectAtMs = nil
-local greeted = false
 
 -- The operator's wording comes first, on its own. The numbers are the mod's
 -- and always follow in the same shape, so an operator rewriting the message
@@ -68,10 +75,54 @@ MaxTimeInServerClient.hooks = {
     nowMs = function() return getTimestampMs() end,
 }
 
---- Forgets any pending disconnect. Used by the tests and on a fresh session.
+local function now()
+    local ok, value = pcall(MaxTimeInServerClient.hooks.nowMs)
+    if ok and value ~= nil then return value end
+    return 0
+end
+
+--- Forgets everything about this session. Used by the tests and on a new one.
 function MaxTimeInServerClient.reset()
+    acknowledged = false
+    attempts = 0
+    nextHelloMs = nil
     disconnectAtMs = nil
-    greeted = false
+end
+
+local function localCharacter(playerIndex)
+    if playerIndex ~= nil then
+        local ok, character = pcall(getSpecificPlayer, playerIndex)
+        if ok and character ~= nil then return character end
+    end
+    local ok, character = pcall(getPlayer)
+    if ok then return character end
+    return nil
+end
+
+-- Sends the greeting, unless the server has already answered or the last
+-- attempt was too recent. Returns true when something was actually sent.
+local function greet(character)
+    if acknowledged then return false end
+    if attempts >= (MaxTimeInServerConfig.helloAttempts or 15) then return false end
+
+    local moment = now()
+    if nextHelloMs ~= nil and moment < nextHelloMs then return false end
+
+    character = character or localCharacter(nil)
+    if character == nil then return false end
+
+    attempts = attempts + 1
+    nextHelloMs = moment + (MaxTimeInServerConfig.helloRetrySeconds or 2) * 1000
+
+    local ok, err = pcall(MaxTimeInServerClient.hooks.sendHello, character)
+    if not ok then
+        print("[MaxTimeInServer] could not greet the server: " .. tostring(err))
+        return false
+    end
+    if attempts == 1 then
+        print("[MaxTimeInServer] greeted the server, waiting to hear whether we may play")
+    end
+    return true
 end
 
 local function dropNow()
@@ -84,49 +135,31 @@ function MaxTimeInServerClient.onNoticeDismissed()
     dropNow()
 end
 
--- Greets the server once, as soon as there is a local character to greet it
--- with. Called from two events because neither is guaranteed to be the one that
--- arrives with a usable character.
-local function greet(character)
-    if greeted then return false end
-    if character == nil then
-        local ok, player = pcall(getPlayer)
-        if ok then character = player end
-    end
-    if character == nil then return false end
-
-    greeted = true
-    local ok, err = pcall(MaxTimeInServerClient.hooks.sendHello, character)
-    if ok then
-        print("[MaxTimeInServer] greeted the server, waiting to hear whether we may play")
-    else
-        greeted = false
-        print("[MaxTimeInServer] could not greet the server: " .. tostring(err))
-    end
-    return ok
-end
-
 function MaxTimeInServerClient.onCreatePlayer(playerIndex)
     if not actingAsClient() then return end
     -- Only the first local player greets; a split-screen second player is the
     -- same account as far as the quota is concerned.
     if playerIndex ~= 0 then return end
-    local character = nil
-    local ok, player = pcall(getSpecificPlayer, playerIndex)
-    if ok then character = player end
-    greet(character)
+    greet(localCharacter(playerIndex))
 end
 
 function MaxTimeInServerClient.onGameStart()
     if not actingAsClient() then return end
-    -- Second chance: by the time the world is up, getPlayer() is reliable.
     greet(nil)
 end
 
 function MaxTimeInServerClient.onServerCommand(module, command, args)
     if not actingAsClient() then return end
     if module ~= MaxTimeInServerConfig.netModule then return end
+
+    if command == MaxTimeInServerConfig.netAllowed then
+        acknowledged = true
+        print("[MaxTimeInServer] the server says we may play")
+        return
+    end
+
     if command ~= MaxTimeInServerConfig.netBlocked then return end
+    acknowledged = true
 
     args = args or {}
     local minutes = tonumber(args.minutes) or 0
@@ -135,16 +168,15 @@ function MaxTimeInServerClient.onServerCommand(module, command, args)
 
     -- The disconnect is armed before the notice: a UI that refuses to open
     -- must not leave the player in a world they are not allowed to be in.
-    local clockOk, now = pcall(MaxTimeInServerClient.hooks.nowMs)
-    now = clockOk and now or 0
-    disconnectAtMs = now + graceSeconds * 1000
+    local moment = now()
+    disconnectAtMs = moment + graceSeconds * 1000
 
     local shown = pcall(MaxTimeInServerClient.hooks.showNotice,
         noticeText(args.message, minutes, cap, args.resetsAt, graceSeconds))
     if not shown then
         -- Nothing was put on screen, so the grace period buys the player
         -- nothing but confusion. Go almost immediately instead.
-        disconnectAtMs = now + 2000
+        disconnectAtMs = moment + 2000
     end
 
     print("[MaxTimeInServer] refused by the server: " .. tostring(minutes) ..
@@ -152,16 +184,14 @@ function MaxTimeInServerClient.onServerCommand(module, command, args)
 end
 
 function MaxTimeInServerClient.update()
-    if disconnectAtMs == nil then return end
-    local ok, now = pcall(MaxTimeInServerClient.hooks.nowMs)
-    if not ok or now == nil then return end
-    if now >= disconnectAtMs then dropNow() end
+    if not actingAsClient() then return end
+
+    if not acknowledged then greet(nil) end
+
+    if disconnectAtMs ~= nil and now() >= disconnectAtMs then dropNow() end
 end
 
 function MaxTimeInServerClient.registerEvents()
-
-print("[MaxTimeInServer] client half loaded (isClient=" ..
-    tostring(isClient ~= nil and isClient()) .. ")")
     -- Keyed to the event object so a Lua reload re-attaches us, instead of a
     -- boolean that would survive the reload and skip it.
     if MaxTimeInServerClient.registeredOn == Events.OnServerCommand then return end
@@ -172,9 +202,6 @@ print("[MaxTimeInServer] client half loaded (isClient=" ..
     Events.OnTick.Add(MaxTimeInServerClient.update)
 end
 
--- Registered whatever side we are on; every handler checks for itself. A
--- dedicated server runs this file too and stays silent because isClient() is
--- false there when the events fire.
 MaxTimeInServerClient.registerEvents()
 
 print("[MaxTimeInServer] client half loaded (isClient=" ..

@@ -34,6 +34,50 @@ H.test("the client greets the server once its player exists", function()
     H.assertEqual(world.hellos, 1, "split-screen players do not greet again")
 end)
 
+H.test("an unanswered greeting is retried, because a dropped one is silent", function()
+    local world = wire()
+    MaxTimeInServerClient.onCreatePlayer(0)
+    H.assertEqual(world.hellos, 1, "first attempt")
+
+    MaxTimeInServerClient.update()
+    H.assertEqual(world.hellos, 1, "not immediately again")
+
+    world.nowMs = world.nowMs + 2000
+    MaxTimeInServerClient.update()
+    H.assertEqual(world.hellos, 2, "retried once the interval passed")
+end)
+
+H.test("an answer stops the retries", function()
+    local world = wire()
+    MaxTimeInServerClient.onCreatePlayer(0)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netAllowed, { ok = true })
+    for _ = 1, 5 do
+        world.nowMs = world.nowMs + 5000
+        MaxTimeInServerClient.update()
+    end
+    H.assertEqual(world.hellos, 1, "no further greetings")
+end)
+
+H.test("a refusal stops the retries too", function()
+    local world = wire()
+    MaxTimeInServerClient.onCreatePlayer(0)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netBlocked, BLOCKED)
+    world.nowMs = world.nowMs + 5000
+    MaxTimeInServerClient.update()
+    H.assertEqual(world.hellos, 1, "no further greetings")
+end)
+
+H.test("the retries give up rather than going on forever", function()
+    local world = wire()
+    for _ = 1, 40 do
+        MaxTimeInServerClient.update()
+        world.nowMs = world.nowMs + 2500
+    end
+    H.assertEqual(world.hellos, MaxTimeInServerConfig.helloAttempts, "stopped at the limit")
+end)
+
 H.test("OnGameStart greets too, in case OnCreatePlayer had no character yet", function()
     local world = wire()
     S.localPlayer = nil
@@ -44,7 +88,7 @@ H.test("OnGameStart greets too, in case OnCreatePlayer had no character yet", fu
     MaxTimeInServerClient.onGameStart()
     H.assertEqual(world.hellos, 1, "greeted on the second chance")
     MaxTimeInServerClient.onGameStart()
-    H.assertEqual(world.hellos, 1, "and only once")
+    H.assertEqual(world.hellos, 1, "and not twice in the same breath")
 end)
 
 H.test("a greeting the engine refuses is retried rather than swallowed", function()
@@ -54,8 +98,9 @@ H.test("a greeting the engine refuses is retried rather than swallowed", functio
     MaxTimeInServerClient.onCreatePlayer(0)
 
     MaxTimeInServerClient.hooks.sendHello = function() world.hellos = world.hellos + 1 end
-    MaxTimeInServerClient.onGameStart()
-    H.assertEqual(world.hellos, 1, "the second chance got through")
+    world.nowMs = world.nowMs + 2000
+    MaxTimeInServerClient.update()
+    H.assertEqual(world.hellos, 1, "the retry got through")
 end)
 
 H.test("a refusal is shown with the numbers in it", function()

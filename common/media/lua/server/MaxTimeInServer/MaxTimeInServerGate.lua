@@ -47,10 +47,21 @@ local function dependencies()
     return deps
 end
 
+-- Bounded, so the log cannot be flooded, but enough to prove whether client
+-- commands reach this server at all. Without it, "nothing happened" and "the
+-- greeting never arrived" look identical.
+local seen = 0
+
 --- Server-side handler for the client's greeting.
 function MaxTimeInServerGate.onClientCommand(module, command, player)
     local d = dependencies()
     if module ~= d.config.netModule then return end
+
+    if seen < 20 then
+        seen = seen + 1
+        log("client command received: " .. tostring(module) .. "/" .. tostring(command))
+    end
+
     if command ~= d.config.netHello then return end
 
     local ok, err = pcall(function()
@@ -68,7 +79,11 @@ function MaxTimeInServerGate.onClientCommand(module, command, player)
             tostring(verdict.minutes or 0) .. "/" .. tostring(verdict.cap or 0) ..
             " minutes this week")
 
-        if verdict.allowed then return end
+        if verdict.allowed then
+            -- Answering is what stops the client retrying its greeting.
+            d.net.send(player, d.config.netModule, d.config.netAllowed, { ok = true })
+            return
+        end
 
         d.net.send(player, d.config.netModule, d.config.netBlocked, {
             message = d.config.blockedMessage,
@@ -95,3 +110,5 @@ end
 -- Registered unconditionally: OnClientCommand only ever fires on a server, so
 -- there is no need to work out which side this is at load time.
 MaxTimeInServerGate.registerEvents()
+
+print("[MaxTimeInServer] join check listening for client commands")

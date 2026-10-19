@@ -5,6 +5,12 @@ VERSION = 1,
  * server's sandbox options, so they can be set from the admin panel or by
  * editing <World>_SandboxVars.lua. Sandbox options are read when the server
  * boots, so changing one takes a restart.
+ *
+ * The option names show as these raw keys rather than as prose. Giving them
+ * readable names needs a media/lua/shared/Translate/<LANG>/Sandbox.json, and
+ * that path belongs to the base game: shipping one from a mod shadows the
+ * game's own file, which holds hundreds of keys. Raw keys are the lesser
+ * problem.
  */
 
 option MaxTimeInServer.CapMinutes

@@ -32,6 +32,13 @@ MaxTimeInServerConfig = {
     netModule = "MaxTimeInServer",
     netHello = "hello",
     netBlocked = "blocked",
+    netAllowed = "allowed",
+
+    -- The greeting is retried until the server answers. A command sent before
+    -- the connection can carry it is dropped without an error, so one attempt
+    -- is not enough to rely on.
+    helloRetrySeconds = 2,
+    helloAttempts = 15,
 
     -- Real seconds between two sweeps. The sweep is driven by a game-time
     -- event, so it is checked far more often than this and returns early until

@@ -72,19 +72,20 @@ H.test("a player over the cap is told to leave, with the numbers", function()
     H.assertMatch(S.logText(), "refused darkkz", "logged")
 end)
 
-H.test("a player under the cap is left alone", function()
+H.test("a player under the cap is told they may play, so they stop asking", function()
     local gate = makeGate({ files = { [DATA] = "version=1\nweekStartEpoch=" ..
         MONDAY .. "\n\n[darkkz]\nminutes=10\n" } })
     MaxTimeInServerGate.onClientCommand(gate.config.netModule, gate.config.netHello,
         fakePlayer("darkkz", "user"))
-    H.assertEqual(#gate.net.sent, 0, "nothing sent")
+    local message = gate.net.lastTo("darkkz")
+    H.assertEqual(message.command, gate.config.netAllowed, "an answer, not silence")
 end)
 
-H.test("an exempt role is left alone even over the cap", function()
+H.test("an exempt role is allowed even over the cap", function()
     local gate = makeGate({ files = { [DATA] = OVER_CAP } })
     MaxTimeInServerGate.onClientCommand(gate.config.netModule, gate.config.netHello,
         fakePlayer("darkkz", "moderator"))
-    H.assertEqual(#gate.net.sent, 0, "nothing sent")
+    H.assertEqual(gate.net.lastTo("darkkz").command, gate.config.netAllowed, "allowed")
 end)
 
 H.test("commands from other modules are ignored", function()
@@ -106,7 +107,8 @@ H.test("the role falls back to the access level when there is no role object", f
     local player = fakePlayer("darkkz", nil)
     player.accessLevel = "Admin"
     MaxTimeInServerGate.onClientCommand(gate.config.netModule, gate.config.netHello, player)
-    H.assertEqual(#gate.net.sent, 0, "an admin by access level is exempt too")
+    H.assertEqual(gate.net.lastTo("darkkz").command, gate.config.netAllowed,
+        "an admin by access level is exempt too")
 end)
 
 H.test("a handshake never raises, however broken the player object is", function()
