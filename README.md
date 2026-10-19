@@ -41,13 +41,18 @@ session and simply cannot get back in. That is deliberate.
 
 ## Installing on the server
 
+The mod itself is generic: it carries nothing about any particular server, and
+every setting that varies is a sandbox option. Put the folder in a server's
+`mods/`, list the id, restart, and it works.
+
+The `Makefile` in this repo is a convenience for deploying to **one** server over
+SSH, not part of the mod. Set `SERVER` and `WORLD` at the top of it to your own
+host and world name, or ignore it entirely and copy the folder however you like.
+
 ```sh
 make test      # the full suite, no server needed
 make deploy    # copies the mod to ~/Zomboid/mods/MaxTimeInServer/ on your server
 ```
-
-`make deploy` reaches the server over SSH. Set `SERVER` and `WORLD` at the top of
-the Makefile to your own host and world name first.
 
 Then add the mod id to the server's `.ini`, keeping any mods already listed:
 
@@ -69,7 +74,7 @@ client half is what shows the notice and disconnects, and a client missing a mod
 the server lists is turned away at the connection screen anyway.
 
 ```sh
-make package          # builds build/MaxTimeInServer.zip, to hand to the others
+make handout          # builds build/MaxTimeInServer.zip for the others
 make install-client   # or install straight into the game on this machine
 make verify-client    # and prove this machine matches the server, byte for byte
 ```
@@ -92,12 +97,17 @@ While the mod is not on the Steam Workshop this is the only way in: a client
 without the folder is turned away at the connection screen, because the server
 lists a mod it cannot find locally.
 
-One trap worth knowing: the server hashes the mod's Lua **when it boots**. Change
-a file, deploy it, forget to restart, and every player with the new zip gets
-kicked on the checksum. The order is deploy, restart, package. `make package`
-compares your working tree against the copy sitting on the server and refuses to
-build when they differ, which catches a forgotten deploy — it has no way to know
-whether the server has restarted since, so that part is on you.
+One trap, and it only exists while the mod is handed out by hand: the server
+hashes the mod's Lua **when it boots**, and kicks clients whose copies differ.
+Change a file, deploy it, forget to restart, and everybody holding the new zip
+is turned away. The order is deploy, restart, hand out — which is why `make
+handout` checks the server's copy first and `make package` does not. `package`
+builds the mod as it would be published; `handout` builds the same archive but
+only once the server has the same files on disk. Neither can tell whether the
+server has restarted since, so that part is on you.
+
+Published to the Workshop this disappears: Steam distributes the mod, and a
+client gets whatever version the server it joins is subscribed to.
 
 ## Server settings
 

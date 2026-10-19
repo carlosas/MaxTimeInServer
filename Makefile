@@ -21,7 +21,7 @@ SERVER_INI  ?= $(ZOMBOID)/Server/$(WORLD).ini
 MOD_FILES   = 42 common
 
 .PHONY: help test deploy package restart status logs data roles ini \
-        install-client verify-client demo-block demo-restore sandbox uninstall
+        handout install-client verify-client demo-block demo-restore sandbox uninstall
 
 help:
 	@grep -E '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t24
@@ -49,12 +49,19 @@ verify-sync: ## Check the server's copy of the mod matches this working tree
 			echo; echo "OUT OF SYNC - run 'make deploy' and restart, or the players' copies will"; \
 			echo "fail the server's Lua checksum and be kicked at the connection screen."; exit 1; fi
 
-package: test verify-sync ## Build the zip the players install into their own Zomboid/mods/
+package: test ## Build the mod archive from this working tree
+	@# Deliberately independent of any server: this is the mod as it would be
+	@# published. While it is unpublished and copied by hand, use `handout`.
 	@rm -rf build && mkdir -p build/$(MOD_ID)
 	@COPYFILE_DISABLE=1 tar --no-xattrs -cf - $(MOD_FILES) | tar xf - -C build/$(MOD_ID)
 	@cd build && zip -qr $(MOD_ID).zip $(MOD_ID)
-	@echo "build/$(MOD_ID).zip - players unzip this into their Zomboid/mods/ folder"
+	@echo "build/$(MOD_ID).zip - the mod, as it would be published"
 	@unzip -l build/$(MOD_ID).zip | tail -3
+
+handout: verify-sync package ## Build the archive to hand out while the mod is unpublished
+	@echo
+	@echo "Safe to hand out: the server booted these same files, so these copies"
+	@echo "will pass its Lua checksum."
 
 install-client: test verify-sync ## Install the mod into the game on THIS machine
 	@test -d "$(CLIENT_ZOMBOID)" || { echo "no $(CLIENT_ZOMBOID) here - set CLIENT_ZOMBOID to your game's user folder"; exit 1; }

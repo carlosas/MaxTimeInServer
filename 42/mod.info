@@ -1,3 +1,6 @@
 name=Max Time In Server
 id=MaxTimeInServer
-description=Server-side weekly connected-time quota. Counts the real minutes each account spends connected during the current week and refuses the login of accounts that have spent their weekly budget.
+description=Caps how long each account may play per week on a dedicated server. Counts the real minutes a player spends connected, Monday to Sunday, and turns away anyone who has spent their weekly budget, telling them how much they used and when it resets. The budget, who is exempt from it, and the wording are server sandbox options. Built for Build 42 multiplayer; it does nothing in single-player.
+author=Carlos Alandete Sastre
+modversion=1.0.0
+poster=poster.png
