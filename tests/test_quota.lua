@@ -58,21 +58,55 @@ H.test("tick does nothing until the sweep interval has passed", function()
     H.assertFalse(world.tickAfter(59), "a 59 second tick")
     H.assertNil(world.minutes("darkkz"), "no record yet")
     H.assertTrue(world.tickAfter(1), "the 60 second tick")
-    H.assertEqual(world.minutes("darkkz"), 1, "one minute credited")
 end)
 
-H.test("a minute of presence credits exactly one minute", function()
+H.test("the first sighting only starts the clock; the next one pays", function()
+    -- Nobody is charged for time before the mod first saw them, which is what
+    -- stops an idle server's empty stretch landing on whoever arrives first.
     local world = makeWorld({ online = { { username = "darkkz", role = "user" } } })
     world.sweepAfter(60)
-    H.assertEqual(world.minutes("darkkz"), 1, "minutes")
+    H.assertEqual(world.minutes("darkkz"), 0, "first sighting")
+    world.sweepAfter(60)
+    H.assertEqual(world.minutes("darkkz"), 1, "a minute of presence")
+end)
+
+H.test("an empty server does not charge the first player to arrive", function()
+    -- The bug this replaced: with PauseEmpty on, no sweep runs while the server
+    -- is empty, so the gap between sweeps was an hour and the first player
+    -- through the door was billed for all of it.
+    local world = makeWorld({ online = {} })
+    world.sweepAfter(60)                 -- empty
+    world.advance(4 * 3600)              -- four hours of nobody
+    world.players.entries = { { username = "darkkz", role = "user" } }
+    world.sweepAfter(60)
+    H.assertEqual(world.minutes("darkkz"), 0, "arrives owing nothing")
+    world.sweepAfter(120)
+    H.assertEqual(world.minutes("darkkz"), 2, "and pays only from arrival")
 end)
 
 H.test("leftover seconds carry over between sweeps", function()
     local world = makeWorld({ online = { { username = "darkkz", role = "user" } } })
+    world.sweepAfter(1)
     world.sweepAfter(90)
-    H.assertEqual(world.minutes("darkkz"), 1, "after 90s")
+    H.assertEqual(world.minutes("darkkz"), 1, "after 90s of presence")
     world.sweepAfter(90)
     H.assertEqual(world.minutes("darkkz"), 3, "after 180s")
+end)
+
+H.test("leaving and coming back does not bill the time away", function()
+    local world = makeWorld({ online = { { username = "darkkz", role = "user" } } })
+    world.sweepAfter(1)
+    world.sweepAfter(120)
+    H.assertEqual(world.minutes("darkkz"), 2, "two minutes played")
+
+    world.players.entries = {}
+    world.sweepAfter(60)
+    world.advance(3600)                  -- an hour away
+    world.players.entries = { { username = "darkkz", role = "user" } }
+    world.sweepAfter(60)
+    H.assertEqual(world.minutes("darkkz"), 2, "the hour away is not charged")
+    world.sweepAfter(60)
+    H.assertEqual(world.minutes("darkkz"), 3, "and the new session counts")
 end)
 
 H.test("an offline player is not credited", function()
@@ -81,14 +115,16 @@ H.test("an offline player is not credited", function()
     H.assertNil(world.minutes("quiet"), "never seen")
 end)
 
-H.test("a huge clock jump credits at most one capped sweep", function()
+H.test("a huge clock jump credits at most the per-sweep ceiling", function()
     local world = makeWorld({ online = { { username = "darkkz", role = "user" } } })
+    world.sweepAfter(1)
     world.sweepAfter(10000)
     H.assertEqual(world.minutes("darkkz"), 60, "capped at maxCreditSecondsPerSweep")
 end)
 
 H.test("an exempt role is never counted", function()
     local world = makeWorld({ online = { { username = "boss", role = "admin" } } })
+    world.sweepAfter(1)
     world.sweepAfter(600)
     H.assertEqual(world.minutes("boss"), 0, "minutes")
     H.assertEqual(world.record("boss").role, "admin", "role recorded for the operator to see")
@@ -100,6 +136,7 @@ H.test("exempt=true in the file is honoured", function()
         files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=0\nexempt=true\n" },
     })
+    world.sweepAfter(1)
     world.sweepAfter(600)
     H.assertEqual(world.minutes("darkkz"), 0, "minutes")
 end)
@@ -122,6 +159,7 @@ H.test("a new week zeroes the counters and the bonuses", function()
         files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
             "\n\n[darkkz]\nminutes=300\nbonusMinutes=60\n" },
     })
+    world.sweepAfter(1)
     world.sweepAfter(60)
     H.assertEqual(world.minutes("darkkz"), 301, "still the old week")
 
@@ -136,9 +174,10 @@ end)
 H.test("a sweep that straddles the boundary only credits the part in the new week", function()
     local world = makeWorld({
         online = { { username = "darkkz", role = "user" } },
-        startEpoch = MONDAY + WEEK - 60,
+        startEpoch = MONDAY + WEEK - 120,
     })
-    world.sweepAfter(120)
+    world.sweepAfter(1)        -- seen before the boundary
+    world.sweepAfter(180)      -- and again a minute into the new week
     H.assertEqual(world.state().weekStartEpoch, MONDAY + WEEK, "new week stored")
     H.assertEqual(world.minutes("darkkz"), 1, "only the new week's minute")
 end)
@@ -243,6 +282,7 @@ H.test("an unparseable data file is rescued, not overwritten in place", function
         online = { { username = "darkkz", role = "user" } },
         files = { [DATA] = "\1\2\3 garbage" },
     })
+    world.sweepAfter(1)
     world.sweepAfter(60)
     H.assertEqual(world.files.files["MaxTimeInServer.broken.txt"], "\1\2\3 garbage", "rescue copy")
     H.assertEqual(world.minutes("darkkz"), 1, "counting carried on")

@@ -45,6 +45,7 @@ local pzFiles = {
 local deps = nil
 local lastSweepEpoch = nil
 local carriedSeconds = {}        -- username -> seconds not yet worth a minute
+local lastSeenEpoch = {}         -- username -> when this sweep last saw them online
 
 local function defaultDeps()
     return {
@@ -75,6 +76,7 @@ function MaxTimeInServerQuota.configure(overrides)
     for key, value in pairs(overrides or {}) do deps[key] = value end
     lastSweepEpoch = nil
     carriedSeconds = {}
+    lastSeenEpoch = {}
 end
 
 local function dependencies()
@@ -161,11 +163,20 @@ local function startNewWeek(state, weekStart, d)
     log("new week starting " .. tostring(state.weekStart))
 end
 
-local function creditOnlinePlayers(state, seconds, d, exemptRoles)
+-- Credits each connected player for the time since *they* were last seen, not
+-- for the time since the last sweep. The difference matters: with PauseEmpty
+-- on, game time stops while the server is empty, so no sweep runs for as long
+-- as nobody is on. Crediting the gap between sweeps charged the first player to
+-- arrive for the whole empty stretch - an hour of it, in the first version.
+local function creditOnlinePlayers(state, now, weekStart, d, exemptRoles)
     local changed = false
+    local present = {}
+    local maximum = d.config.maxCreditSecondsPerSweep or 3600
 
     for _, entry in ipairs(d.players.online() or {}) do
         local username = entry.username
+        present[username] = true
+
         local isNewAccount = state.players[username] == nil
         local record = d.store.player(state, username)
         if isNewAccount then changed = true end
@@ -175,8 +186,22 @@ local function creditOnlinePlayers(state, seconds, d, exemptRoles)
             changed = true
         end
 
+        local previous = lastSeenEpoch[username]
+        lastSeenEpoch[username] = now
+
         local exempt = record.exempt == true or roleIsExempt(entry.role, exemptRoles)
-        if not exempt and seconds > 0 then
+        if not exempt and previous ~= nil then
+            -- Time before this week began belongs to the week that has gone.
+            if previous < weekStart then previous = weekStart end
+
+            local seconds = now - previous
+            if seconds < 0 then seconds = 0 end
+            if seconds > maximum then
+                log("the clock moved " .. tostring(seconds) .. " seconds since " ..
+                    username .. " was last seen; crediting " .. tostring(maximum))
+                seconds = maximum
+            end
+
             local carried = (carriedSeconds[username] or 0) + seconds
             local wholeMinutes = math.floor(carried / SECONDS_PER_MINUTE)
             carriedSeconds[username] = carried - wholeMinutes * SECONDS_PER_MINUTE
@@ -184,6 +209,15 @@ local function creditOnlinePlayers(state, seconds, d, exemptRoles)
                 record.minutes = (record.minutes or 0) + wholeMinutes
                 changed = true
             end
+        end
+    end
+
+    -- Forget whoever has left, so their next session starts from its own
+    -- beginning rather than from whenever they were last here.
+    for username in pairs(lastSeenEpoch) do
+        if not present[username] then
+            lastSeenEpoch[username] = nil
+            carriedSeconds[username] = nil
         end
     end
 
@@ -212,29 +246,13 @@ local function sweepBody(now)
         log(d.config.dataFile .. ": " .. warning)
     end
 
-    local elapsed = 0
-    if lastSweepEpoch ~= nil then
-        elapsed = now - lastSweepEpoch
-        if elapsed < 0 then elapsed = 0 end
-        local maximum = d.config.maxCreditSecondsPerSweep or 3600
-        if elapsed > maximum then
-            log("clock moved " .. tostring(elapsed) ..
-                " seconds since the last sweep; crediting " .. tostring(maximum))
-            elapsed = maximum
-        end
-    end
-
     local weekStart = d.clock.getWeekStartEpoch(now)
     if weekStart ~= state.weekStartEpoch then
         startNewWeek(state, weekStart, d)
         changed = true
-        -- Only the part of this sweep that falls inside the new week counts.
-        local secondsInNewWeek = now - weekStart
-        if elapsed > secondsInNewWeek then elapsed = secondsInNewWeek end
-        carriedSeconds = {}
     end
 
-    if creditOnlinePlayers(state, elapsed, d, exemptRoles) then changed = true end
+    if creditOnlinePlayers(state, now, weekStart, d, exemptRoles) then changed = true end
 
     if changed then
         local ok, err = d.store.save(d.files, d.config.dataFile, state, now)
@@ -244,8 +262,7 @@ local function sweepBody(now)
     end
 
     if d.config.debug then
-        log("sweep at " .. tostring(d.clock.formatIso(now)) ..
-            " credited " .. tostring(elapsed) .. " seconds")
+        log("sweep at " .. tostring(d.clock.formatIso(now)))
     end
 end
 
@@ -276,6 +293,7 @@ function MaxTimeInServerQuota.start()
     local d = dependencies()
     lastSweepEpoch = d.clock.now()
     carriedSeconds = {}
+    lastSeenEpoch = {}
 end
 
 -- Every handler says it ran and reports its own failure. An error escaping an

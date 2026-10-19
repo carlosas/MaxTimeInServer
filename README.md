@@ -208,8 +208,13 @@ leaves everyone else alone.
 
 ## How the counting behaves
 
-- Time counts only while somebody is connected. Hours the server spent empty, or
-  down, are never charged to anyone.
+- Each player is charged for the time since **they** were last seen online, not
+  for the time since the mod last looked. That distinction is the whole game:
+  with `PauseEmpty` on, nothing runs while the server is empty, so the gap
+  between two passes can be hours long. Charging that gap billed the first
+  player through the door for the entire empty stretch.
+- A player's first sighting only starts their clock, so nobody pays for time
+  before the mod saw them, and leaving for an hour costs nothing.
 - The join check happens during the handshake, so it does not depend on the game
   clock and is never late.
 - The weekly reset runs on the first pass after the boundary: the server starting
