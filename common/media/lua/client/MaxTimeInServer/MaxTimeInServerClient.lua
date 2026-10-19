@@ -29,25 +29,27 @@ local function actingAsClient()
     return isClient ~= nil and isClient()
 end
 
--- The operator's wording comes first, on its own. The numbers are the mod's
--- and always follow in the same shape, so an operator rewriting the message
--- cannot accidentally hide what the player needs to know.
+-- The operator's wording comes first, on its own, in whatever language they
+-- wrote it. The numbers are the mod's own and always follow in the same shape,
+-- in the player's language, so an operator rewriting the message cannot
+-- accidentally hide what the player needs to know.
 local function noticeText(message, minutes, cap, resetsAt, graceSeconds)
     local blocks = {}
 
     local wording = tostring(message or "")
     wording = (wording:gsub("^%s+", ""):gsub("%s+$", ""))
-    if wording ~= "" then table.insert(blocks, wording) end
+    if wording == "" then wording = MaxTimeInServerText.format("limitReached") end
+    table.insert(blocks, wording)
 
     if cap and cap > 0 then
         table.insert(blocks,
-            "You have used " .. tostring(math.floor(minutes or 0)) ..
-            " of your " .. tostring(math.floor(cap)) .. " minutes this week.\n" ..
-            "Your allowance resets on " .. tostring(resetsAt or "the next Monday") .. ".")
+            MaxTimeInServerText.format("used", math.floor(minutes or 0), math.floor(cap)) ..
+            "\n" ..
+            MaxTimeInServerText.format("resets", tostring(resetsAt or "?")))
     end
 
-    table.insert(blocks, "Disconnecting in " ..
-        tostring(math.floor(graceSeconds or 0)) .. " seconds.")
+    table.insert(blocks,
+        MaxTimeInServerText.format("leaving", math.floor(graceSeconds or 0)))
 
     return table.concat(blocks, "\n\n")
 end

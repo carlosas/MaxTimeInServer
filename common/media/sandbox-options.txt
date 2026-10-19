@@ -32,14 +32,16 @@ option MaxTimeInServer.ExemptRoles
 }
 
 /*
- * The parser splits a block on commas, so this value cannot contain one. The
- * numbers - minutes used, the cap, when it resets - are added by the mod on
- * their own lines underneath, so this is only the explanation.
+ * Left empty, the mod says it in the player's own language. Set it only to
+ * override that with your own wording, in which case every player reads it
+ * exactly as written. The parser splits a block on commas, so this value cannot
+ * contain one. Either way the numbers - minutes used, the cap, when it resets -
+ * are added by the mod underneath, translated.
  */
 option MaxTimeInServer.BlockedMessage
 {
     type = string,
-    default = Weekly play limit reached.,
+    default = ,
     page = MaxTimeInServer,
     translation = MaxTimeInServer_BlockedMessage,
 }

@@ -17,7 +17,10 @@ server restart.
 local DEFAULT_CAP_MINUTES = 600
 local DEFAULT_EXEMPT_ROLES = { "admin", "moderator", "gm" }
 local DEFAULT_GRACE_SECONDS = 12
-local DEFAULT_BLOCKED_MESSAGE = "Weekly play limit reached."
+-- An empty default means "say nothing of your own", and the client then shows
+-- its own translated line instead. That way a server that never touches the
+-- setting still speaks to each player in their language.
+local DEFAULT_BLOCKED_MESSAGE = ""
 
 MaxTimeInServerConfig = {
     -- Set from the sandbox options; see applySandboxOptions below.
@@ -147,7 +150,9 @@ function MaxTimeInServerConfig.describe()
     local roles = table.concat(MaxTimeInServerConfig.exemptRoles, ", ")
     if roles == "" then roles = "none" end
     local wording = MaxTimeInServerConfig.blockedMessage
-    if wording == nil or wording == "" then wording = "(numbers only)" end
+    if wording == nil or wording == "" then
+        wording = "(the mod's own wording, in each player's language)"
+    end
     return "cap " .. tostring(MaxTimeInServerConfig.capMinutes) ..
         " minutes per week, exempt roles: " .. roles ..
         ", " .. tostring(MaxTimeInServerConfig.graceSeconds) ..

@@ -109,11 +109,11 @@ a page called *Max Time In Server*. Set them from your admin panel, or by editin
 |---|---|---|
 | Weekly minutes per account | `600` | the budget, in real minutes, per account per week |
 | Roles that are never limited | `admin;moderator;gm` | semicolon-separated; these accounts are never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included |
-| What a refused player is told | `Weekly play limit reached.` | the wording of the notice. It cannot contain a comma, because the sandbox file splits on them. Empty shows the numbers alone |
+| What a refused player is told | *(empty)* | leave it empty and the mod says it in each player's own language; set it to override that with your own wording, the same for everyone. It cannot contain a comma, because the sandbox file splits on them |
 | Seconds to read the notice | `12` | how long a refused player gets before their game disconnects itself |
 
-The wording is only the explanation. The minutes used, the cap and the reset day
-are added by the mod underneath, on their own lines, so rewriting the message
+Whatever the wording, the numbers are the mod's own and always follow
+underneath, translated into the player's language, so rewriting the message
 cannot accidentally hide what the player needs to know:
 
 ```
@@ -124,6 +124,21 @@ Your allowance resets on 2026-10-19.
 
 Disconnecting in 12 seconds.
 ```
+
+### Languages
+
+The mod's own lines follow the player's game language. English and Spanish ship
+with it; any other language falls back to English, per line.
+
+Adding one is a single block in
+`common/media/lua/shared/MaxTimeInServer/MaxTimeInServerText.lua`, keyed by the
+code `Translator.getLanguage():name()` returns, and a test fails if a language
+is missing a line rather than letting it reach a player's screen blank.
+
+This deliberately avoids the engine's own translation files: every name under
+`media/lua/shared/Translate/<LANG>/` belongs to the base game, and a mod
+shipping one shadows a file with hundreds of keys in it. Four lines of our own
+are not worth that.
 
 Sandbox options are read once when the server boots, so a change takes a
 restart. On start-up the mod prints the settings it is actually enforcing:

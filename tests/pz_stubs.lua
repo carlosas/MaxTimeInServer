@@ -12,6 +12,7 @@ local LUA_ROOT = "common/media/lua/"
 -- safe to load without its siblings being present yet.
 S.SERVER_MODULES = {
     "shared/MaxTimeInServer/MaxTimeInServerConfig.lua",
+    "shared/MaxTimeInServer/MaxTimeInServerText.lua",
     "server/MaxTimeInServer/MaxTimeInServerClock.lua",
     "server/MaxTimeInServer/MaxTimeInServerGate.lua",
     "server/MaxTimeInServer/MaxTimeInServerPlayers.lua",
@@ -21,6 +22,7 @@ S.SERVER_MODULES = {
 
 S.CLIENT_MODULES = {
     "shared/MaxTimeInServer/MaxTimeInServerConfig.lua",
+    "shared/MaxTimeInServer/MaxTimeInServerText.lua",
     "client/MaxTimeInServer/MaxTimeInServerClient.lua",
 }
 

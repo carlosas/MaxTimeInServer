@@ -112,6 +112,21 @@ H.test("a refusal is shown with the numbers in it", function()
     H.assertMatch(world.notices[1], "2026%-10%-19", "when it resets")
 end)
 
+H.test("the mod speaks the player's language when the operator said nothing", function()
+    local world = wire()
+    _G.Translator = { getLanguage = function() return { name = function() return "ES" end } end }
+    local silent = {}
+    for key, value in pairs(BLOCKED) do silent[key] = value end
+    silent.message = ""
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netBlocked, silent)
+    local notice = world.notices[1]
+    H.assertMatch(notice, "Has alcanzado", "its own wording in Spanish")
+    H.assertMatch(notice, "Has jugado 612 de tus 600", "and the numbers too")
+    H.assertMatch(notice, "Desconectando en 12", "and the countdown")
+    _G.Translator = nil
+end)
+
 H.test("the operator's wording is what the player reads first", function()
     local world = wire()
     MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
@@ -124,16 +139,12 @@ end)
 
 H.test("the numbers are the mod's own, whatever the operator writes", function()
     local world = wire()
-    local silent = {}
-    for key, value in pairs(BLOCKED) do silent[key] = value end
-    silent.message = ""
     MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
-        MaxTimeInServerConfig.netBlocked, silent)
+        MaxTimeInServerConfig.netBlocked, BLOCKED)
     local notice = world.notices[1]
     H.assertMatch(notice, "612", "minutes used")
     H.assertMatch(notice, "600", "the cap")
     H.assertMatch(notice, "2026%-10%-19", "when it resets")
-    H.assertFalse(notice:find("^%s") ~= nil, "no empty line where the wording would be")
 end)
 
 H.test("the connection is dropped once the grace period is over", function()
