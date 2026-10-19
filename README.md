@@ -69,12 +69,28 @@ client half is what shows the notice and disconnects, and a client missing a mod
 the server lists is turned away at the connection screen anyway.
 
 ```sh
-make package   # builds build/MaxTimeInServer.zip
+make package          # builds build/MaxTimeInServer.zip, to hand to the others
+make install-client   # or install straight into the game on this machine
+make verify-client    # and prove this machine matches the server, byte for byte
 ```
 
-They unzip it into their own Zomboid directory — `%UserProfile%\Zomboid\mods\` on
-Windows, `~/Zomboid/mods/` on Linux and macOS. Nothing to enable in the mod menu;
-the server's mod list drives it.
+Everyone unzips the archive into their own Zomboid folder, so that the mod ends
+up at `<Zomboid>/mods/MaxTimeInServer/` with `42/` and `common/` inside it:
+
+| | |
+|---|---|
+| Windows | `%UserProfile%\Zomboid\mods\` |
+| macOS | `~/Zomboid/mods/` |
+| Linux | `~/Zomboid/mods/` |
+
+Nothing to tick in the mod menu — that list is for single-player. Joining the
+server is what switches the mod on, and the server's own list drives it. The
+only requirement is that the folder is **there** and **identical** to the
+server's copy.
+
+While the mod is not on the Steam Workshop this is the only way in: a client
+without the folder is turned away at the connection screen, because the server
+lists a mod it cannot find locally.
 
 One trap worth knowing: the server hashes the mod's Lua **when it boots**. Change
 a file, deploy it, forget to restart, and every player with the new zip gets

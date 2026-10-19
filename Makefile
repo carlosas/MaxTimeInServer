@@ -9,6 +9,9 @@ MOD_ID      ?= MaxTimeInServer
 WORLD       ?= Zomboides2
 
 ZOMBOID     ?= $$HOME/Zomboid
+
+# The game's user folder on THIS machine, for install-client.
+CLIENT_ZOMBOID ?= $(HOME)/Zomboid
 MODS_DIR    ?= $(ZOMBOID)/mods
 CONSOLE     ?= $(ZOMBOID)/server-console.txt
 DATA_FILE   ?= $(ZOMBOID)/Lua/MaxTimeInServer.txt
@@ -18,7 +21,7 @@ SERVER_INI  ?= $(ZOMBOID)/Server/$(WORLD).ini
 MOD_FILES   = 42 common
 
 .PHONY: help test deploy package restart status logs data roles ini \
-        demo-block demo-restore sandbox uninstall
+        install-client verify-client demo-block demo-restore sandbox uninstall
 
 help:
 	@grep -E '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | expand -t24
@@ -52,6 +55,21 @@ package: test verify-sync ## Build the zip the players install into their own Zo
 	@cd build && zip -qr $(MOD_ID).zip $(MOD_ID)
 	@echo "build/$(MOD_ID).zip - players unzip this into their Zomboid/mods/ folder"
 	@unzip -l build/$(MOD_ID).zip | tail -3
+
+install-client: test verify-sync ## Install the mod into the game on THIS machine
+	@test -d "$(CLIENT_ZOMBOID)" || { echo "no $(CLIENT_ZOMBOID) here - set CLIENT_ZOMBOID to your game's user folder"; exit 1; }
+	@rm -rf "$(CLIENT_ZOMBOID)/mods/$(MOD_ID)"
+	@mkdir -p "$(CLIENT_ZOMBOID)/mods/$(MOD_ID)"
+	@COPYFILE_DISABLE=1 tar --no-xattrs -cf - $(MOD_FILES) | tar xf - -C "$(CLIENT_ZOMBOID)/mods/$(MOD_ID)"
+	@find "$(CLIENT_ZOMBOID)/mods/$(MOD_ID)" -name "._*" -delete
+	@echo "installed into $(CLIENT_ZOMBOID)/mods/$(MOD_ID)"
+
+verify-client: ## Check this machine's copy matches the server's, byte for byte
+	@cd "$(CLIENT_ZOMBOID)/mods/$(MOD_ID)" && find . -type f | sort | xargs md5 -r \
+		| sed 's|^\([a-f0-9]*\) ./|\1  |' > /tmp/mts-client.txt
+	@$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | sort | xargs md5sum | sed "s|\./||"' > /tmp/mts-server.txt
+	@if diff -u /tmp/mts-client.txt /tmp/mts-server.txt; then echo "identical to the server"; else \
+		echo; echo "DIFFERENT - this client would be kicked on the Lua checksum"; exit 1; fi
 
 restart: ## Restart the game server (asks nothing, so run it on purpose)
 	@$(SSH) 'systemctl --user restart zomboid.service'
