@@ -129,11 +129,17 @@ local function noticeHeight(text)
 end
 
 local function defaultShowNotice(text)
+    -- A blank line in front of it. The engine's text sits 20 pixels from the
+    -- top whatever the box, and its descenders push the last line nearer the
+    -- bottom edge than the first is to the top: a line's worth of air above
+    -- evens the two out.
+    local padded = "\n" .. tostring(text)
+
     local width = 440
-    local height = noticeHeight(text)
+    local height = noticeHeight(padded)
     local x = (getCore():getScreenWidth() - width) / 2
     local y = (getCore():getScreenHeight() - height) / 2
-    local modal = ISModalDialog:new(x, y, width, height, text, false, nil,
+    local modal = ISModalDialog:new(x, y, width, height, padded, false, nil,
         MaxTimeInServerClient.onNoticeDismissed)
     modal:initialise()
 
