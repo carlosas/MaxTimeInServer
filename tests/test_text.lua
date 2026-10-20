@@ -88,10 +88,12 @@ H.test("a weekday that is not one of the seven is simply left out", function()
     H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "October 23", "none")
 end)
 
+-- The engine files translations by the prefix of the key, so ours carry
+-- Sandbox_ like the settings do. A key without a prefix it knows raises.
 H.test("the engine's answer wins over the table, which is the fallback", function()
     _G.getTextOrNull = function(key)
-        if key == "MaxTimeInServer_month10" then return "lokakuuta" end
-        if key == "MaxTimeInServer_date" then return "%1. %2" end
+        if key == "Sandbox_MaxTimeInServer_month10" then return "lokakuuta" end
+        if key == "Sandbox_MaxTimeInServer_date" then return "%1. %2" end
         return nil
     end
     H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "23. lokakuuta",
@@ -114,6 +116,39 @@ end)
 H.test("something that is not a date comes back as it arrived", function()
     H.assertEqual(MaxTimeInServerText.date("whenever"), "whenever", "untouched")
     H.assertEqual(MaxTimeInServerText.date(nil), "", "and nil is not an error")
+end)
+
+H.test("the engine substitutes its own placeholders, whatever shape they are", function()
+    _G.getTextOrNull = function(key)
+        if key == "Sandbox_MaxTimeInServer_played" then
+            return "Has jugado %1$s minutos esta semana (máximo %2$s)."
+        end
+    end
+    _G.getText = function(key, a, b)
+        return "Has jugado " .. tostring(a) .. " minutos esta semana (máximo " .. tostring(b) .. ")."
+    end
+    H.assertEqual(MaxTimeInServerText.format("played", 0, 3),
+        "Has jugado 0 minutos esta semana (máximo 3).", "the engine's own formatting")
+    _G.getText = nil
+    _G.getTextOrNull = nil
+end)
+
+H.test("and if it will not, the %1$s form is substituted here without leftovers", function()
+    _G.getTextOrNull = function(key)
+        if key == "Sandbox_MaxTimeInServer_played" then
+            return "Has jugado %1$s minutos (maximo %2$s)."
+        end
+    end
+    _G.getText = function() error("no formatting today") end
+    H.assertEqual(MaxTimeInServerText.format("played", 0, 3),
+        "Has jugado 0 minutos (maximo 3).", "no $s left behind")
+    _G.getText = nil
+    _G.getTextOrNull = nil
+end)
+
+H.test("the fallback table still uses the plain %1 form", function()
+    H.assertMatch(MaxTimeInServerText.format("played", 7, 9), "7", "substituted")
+    H.assertFalse(MaxTimeInServerText.format("played", 7, 9):find("%$s"), "nothing left over")
 end)
 
 H.run("text")

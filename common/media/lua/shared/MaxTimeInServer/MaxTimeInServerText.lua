@@ -12,8 +12,12 @@ whose encoding nobody has measured.
 
 The table below is the last resort: what a player reads if the engine cannot
 answer, which is why it is English, complete, and covered by a test. Spanish is
-kept beside it because this mod was written for a Spanish server and it costs
-four lines.
+kept beside it because this mod was written for a Spanish server.
+
+Nothing here may hold a character outside ASCII. The engine reads this file with
+Kahlua, which collapses a UTF-8 literal to a single byte - measured: an accented
+word reached a player's screen with the accent drawn as a box. The translations
+proper live in JSON, where the bytes survive, and that is where the accents are.
 
 Adding a language is one block below. Anything missing falls back to English,
 per key, so a half-finished translation degrades to English rather than to a
@@ -63,7 +67,7 @@ local STRINGS = {
         limitReached = "Has alcanzado tu limite de juego semanal.",
         timeUp = "Se te ha acabado el tiempo de esta semana.",
         warning = "Te quedan %1 minutos de juego esta semana.",
-        played = "Has jugado %1 minutos esta semana (máximo %2).",
+        played = "Has jugado %1 minutos esta semana (maximo %2).",
         date = "%1 de %2",
         dateWithDay = "%3 %1 de %2",
         day1 = "lunes",
@@ -90,8 +94,12 @@ local STRINGS = {
 
 local FALLBACK = "EN"
 
--- Where the engine keeps our lines, so they cannot collide with anyone else's.
-local ENGINE_PREFIX = "MaxTimeInServer_"
+-- Where the engine keeps our lines. The prefix is not decoration: the engine
+-- files translations by it - Sandbox_ for Sandbox.json, UI_ for UI.json - and a
+-- key that starts with anything else raises rather than answering. Measured on
+-- a client: Sandbox_MaxTimeInServer_CapMinutes came back translated while
+-- MaxTimeInServer_played, in the same file, threw.
+local ENGINE_PREFIX = "Sandbox_MaxTimeInServer_"
 
 -- Codes that read the same language as far as these lines are concerned. The
 -- game ships four Spanish variants and a player set to any of them would
@@ -110,14 +118,16 @@ function MaxTimeInServerText.language()
     return FALLBACK
 end
 
-local function lookup(key)
-    -- The engine knows every language the mod ships a file for, and which one
-    -- this player is reading. Ask it first.
-    if getTextOrNull ~= nil then
-        local ok, value = pcall(getTextOrNull, ENGINE_PREFIX .. key)
-        if ok and value ~= nil and tostring(value) ~= "" then return tostring(value) end
-    end
+-- What the engine has for this key, or nil. It raises on a key whose prefix it
+-- does not file, so this is wrapped rather than trusted.
+local function fromEngine(key)
+    if getTextOrNull == nil then return nil end
+    local ok, value = pcall(getTextOrNull, ENGINE_PREFIX .. key)
+    if ok and value ~= nil and tostring(value) ~= "" then return tostring(value) end
+    return nil
+end
 
+local function fromTable(key)
     local code = MaxTimeInServerText.language()
     code = ALIASES[code] or code
     local table_ = STRINGS[code]
@@ -125,21 +135,39 @@ local function lookup(key)
     return STRINGS[FALLBACK][key]
 end
 
+-- The engine rewrites %1 into %1$s when it loads a translation, so both forms
+-- have to go. The longer one first, or it would leave "$s" behind - which is
+-- exactly what reached a player's screen the first time.
+local function substitute(text, values)
+    local out = tostring(text)
+    for index = 1, #values do
+        local value = tostring(values[index])
+        out = string.gsub(out, "%%" .. tostring(index) .. "%$s", value)
+        out = string.gsub(out, "%%" .. tostring(index), value)
+    end
+    return out
+end
+
 --- The string for `key`, with %1, %2 ... replaced by the values given.
 -- Never raises and never returns nil: an unknown key comes back as itself, so a
 -- mistake shows up on screen as a name rather than as nothing at all.
 function MaxTimeInServerText.format(key, ...)
-    local text = lookup(key)
-    if text == nil then return tostring(key) end
-
     local values = { ... }
-    local out = tostring(text)
-    for index = 1, #values do
-        -- "%%" .. index matches the two characters %1, with no pattern that
-        -- could match the empty string: see the note in the store about Kahlua.
-        out = string.gsub(out, "%%" .. tostring(index), tostring(values[index]))
+
+    -- When the line comes from the engine, the engine does the substituting:
+    -- it is the one that decided what the placeholders look like.
+    local engine = fromEngine(key)
+    if engine ~= nil then
+        if getText ~= nil then
+            local ok, text = pcall(getText, ENGINE_PREFIX .. key, ...)
+            if ok and text ~= nil and tostring(text) ~= "" then return tostring(text) end
+        end
+        return substitute(engine, values)
     end
-    return out
+
+    local text = fromTable(key)
+    if text == nil then return tostring(key) end
+    return substitute(text, values)
 end
 
 --- Every language this mod carries, for tests and for the log.

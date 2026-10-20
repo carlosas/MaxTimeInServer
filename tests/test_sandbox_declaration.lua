@@ -93,8 +93,10 @@ local function expectedKeys()
     end
     -- And every line the mod says to a player. The Lua table is the English
     -- fallback and therefore the list of what each language has to carry.
+    -- The engine files translations by prefix, so the mod's own lines carry the
+    -- same Sandbox_ as the settings or they never resolve.
     for _, key in ipairs(MaxTimeInServerText.keys()) do
-        expected["MaxTimeInServer_" .. key] = true
+        expected["Sandbox_MaxTimeInServer_" .. key] = true
     end
     return expected
 end
