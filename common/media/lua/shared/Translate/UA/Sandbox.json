@@ -3,7 +3,7 @@
     "Sandbox_MaxTimeInServer_CapMinutes": "Хвилин на акаунт за тиждень",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Скільки реальних хвилин кожен акаунт може провести на сервері за тиждень. 600 — це десять годин.",
     "Sandbox_MaxTimeInServer_ResetDay": "День обнулення лічильника",
-    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Хвилини всіх акаунтів обнуляються о 00:00 цього дня, у ніч із попереднього дня на нього. Якщо змінити це налаштування, усі обнуляться менш ніж за хвилину, не чекаючи того дня.",
+    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Хвилини всіх акаунтів обнуляються о 00:00, у ніч із попереднього дня на цей. Якщо змінити це налаштування, поточні лічильники обнуляться одразу, не чекаючи того дня.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Понеділок",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Вівторок",
     "Sandbox_MaxTimeInServer_ResetDay_option3": "Середа",

@@ -3,7 +3,7 @@
     "Sandbox_MaxTimeInServer_CapMinutes": "Menit per akun per minggu",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Berapa menit nyata yang boleh dihabiskan setiap akun saat terhubung dalam seminggu. 600 sama dengan sepuluh jam.",
     "Sandbox_MaxTimeInServer_ResetDay": "Hari penghitung direset",
-    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Menit semua akun kembali ke nol pada pukul 00:00 di hari ini, pada malam antara hari sebelumnya dan hari ini. Jika kamu mengubah pengaturan ini, semua orang kembali ke nol dalam waktu kurang dari satu menit, tanpa menunggu hari itu.",
+    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Menit semua akun kembali ke nol pada pukul 00:00, pada malam antara hari sebelumnya dan hari ini. Jika kamu mengubah pengaturan ini, penghitung yang ada sekarang langsung direset, tanpa menunggu hari itu.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Senin",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Selasa",
     "Sandbox_MaxTimeInServer_ResetDay_option3": "Rabu",

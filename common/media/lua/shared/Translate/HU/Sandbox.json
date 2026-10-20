@@ -3,7 +3,7 @@
     "Sandbox_MaxTimeInServer_CapMinutes": "Heti percek fiókonként",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Hány valós percet tölthet el egy fiók a szerveren egy hét alatt. A 600 tíz óra.",
     "Sandbox_MaxTimeInServer_ResetDay": "A számláló nullázásának napja",
-    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Minden fiók percei ezen a napon 00:00-kor nullázódnak, az előző napról erre virradó éjszaka. Ha megváltoztatod ezt a beállítást, mindenki egy percen belül nulláról indul, anélkül hogy megvárná azt a napot.",
+    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Minden fiók percei 00:00-kor nullázódnak, az előző napról erre virradó éjszaka. Ha megváltoztatod ezt a beállítást, a jelenlegi számlálók azonnal nullázódnak, anélkül hogy megvárnák azt a napot.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Hétfő",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Kedd",
     "Sandbox_MaxTimeInServer_ResetDay_option3": "Szerda",

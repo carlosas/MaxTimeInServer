@@ -3,7 +3,7 @@
     "Sandbox_MaxTimeInServer_CapMinutes": "Минут на аккаунт в неделю",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Сколько реальных минут каждый аккаунт может провести на сервере за неделю. 600 — это десять часов.",
     "Sandbox_MaxTimeInServer_ResetDay": "День обнуления счётчика",
-    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Минуты всех аккаунтов обнуляются в 00:00 этого дня, в ночь с предыдущего дня на него. Если изменить эту настройку, все обнулятся меньше чем за минуту, не дожидаясь этого дня.",
+    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Минуты всех аккаунтов обнуляются в 00:00, в ночь с предыдущего дня на этот. Если изменить эту настройку, текущие счётчики обнулятся сразу, не дожидаясь этого дня.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Понедельник",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Вторник",
     "Sandbox_MaxTimeInServer_ResetDay_option3": "Среда",

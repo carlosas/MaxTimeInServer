@@ -3,7 +3,7 @@
     "Sandbox_MaxTimeInServer_CapMinutes": "Minuutteja tiliä kohden viikossa",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Kuinka monta todellista minuuttia kukin tili saa olla yhdistettynä viikossa. 600 on kymmenen tuntia.",
     "Sandbox_MaxTimeInServer_ResetDay": "Päivä, jona laskuri nollataan",
-    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Kaikkien tilien minuutit nollautuvat tänä päivänä kello 00:00, edellisen päivän ja tämän välisenä yönä. Jos muutat tätä asetusta, kaikki ovat nollassa alle minuutissa, odottamatta kyseistä päivää.",
+    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Kaikkien tilien minuutit nollautuvat kello 00:00, edellisen päivän ja tämän välisenä yönä. Jos muutat tätä asetusta, nykyiset laskurit nollautuvat heti, odottamatta kyseistä päivää.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Maanantai",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Tiistai",
     "Sandbox_MaxTimeInServer_ResetDay_option3": "Keskiviikko",

@@ -3,7 +3,7 @@
     "Sandbox_MaxTimeInServer_CapMinutes": "Minuten per account per week",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Hoeveel echte minuten elk account per week verbonden mag zijn. 600 is tien uur.",
     "Sandbox_MaxTimeInServer_ResetDay": "Dag waarop de teller wordt gereset",
-    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "De minuten van alle accounts gaan om 00:00 op deze dag terug naar nul, in de nacht van de dag ervoor naar deze. Verander je deze instelling, dan staat iedereen binnen een minuut weer op nul, zonder op die dag te wachten.",
+    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "De minuten van alle accounts gaan om 00:00 terug naar nul, in de nacht van de dag ervoor naar deze. Verander je deze instelling, dan worden de huidige tellers meteen op nul gezet, zonder op die dag te wachten.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Maandag",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Dinsdag",
     "Sandbox_MaxTimeInServer_ResetDay_option3": "Woensdag",

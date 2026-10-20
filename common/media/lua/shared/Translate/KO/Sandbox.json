@@ -3,7 +3,7 @@
     "Sandbox_MaxTimeInServer_CapMinutes": "계정당 주간 플레이 분",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "각 계정이 일주일 동안 접속해 있을 수 있는 실제 분. 600분은 10시간입니다.",
     "Sandbox_MaxTimeInServer_ResetDay": "카운터가 초기화되는 요일",
-    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "이 요일 00:00, 전날에서 이날로 넘어가는 밤에 모든 계정의 분이 0으로 돌아갑니다. 이 설정을 바꾸면 그 요일을 기다리지 않고 1분 안에 모두 0이 됩니다.",
+    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "모든 계정의 분이 00:00에, 전날에서 이날로 넘어가는 밤에 0으로 돌아갑니다. 이 설정을 바꾸면 현재 카운터가 그 요일을 기다리지 않고 즉시 초기화됩니다.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "월요일",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "화요일",
     "Sandbox_MaxTimeInServer_ResetDay_option3": "수요일",
