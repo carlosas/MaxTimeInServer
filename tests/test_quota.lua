@@ -26,12 +26,26 @@ local function makeWorld(opts)
     world.config.resetDay = opts.resetDay or 1
     if opts.exemptRoles then world.config.exemptRoles = opts.exemptRoles end
 
+    -- Everything the server would say to a connected player lands here.
+    world.told = { blocked = {}, warned = {} }
+    world.notify = {
+        tellBlocked = function(player, verdict, reason)
+            table.insert(world.told.blocked, { username = player.username,
+                reason = reason, minutes = verdict.minutes, cap = verdict.cap })
+        end,
+        tellWarning = function(player, verdict, remaining)
+            table.insert(world.told.warned, { username = player.username,
+                remaining = remaining })
+        end,
+    }
+
     MaxTimeInServerQuota.configure({
         config = world.config,
         clock = world.clock,
         store = MaxTimeInServerStore,
         files = world.files,
         players = world.players,
+        notify = world.notify,
     })
     MaxTimeInServerQuota.start()
 
@@ -150,6 +164,115 @@ H.test("the role a player holds is written down and kept fresh", function()
     world.players.entries[1].role = "priority"
     world.sweepAfter(60)
     H.assertEqual(world.record("darkkz").role, "priority", "updated")
+end)
+
+-- being told, while still connected ------------------------------------------
+
+local ONLINE = { { username = "darkkz", role = "user" } }
+
+local function startingAt(minutes, opts)
+    opts = opts or {}
+    local record = "\n\n[darkkz]\nminutes=" .. minutes ..
+        (opts.bonus and ("\nbonusMinutes=" .. opts.bonus) or "") ..
+        (opts.exempt and "\nexempt=true" or "") .. "\n"
+    return makeWorld({
+        online = opts.online or ONLINE,
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY .. record },
+    })
+end
+
+H.test("running out while playing is told to the player, once in the log", function()
+    local world = startingAt(599)
+    world.sweepAfter(60)                       -- first sighting: nothing owed yet
+    H.assertEqual(#world.told.blocked, 0, "still a minute left")
+
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.blocked, 1, "told when the minute ran out")
+    H.assertEqual(world.told.blocked[1].reason, "timeUp", "and told why")
+    H.assertEqual(world.told.blocked[1].username, "darkkz", "the right player")
+
+    S.logLines = {}
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.blocked, 2, "told again while they are still here")
+    H.assertFalse(S.logText():find("ran out"), "but the log says it once")
+end)
+
+H.test("the warnings speak once each, carrying the minutes actually left", function()
+    local world = startingAt(570)              -- thirty left, so the first mark
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 1, "warned at the first mark")
+    H.assertEqual(world.told.warned[1].remaining, 30, "with the real number")
+
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 1, "and not again for the same mark")
+
+    world.sweepAfter(60 * 25)                  -- four left, so the second mark
+    H.assertEqual(#world.told.warned, 2, "warned at the second mark")
+    H.assertEqual(world.told.warned[2].remaining, 4, "with the real number again")
+    H.assertEqual(#world.told.blocked, 0, "and nobody has been told to leave")
+end)
+
+H.test("passing two marks in one sweep is one warning, not two", function()
+    local world = startingAt(560)              -- forty left: above both marks
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 0, "nothing to say yet")
+
+    world.sweepAfter(60 * 36)                  -- four left: straight past both
+    H.assertEqual(#world.told.warned, 1, "one warning, not one per mark")
+    H.assertEqual(world.told.warned[1].remaining, 4, "and it says what is really left")
+end)
+
+H.test("a player far from the cap hears nothing", function()
+    local world = startingAt(100)
+    world.sweepAfter(60)
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 0, "no warning")
+    H.assertEqual(#world.told.blocked, 0, "no refusal")
+end)
+
+H.test("an exempt player is neither warned nor turned out", function()
+    local world = startingAt(700, { exempt = true })
+    world.sweepAfter(60)
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 0, "no warning")
+    H.assertEqual(#world.told.blocked, 0, "no refusal")
+end)
+
+H.test("an exempt role is neither warned nor turned out", function()
+    local world = startingAt(700, { online = { { username = "darkkz", role = "admin" } } })
+    world.sweepAfter(60)
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.blocked, 0, "admins play on")
+end)
+
+H.test("the bonus moves the marks along with the cap", function()
+    local world = startingAt(570, { bonus = 60 })
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 0, "ninety left, so nothing to say yet")
+end)
+
+H.test("leaving and coming back is a new session, and warns again", function()
+    local world = startingAt(570)
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 1, "warned")
+
+    world.players.entries = {}
+    world.sweepAfter(60)                       -- gone: forgotten
+    world.players.entries = { { username = "darkkz", role = "user" } }
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 2, "warned again on the new session")
+end)
+
+H.test("a new week lets the warnings speak again", function()
+    local world = startingAt(570)
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 1, "warned in the old week")
+
+    world.sweepAfter(WEEK)                     -- the week turns over, counters zeroed
+    world.files.files[DATA] = "version=1\nweekStartEpoch=" .. (MONDAY + WEEK) ..
+        "\n\n[darkkz]\nminutes=570\n"
+    world.sweepAfter(60)
+    H.assertEqual(#world.told.warned, 2, "and warned again in the new one")
 end)
 
 -- weeks ----------------------------------------------------------------------

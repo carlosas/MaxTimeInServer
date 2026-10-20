@@ -34,8 +34,11 @@ of every mod included, and vanilla kicks anyone whose copy differs: editing this
 mod to dodge the quota gets you kicked before the quota is even consulted.
 (Roles holding the `BypassLuaChecksum` capability are exempt from that check.)
 
-A player who crosses the cap *while connected* is not kicked. They finish the
-session and cannot get back in. That is deliberate.
+The same conversation happens while people play. The server counts every
+minute, so it knows when somebody is running out: it warns them with a line over
+their head as the cap approaches, and when they cross it, sends the same notice
+as the door and their game disconnects itself. Nobody is caught by surprise, and
+nobody keeps playing on a budget they have spent.
 
 ## Installing
 
@@ -90,6 +93,7 @@ Time In Server*. Set them from the admin panel or by editing
 | Day the week resets | `Friday` | everyone's minutes go back to zero at 00:00 on this day, in the night between the day before and it. A dropdown of the seven days. Changing the setting puts everyone back to zero within a minute, without waiting for that day |
 | Roles that are never limited | `admin;moderator;gm` | semicolon-separated; never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included |
 | What a refused player is told | *(empty)* | empty means the mod says it in each player's own language; set it to use your own wording instead, the same for everyone. It cannot contain a comma, because the sandbox file splits on them |
+| Warn when this much is left | `30;5` | minutes left, separated by semicolons, at which a player is warned while they play. Each mark is said once per session; empty means they hear nothing until their time is up |
 | Seconds to read the notice | `5` | how long a refused player gets before their game disconnects itself |
 
 Whatever the wording, the numbers are the mod's own and always follow
@@ -109,7 +113,7 @@ Sandbox options are read when the server boots, so a change takes a restart. On
 start-up the mod logs what it is enforcing:
 
 ```
-[MaxTimeInServer] ready: cap 600 minutes per week resetting Fridays at 00:00, exempt roles: admin, moderator, gm, 5 seconds to read the notice, counting in MaxTimeInServer_MyServer.txt, week starting 2026-10-16T00:00:00+0000, 3 accounts on record
+[MaxTimeInServer] ready: cap 600 minutes per week resetting Fridays at 00:00, exempt roles: admin, moderator, gm, warning at 30, 5 minutes left, 5 seconds to read the notice, counting in MaxTimeInServer_MyServer.txt, week starting 2026-10-16T00:00:00+0000, 3 accounts on record
 ```
 
 If it cannot find its settings page it says so and falls back to the defaults
@@ -203,7 +207,9 @@ copy, so keep servers that share players on the same version.
   while the server is empty, and that gap is not anybody's playing time.
 - A player's first sighting only starts their clock, so nobody pays for time
   before the mod saw them, and leaving for an hour costs nothing.
-- The join check happens during the handshake, so it never arrives late.
+- The join check happens during the handshake, so it never arrives late. The
+  checks during a session ride on the same pass that counts the minutes, so
+  they are at most one interval behind.
 - The weekly reset runs on the first pass after the boundary: the server
   starting up, or the first player connecting. Nobody is kept out in the
   meantime, because a counter belonging to a week that has rolled over is
@@ -254,7 +260,8 @@ MaxTimeInServer/
 
 ## Limitations
 
-- A player who crosses the cap mid-session is not kicked.
+- A player who crosses the cap while connected is told within a minute, not
+  instantly: that is how often the counting runs.
 - The quota is enforced by the client on the server's instruction. The Lua
   checksum makes editing the mod a kickable offence, but a patched game binary
   could still ignore it. Enforcement that cannot be tampered with would need

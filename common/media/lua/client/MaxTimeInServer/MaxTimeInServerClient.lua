@@ -40,12 +40,20 @@ end
 -- wrote it. The numbers are the mod's own and always follow in the same shape,
 -- in the player's language, so an operator rewriting the message cannot
 -- accidentally hide what the player needs to know.
-local function noticeText(message, minutes, cap, resetsAt, graceSeconds)
+local function noticeText(message, minutes, cap, resetsAt, graceSeconds, reason)
     local blocks = {}
 
     local wording = tostring(message or "")
     wording = (wording:gsub("^%s+", ""):gsub("%s+$", ""))
-    if wording == "" then wording = MaxTimeInServerText.format("limitReached") end
+    if wording == "" then
+        -- Being turned away at the door and running out while playing are not
+        -- the same news, so they do not read the same.
+        if reason == "timeUp" then
+            wording = MaxTimeInServerText.format("timeUp")
+        else
+            wording = MaxTimeInServerText.format("limitReached")
+        end
+    end
     table.insert(blocks, wording)
 
     if cap and cap > 0 then
@@ -59,6 +67,12 @@ local function noticeText(message, minutes, cap, resetsAt, graceSeconds)
         MaxTimeInServerText.format("leaving", math.floor(graceSeconds or 0)))
 
     return table.concat(blocks, "\n\n")
+end
+
+-- A line over the player's head, which is how the base game says something
+-- small to somebody who is busy (HaloTextHelper, used all over its own Lua).
+local function defaultShowWarning(text)
+    HaloTextHelper.addBadText(getPlayer(), text)
 end
 
 local function defaultShowNotice(text)
@@ -83,6 +97,7 @@ MaxTimeInServerClient.hooks = {
             MaxTimeInServerConfig.netHello, {})
     end,
     showNotice = defaultShowNotice,
+    showWarning = defaultShowWarning,
     disconnect = function() forceDisconnect() end,
     -- Identifies the server this client is connected to. The base game reads
     -- the same three for the connection line in its own watermark, inside an
@@ -210,6 +225,17 @@ function MaxTimeInServerClient.onServerCommand(module, command, args)
         return
     end
 
+    if command == MaxTimeInServerConfig.netWarning then
+        -- Nothing is armed here: a warning is only a warning.
+        args = args or {}
+        local remaining = math.floor(tonumber(args.remaining) or 0)
+        local shown = pcall(MaxTimeInServerClient.hooks.showWarning,
+            MaxTimeInServerText.format("warning", remaining))
+        print("[MaxTimeInServer] " .. tostring(remaining) ..
+            " minutes left this week" .. (shown and "" or " (could not show it)"))
+        return
+    end
+
     if command ~= MaxTimeInServerConfig.netBlocked then return end
     acknowledged = true
 
@@ -224,7 +250,7 @@ function MaxTimeInServerClient.onServerCommand(module, command, args)
     disconnectAtMs = moment + graceSeconds * 1000
 
     local shown = pcall(MaxTimeInServerClient.hooks.showNotice,
-        noticeText(args.message, minutes, cap, args.resetsAt, graceSeconds))
+        noticeText(args.message, minutes, cap, args.resetsAt, graceSeconds, args.reason))
     if not shown then
         -- Nothing was put on screen, so the grace period buys the player
         -- nothing but confusion. Go almost immediately instead.

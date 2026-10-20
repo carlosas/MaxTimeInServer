@@ -5,7 +5,7 @@ S.loadModules(S.CLIENT_MODULES, "client")
 
 local function wire(opts)
     opts = opts or {}
-    local world = { nowMs = 1000, hellos = 0, notices = {}, disconnects = 0,
+    local world = { nowMs = 1000, hellos = 0, notices = {}, warnings = {}, disconnects = 0,
                     serverKey = opts.serverKey or "Alpha|10.0.0.1|16261" }
     MaxTimeInServerClient.hooks = {
         sendHello = function(character)
@@ -16,6 +16,7 @@ local function wire(opts)
             if opts.noticeThrows then error("ui exploded") end
             table.insert(world.notices, text)
         end,
+        showWarning = function(text) table.insert(world.warnings, text) end,
         disconnect = function() world.disconnects = world.disconnects + 1 end,
         nowMs = function() return world.nowMs end,
         serverKey = function() return world.serverKey end,
@@ -188,6 +189,59 @@ H.test("unrelated server commands are ignored", function()
     world.nowMs = world.nowMs + 60000
     MaxTimeInServerClient.update()
     H.assertEqual(world.disconnects, 0, "nothing dropped")
+end)
+
+-- Running out while connected: the server says so, and the client says it on.
+
+H.test("a warning is shown and nothing is armed by it", function()
+    local world = wire()
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netWarning, { remaining = 7, minutes = 593, cap = 600 })
+    H.assertEqual(#world.warnings, 1, "one line over their head")
+    H.assertMatch(world.warnings[1], "7", "with the minutes left in it")
+
+    world.nowMs = world.nowMs + 600000
+    MaxTimeInServerClient.update()
+    H.assertEqual(world.disconnects, 0, "a warning ends nothing")
+end)
+
+H.test("running out mid-session does not read like being turned away", function()
+    local world = wire()
+    local timeUp = {}
+    for key, value in pairs(BLOCKED) do timeUp[key] = value end
+    timeUp.message = ""
+    timeUp.reason = "timeUp"
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netBlocked, timeUp)
+    H.assertMatch(world.notices[1], "time for this week is up", "the mid-session wording")
+
+    local atTheDoor = {}
+    for key, value in pairs(timeUp) do atTheDoor[key] = value end
+    atTheDoor.reason = "join"
+    local door = wire()
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netBlocked, atTheDoor)
+    H.assertMatch(door.notices[1], "Weekly play limit reached", "the door's wording")
+end)
+
+H.test("the operator's wording still wins over either of them", function()
+    local world = wire()
+    local timeUp = {}
+    for key, value in pairs(BLOCKED) do timeUp[key] = value end
+    timeUp.reason = "timeUp"
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netBlocked, timeUp)
+    H.assertMatch(world.notices[1], "No more for you this week%.", "the operator's line")
+end)
+
+H.test("a warning the UI refuses to show costs the player nothing", function()
+    local world = wire()
+    MaxTimeInServerClient.hooks.showWarning = function() error("no halo today") end
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netWarning, { remaining = 3 })
+    world.nowMs = world.nowMs + 600000
+    MaxTimeInServerClient.update()
+    H.assertEqual(world.disconnects, 0, "still nothing armed")
 end)
 
 H.test("the client registers itself on the events it needs", function()

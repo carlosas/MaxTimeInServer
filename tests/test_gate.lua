@@ -57,6 +57,15 @@ end
 local OVER_CAP = "version=1\nweekStartEpoch=" .. MONDAY ..
     "\n\n[darkkz]\nminutes=612\n"
 
+H.test("the door says it is the door, so the client can word it", function()
+    local gate = makeGate({ files = { [DATA] = OVER_CAP } })
+    MaxTimeInServerGate.onClientCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netHello, fakePlayer("darkkz", "user"))
+    local message = gate.net.lastTo("darkkz")
+    H.assertEqual(message.command, MaxTimeInServerConfig.netBlocked, "refused")
+    H.assertEqual(message.args.reason, "join", "turned away at the door")
+end)
+
 H.test("a player over the cap is told to leave, with the numbers", function()
     local gate = makeGate({ files = { [DATA] = OVER_CAP } })
     local player = fakePlayer("darkkz", "user")

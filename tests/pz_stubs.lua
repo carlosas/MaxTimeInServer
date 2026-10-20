@@ -128,7 +128,13 @@ function S.fakePlayers(entries)
     function players.online()
         local out = {}
         for _, entry in ipairs(players.entries) do
-            table.insert(out, { username = entry.username, role = entry.role })
+            table.insert(out, {
+                username = entry.username,
+                role = entry.role,
+                -- The real one carries the IsoPlayer; anything identifiable
+                -- will do for a test.
+                player = { username = entry.username },
+            })
         end
         return out
     end

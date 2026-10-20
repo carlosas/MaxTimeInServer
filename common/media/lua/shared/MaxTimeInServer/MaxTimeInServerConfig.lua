@@ -20,6 +20,9 @@ local DEFAULT_GRACE_SECONDS = 5
 -- The weekday the week turns over on, 1 = Monday .. 7 = Sunday, which is the
 -- contract MaxTimeInServerClock works in. 5 is Friday.
 local DEFAULT_RESET_DAY = 5
+-- How much warning a player gets, in minutes left, largest first. Empty means
+-- they are told nothing until their time is up.
+local DEFAULT_WARN_MINUTES = { 30, 5 }
 local DAY_NAMES = {
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
 }
@@ -37,6 +40,7 @@ MaxTimeInServerConfig = {
     graceSeconds = DEFAULT_GRACE_SECONDS,
     blockedMessage = DEFAULT_BLOCKED_MESSAGE,
     resetDay = DEFAULT_RESET_DAY,
+    warnMinutes = { 30, 5 },
 
     -- Not worth a server setting: changing either breaks the data file or the
     -- handshake rather than tuning anything.
@@ -51,6 +55,7 @@ MaxTimeInServerConfig = {
     netHello = "hello",
     netBlocked = "blocked",
     netAllowed = "allowed",
+    netWarning = "warning",
 
     -- The greeting is retried until the server answers. A command sent before
     -- the connection can carry it is dropped without an error, so one attempt
@@ -106,8 +111,10 @@ local function dayName(number)
     return DAY_NAMES[tonumber(number) or 0] or ("day " .. tostring(number))
 end
 
-local function parseRoleList(text)
-    local roles = {}
+-- Sandbox strings cannot hold a comma - the parser splits a block on them - so
+-- every list setting is separated by semicolons.
+local function splitList(text)
+    local pieces = {}
     local raw = tostring(text or "")
     local cursor = 1
     while cursor <= #raw do
@@ -120,10 +127,39 @@ local function parseRoleList(text)
             piece = string.sub(raw, cursor, separator - 1)
             cursor = separator + 1
         end
-        piece = string.lower((piece:gsub("^%s+", ""):gsub("%s+$", "")))
-        if piece ~= "" then table.insert(roles, piece) end
+        piece = (piece:gsub("^%s+", ""):gsub("%s+$", ""))
+        if piece ~= "" then table.insert(pieces, piece) end
+    end
+    return pieces
+end
+
+local function parseRoleList(text)
+    local roles = {}
+    for _, piece in ipairs(splitList(text)) do
+        table.insert(roles, string.lower(piece))
     end
     return roles
+end
+
+-- Minute marks, largest first and without repeats, so each one speaks once.
+local function parseWarnMinutes(text)
+    local seen = {}
+    local marks = {}
+    for _, piece in ipairs(splitList(text)) do
+        local number = tonumber(piece)
+        if number == nil or number < 1 then
+            log("sandbox option WarnMinutes has \"" .. piece ..
+                "\" in it, which is not a number of minutes; ignoring that one")
+        else
+            number = math.floor(number + 0.5)
+            if not seen[number] then
+                seen[number] = true
+                table.insert(marks, number)
+            end
+        end
+    end
+    table.sort(marks, function(a, b) return a > b end)
+    return marks
 end
 
 --- Reads the server's sandbox options over the defaults.
@@ -134,6 +170,10 @@ function MaxTimeInServerConfig.applySandboxOptions(vars)
     MaxTimeInServerConfig.graceSeconds = DEFAULT_GRACE_SECONDS
     MaxTimeInServerConfig.blockedMessage = DEFAULT_BLOCKED_MESSAGE
     MaxTimeInServerConfig.resetDay = DEFAULT_RESET_DAY
+    MaxTimeInServerConfig.warnMinutes = {}
+    for _, mark in ipairs(DEFAULT_WARN_MINUTES) do
+        table.insert(MaxTimeInServerConfig.warnMinutes, mark)
+    end
     MaxTimeInServerConfig.exemptRoles = {}
     for _, role in ipairs(DEFAULT_EXEMPT_ROLES) do
         table.insert(MaxTimeInServerConfig.exemptRoles, role)
@@ -168,6 +208,12 @@ function MaxTimeInServerConfig.applySandboxOptions(vars)
     if page.BlockedMessage ~= nil then
         MaxTimeInServerConfig.blockedMessage =
             (tostring(page.BlockedMessage):gsub("^%s+", ""):gsub("%s+$", ""))
+    end
+
+    -- An empty list is a deliberate answer here too: say nothing until their
+    -- time is up.
+    if page.WarnMinutes ~= nil then
+        MaxTimeInServerConfig.warnMinutes = parseWarnMinutes(page.WarnMinutes)
     end
 
     -- An empty list is a deliberate answer: limit everybody, operators too.
@@ -214,9 +260,16 @@ end
 function MaxTimeInServerConfig.describe()
     local roles = table.concat(MaxTimeInServerConfig.exemptRoles, ", ")
     if roles == "" then roles = "none" end
+    local marks = table.concat(MaxTimeInServerConfig.warnMinutes, ", ")
+    if marks == "" then
+        marks = "no warning"
+    else
+        marks = "warning at " .. marks .. " minutes left"
+    end
     return "cap " .. tostring(MaxTimeInServerConfig.capMinutes) ..
         " minutes per week resetting " .. dayName(MaxTimeInServerConfig.resetDay) ..
         "s at 00:00, exempt roles: " .. roles ..
+        ", " .. marks ..
         ", " .. tostring(MaxTimeInServerConfig.graceSeconds) ..
         " seconds to read the notice"
 end

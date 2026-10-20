@@ -17,6 +17,7 @@ H.test("without the sandbox page the shipped defaults stand", function()
     H.assertEqual(C.capMinutes, 600, "capMinutes")
     H.assertEqual(C.graceSeconds, 5, "graceSeconds")
     H.assertEqual(C.resetDay, 5, "resetDay is friday")
+    H.assertEqual(table.concat(C.warnMinutes, ","), "30,5", "warnMinutes")
     H.assertEqual(roleList(), "admin,gm,moderator", "exemptRoles")
 end)
 
@@ -36,6 +37,24 @@ H.test("a day outside the week is refused and friday stands", function()
         H.assertEqual(C.resetDay, 5, "refused " .. tostring(bad))
     end
     H.assertMatch(S.logText(), "ResetDay", "and said which option it was")
+end)
+
+H.test("the warning marks are a list, largest first and without repeats", function()
+    C.applySandboxOptions({ MaxTimeInServer = { WarnMinutes = "5;30;5" } })
+    H.assertEqual(table.concat(C.warnMinutes, ","), "30,5", "sorted and deduplicated")
+end)
+
+H.test("an empty list of marks means nothing is said until the time is up", function()
+    C.applySandboxOptions({ MaxTimeInServer = { WarnMinutes = "" } })
+    H.assertEqual(#C.warnMinutes, 0, "no marks")
+    H.assertMatch(C.describe(), "no warning", "and the start-up line says so")
+end)
+
+H.test("a mark that is not a number is dropped, and the rest survive", function()
+    S.logLines = {}
+    C.applySandboxOptions({ MaxTimeInServer = { WarnMinutes = "10; soon ;0;2" } })
+    H.assertEqual(table.concat(C.warnMinutes, ","), "10,2", "kept what made sense")
+    H.assertMatch(S.logText(), "WarnMinutes", "and named the option")
 end)
 
 H.test("the start-up line says when the week turns over", function()

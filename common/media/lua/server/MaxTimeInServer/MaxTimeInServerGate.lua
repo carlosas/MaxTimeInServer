@@ -1,5 +1,9 @@
 --[[
-The join check.
+Everything the server says to a player about their quota.
+
+The join check lives here, and so do the two messages the sweep sends to
+somebody already connected, because both have to speak in exactly the shape the
+client half reads. One place to build that shape is one place to change it.
 
 Build 42's server-side Lua cannot refuse a login: there is no connection event,
 GameServer is hidden from Lua, and the ban/role APIs are not in the server's Lua
@@ -47,6 +51,32 @@ local function dependencies()
     return deps
 end
 
+--- Tells a player they may not play, with the numbers and what happened.
+-- `reason` is "join" when they were turned away at the door and "timeUp" when
+-- they ran out while playing; the client picks its opening line from it.
+function MaxTimeInServerGate.tellBlocked(player, verdict, reason)
+    local d = dependencies()
+    d.net.send(player, d.config.netModule, d.config.netBlocked, {
+        message = d.config.blockedMessage,
+        reason = reason or "join",
+        minutes = verdict.minutes,
+        cap = verdict.cap,
+        resetsAt = verdict.resetsAt,
+        graceSeconds = d.config.graceSeconds,
+    })
+end
+
+--- Tells a player how little is left. Threatens nothing and ends nothing.
+function MaxTimeInServerGate.tellWarning(player, verdict, remaining)
+    local d = dependencies()
+    d.net.send(player, d.config.netModule, d.config.netWarning, {
+        remaining = remaining,
+        minutes = verdict.minutes,
+        cap = verdict.cap,
+        resetsAt = verdict.resetsAt,
+    })
+end
+
 -- Bounded, so the log cannot be flooded, but enough to prove whether client
 -- commands reach this server at all. Without it, "nothing happened" and "the
 -- greeting never arrived" look identical.
@@ -85,13 +115,7 @@ function MaxTimeInServerGate.onClientCommand(module, command, player)
             return
         end
 
-        d.net.send(player, d.config.netModule, d.config.netBlocked, {
-            message = d.config.blockedMessage,
-            minutes = verdict.minutes,
-            cap = verdict.cap,
-            resetsAt = verdict.resetsAt,
-            graceSeconds = d.config.graceSeconds,
-        })
+        MaxTimeInServerGate.tellBlocked(player, verdict, "join")
         log("refused " .. username .. ": " .. tostring(verdict.minutes or 0) ..
             "/" .. tostring(verdict.cap or 0) .. " minutes this week, resets " ..
             tostring(verdict.resetsAt))

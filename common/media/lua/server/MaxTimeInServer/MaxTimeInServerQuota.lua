@@ -46,6 +46,10 @@ local deps = nil
 local lastSweepEpoch = nil
 local carriedSeconds = {}        -- username -> seconds not yet worth a minute
 local lastSeenEpoch = {}         -- username -> when this sweep last saw them online
+-- Who has already been told what, this session. Session state, not accounting:
+-- it never reaches the counter file, and it is forgotten when they leave.
+local warnedMarks = {}           -- username -> { [minutes left] = true }
+local toldOver = {}              -- username -> true once the log has said it
 
 local function defaultDeps()
     return {
@@ -54,6 +58,8 @@ local function defaultDeps()
         store = MaxTimeInServerStore,
         files = pzFiles,
         players = MaxTimeInServerPlayers,
+        -- Everything the server says to a connected player goes through here.
+        notify = MaxTimeInServerGate,
     }
 end
 
@@ -77,6 +83,8 @@ function MaxTimeInServerQuota.configure(overrides)
     lastSweepEpoch = nil
     carriedSeconds = {}
     lastSeenEpoch = {}
+    warnedMarks = {}
+    toldOver = {}
 end
 
 local function dependencies()
@@ -160,7 +168,68 @@ local function startNewWeek(state, weekStart, d)
     end
     state.weekStartEpoch = weekStart
     state.weekStart = d.clock.formatIso(weekStart)
+    -- Everyone's numbers just changed, so whatever they were told is stale.
+    warnedMarks = {}
+    toldOver = {}
     log("new week starting " .. tostring(state.weekStart))
+end
+
+-- Says whatever this player needs to hear: that their time is up, or how
+-- little is left. Nothing here changes the counters, and nothing here may
+-- raise: a server that cannot speak must still be able to count.
+local function tellPlayer(entry, record, now, weekStart, d, exempt)
+    if exempt or d.notify == nil or entry.player == nil then return end
+
+    local minutes = record.minutes or 0
+    local cap = (d.config.capMinutes or 0) + (record.bonusMinutes or 0)
+    local verdict = {
+        minutes = minutes,
+        cap = cap,
+        resetsAt = d.clock.formatIso(weekStart + SECONDS_PER_WEEK),
+    }
+    local remaining = cap - minutes
+    local username = entry.username
+
+    if remaining <= 0 then
+        -- Told again on every sweep while they are still here: a client whose
+        -- notice failed to open gets another chance. The log says it once.
+        local ok, err = pcall(d.notify.tellBlocked, entry.player, verdict, "timeUp")
+        if not ok then
+            log("could not tell " .. username .. " their time is up: " .. tostring(err))
+            return
+        end
+        if not toldOver[username] then
+            toldOver[username] = true
+            log(username .. " ran out mid-session: " .. tostring(minutes) ..
+                "/" .. tostring(cap) .. " minutes this week")
+        end
+        return
+    end
+
+    -- One warning, however many marks have been passed since the last sweep,
+    -- and it carries the real number of minutes rather than the mark.
+    local marks = d.config.warnMinutes or {}
+    local due = false
+    local passed = {}
+    for _, mark in ipairs(marks) do
+        if remaining <= mark then
+            table.insert(passed, mark)
+            if warnedMarks[username] == nil or not warnedMarks[username][mark] then
+                due = true
+            end
+        end
+    end
+    if not due then return end
+
+    warnedMarks[username] = warnedMarks[username] or {}
+    for _, mark in ipairs(passed) do warnedMarks[username][mark] = true end
+
+    local ok, err = pcall(d.notify.tellWarning, entry.player, verdict, remaining)
+    if not ok then
+        log("could not warn " .. username .. ": " .. tostring(err))
+        return
+    end
+    log("warned " .. username .. ": " .. tostring(remaining) .. " minutes left")
 end
 
 -- Credits each connected player for the time since *they* were last seen, not
@@ -210,6 +279,8 @@ local function creditOnlinePlayers(state, now, weekStart, d, exemptRoles)
                 changed = true
             end
         end
+
+        tellPlayer(entry, record, now, weekStart, d, exempt)
     end
 
     -- Forget whoever has left, so their next session starts from its own
@@ -218,6 +289,8 @@ local function creditOnlinePlayers(state, now, weekStart, d, exemptRoles)
         if not present[username] then
             lastSeenEpoch[username] = nil
             carriedSeconds[username] = nil
+            warnedMarks[username] = nil
+            toldOver[username] = nil
         end
     end
 
@@ -294,6 +367,8 @@ function MaxTimeInServerQuota.start()
     lastSweepEpoch = d.clock.now()
     carriedSeconds = {}
     lastSeenEpoch = {}
+    warnedMarks = {}
+    toldOver = {}
 end
 
 -- Every handler says it ran and reports its own failure. An error escaping an

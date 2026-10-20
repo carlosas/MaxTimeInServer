@@ -35,6 +35,19 @@ option MaxTimeInServer.ResetDay
     valueTranslation = MaxTimeInServer_ResetDay,
 }
 
+/*
+ * How much warning a player gets before their time runs out, in minutes left,
+ * separated by semicolons. Each mark speaks once per session. Leave it empty to
+ * say nothing until the time is up.
+ */
+option MaxTimeInServer.WarnMinutes
+{
+    type = string,
+    default = 30;5,
+    page = MaxTimeInServer,
+    translation = MaxTimeInServer_WarnMinutes,
+}
+
 option MaxTimeInServer.ExemptRoles
 {
     type = string,
