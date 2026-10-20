@@ -40,7 +40,7 @@ end
 -- wrote it. The numbers are the mod's own and always follow in the same shape,
 -- in the player's language, so an operator rewriting the message cannot
 -- accidentally hide what the player needs to know.
-local function noticeText(message, minutes, cap, resetsAt, graceSeconds, reason)
+local function noticeText(message, minutes, cap, resetsAt, graceSeconds, reason, resetsDay)
     local blocks = {}
 
     local wording = tostring(message or "")
@@ -61,7 +61,7 @@ local function noticeText(message, minutes, cap, resetsAt, graceSeconds, reason)
             MaxTimeInServerText.format("used", math.floor(minutes or 0), math.floor(cap)) ..
             "\n" ..
             MaxTimeInServerText.format("resets",
-                MaxTimeInServerText.date(resetsAt or "?")))
+                MaxTimeInServerText.date(resetsAt or "?", resetsDay)))
     end
 
     table.insert(blocks,
@@ -251,7 +251,8 @@ function MaxTimeInServerClient.onServerCommand(module, command, args)
     disconnectAtMs = moment + graceSeconds * 1000
 
     local shown = pcall(MaxTimeInServerClient.hooks.showNotice,
-        noticeText(args.message, minutes, cap, args.resetsAt, graceSeconds, args.reason))
+        noticeText(args.message, minutes, cap, args.resetsAt, graceSeconds, args.reason,
+            args.resetsDay))
     if not shown then
         -- Nothing was put on screen, so the grace period buys the player
         -- nothing but confusion. Go almost immediately instead.

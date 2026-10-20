@@ -25,8 +25,10 @@ local function wire(opts)
     return world
 end
 
+-- 2026-10-19 is a Monday, which is what resetsDay says: on a real server the
+-- two always agree, because the reset is the configured weekday.
 local BLOCKED = { message = "No more for you this week.", minutes = 612, cap = 600,
-                  resetsAt = "2026-10-19T00:00:00+0000", graceSeconds = 12 }
+                  resetsAt = "2026-10-19T00:00:00+0000", resetsDay = 1, graceSeconds = 12 }
 
 H.test("the client greets the server once its player exists", function()
     local world = wire()
@@ -112,7 +114,7 @@ H.test("a refusal is shown with the numbers in it", function()
     H.assertEqual(#world.notices, 1, "one notice")
     H.assertMatch(world.notices[1], "612", "minutes used")
     H.assertMatch(world.notices[1], "600", "the cap")
-    H.assertMatch(world.notices[1], "October 19", "when it resets, in words")
+    H.assertMatch(world.notices[1], "Monday October 19", "when it resets, in words")
 end)
 
 H.test("the mod speaks the player's language when the operator said nothing", function()
@@ -147,7 +149,7 @@ H.test("the numbers are the mod's own, whatever the operator writes", function()
     local notice = world.notices[1]
     H.assertMatch(notice, "612", "minutes used")
     H.assertMatch(notice, "600", "the cap")
-    H.assertMatch(notice, "October 19", "when it resets, in words")
+    H.assertMatch(notice, "Monday October 19", "when it resets, in words")
 end)
 
 H.test("the connection is dropped once the grace period is over", function()

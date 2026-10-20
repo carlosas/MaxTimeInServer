@@ -104,7 +104,7 @@ the player needs to know:
 No more for you this week.
 
 You have used 612 of your 600 minutes this week.
-Your allowance resets on October 19.
+Your allowance resets on Friday October 23.
 
 Disconnecting in 5 seconds.
 ```

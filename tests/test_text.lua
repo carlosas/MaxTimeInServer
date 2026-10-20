@@ -71,6 +71,23 @@ H.test("a timestamp is read out as a date, not as a stamp", function()
     _G.Translator = nil
 end)
 
+H.test("the weekday is said too, each language in its own order", function()
+    _G.Translator = nil
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000", 5),
+        "Friday October 23", "weekday first in English")
+
+    _G.Translator = { getLanguage = function() return { name = function() return "ES" end } end }
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000", 5),
+        "viernes 23 de October", "weekday first in Spanish too, the rest in its order")
+    _G.Translator = nil
+end)
+
+H.test("a weekday that is not one of the seven is simply left out", function()
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000", 0), "October 23", "zero")
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000", 9), "October 23", "nine")
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "October 23", "none")
+end)
+
 H.test("the month comes from the game when the game knows it", function()
     _G.getTextOrNull = function(key)
         if key == "Farming_Month_10" then return "Octubre" end

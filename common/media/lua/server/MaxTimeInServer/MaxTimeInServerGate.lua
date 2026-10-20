@@ -62,6 +62,9 @@ function MaxTimeInServerGate.tellBlocked(player, verdict, reason)
         minutes = verdict.minutes,
         cap = verdict.cap,
         resetsAt = verdict.resetsAt,
+        -- The reset always falls on the configured weekday, so there is
+        -- nothing for the client to work out.
+        resetsDay = d.config.resetDay,
         graceSeconds = d.config.graceSeconds,
     })
 end

@@ -22,8 +22,17 @@ local STRINGS = {
         limitReached = "Weekly play limit reached.",
         timeUp = "Your time for this week is up.",
         warning = "%1 minutes of play left this week.",
-        -- %1 is the day of the month, %2 the name of the month.
+        -- %1 is the day of the month, %2 the name of the month, %3 the day
+        -- of the week. Each language puts them in its own order.
         date = "%2 %1",
+        dateWithDay = "%3 %2 %1",
+        day1 = "Monday",
+        day2 = "Tuesday",
+        day3 = "Wednesday",
+        day4 = "Thursday",
+        day5 = "Friday",
+        day6 = "Saturday",
+        day7 = "Sunday",
     },
     ES = {
         used = "Has jugado %1 de tus %2 minutos de esta semana.",
@@ -33,6 +42,14 @@ local STRINGS = {
         timeUp = "Se te ha acabado el tiempo de esta semana.",
         warning = "Te quedan %1 minutos de juego esta semana.",
         date = "%1 de %2",
+        dateWithDay = "%3 %1 de %2",
+        day1 = "lunes",
+        day2 = "martes",
+        day3 = "miercoles",
+        day4 = "jueves",
+        day5 = "viernes",
+        day6 = "sabado",
+        day7 = "domingo",
     },
 }
 
@@ -78,12 +95,12 @@ function MaxTimeInServerText.format(key, ...)
 end
 
 --- Every language this mod carries, for tests and for the log.
---- A timestamp as a player would say it: "October 23", "23 de Octubre".
+--- A timestamp as a player would say it: "Friday October 23".
 -- The month's name comes from the base game, which has one in every language
--- it ships (Farming_Month_1 to 12), so this reads properly for a player whose
--- language the mod itself does not speak. Anything that cannot be read comes
--- back untouched: a stamp is ugly, a blank line is worse.
-function MaxTimeInServerText.date(stamp)
+-- it ships (Farming_Month_1 to 12). The weekday is optional and ours, so it is
+-- in whatever language the rest of the sentence is in. Anything that cannot be
+-- read comes back untouched: a stamp is ugly, a blank line is worse.
+function MaxTimeInServerText.date(stamp, weekday)
     local text = tostring(stamp or "")
     local _, _, _, month, day = string.find(text, "(%d%d%d%d)%-(%d%d)%-(%d%d)")
     if day == nil then return text end
@@ -97,6 +114,11 @@ function MaxTimeInServerText.date(stamp)
     if name == nil and number ~= nil then name = MONTHS_EN[number] end
     if name == nil then return text end
 
+    local dayNumber = tonumber(weekday)
+    if dayNumber ~= nil and dayNumber >= 1 and dayNumber <= 7 then
+        return MaxTimeInServerText.format("dateWithDay", tostring(tonumber(day)), name,
+            MaxTimeInServerText.format("day" .. tostring(math.floor(dayNumber))))
+    end
     return MaxTimeInServerText.format("date", tostring(tonumber(day)), name)
 end
 
