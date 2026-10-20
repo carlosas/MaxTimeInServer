@@ -116,9 +116,15 @@ local function noticeHeight(text)
     end)
     if okFont and tonumber(fontHeight) ~= nil then byLine = lines * tonumber(fontHeight) end
 
-    -- Whichever says more, so a font this has not met cannot clip the text.
-    local body = measured or byLine or (lines * 16)
-    if byLine ~= nil and byLine > body then body = byLine end
+    -- The engine's measurement of this very string, when it will give one: the
+    -- height it reports per line is larger than the spacing it draws with, so
+    -- counting lines leaves a line and a half of nothing under the text. The
+    -- count is kept for a font the engine will not measure, and as a floor
+    -- against a measurement too small to hold the first line.
+    local body = measured
+    if body == nil or (byLine ~= nil and body < (byLine / lines)) then
+        body = byLine or (lines * 16)
+    end
     return math.floor(TEXT_TOP * 2 + body)
 end
 
