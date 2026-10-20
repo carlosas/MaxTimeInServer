@@ -1,5 +1,5 @@
 {
-    "Sandbox_MaxTimeInServer": "Max Time In Server",
+    "Sandbox_MaxTimeInServer": "Max Time In Server (multiplayer only)",
 
     "Sandbox_MaxTimeInServer_CapMinutes": "Weekly minutes per account",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "How many real minutes each account may spend connected in one week. 600 is ten hours.",
