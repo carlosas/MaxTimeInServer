@@ -63,7 +63,7 @@ option MaxTimeInServer.GraceSeconds
     type = integer,
     min = 0,
     max = 300,
-    default = 12,
+    default = 5,
     page = MaxTimeInServer,
     translation = MaxTimeInServer_GraceSeconds,
 }

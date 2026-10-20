@@ -90,7 +90,7 @@ Time In Server*. Set them from the admin panel or by editing
 | Day the week resets | `Friday` | everyone's minutes go back to zero at 00:00 on this day, in the night between the day before and it. A dropdown of the seven days. Changing the setting puts everyone back to zero within a minute, without waiting for that day |
 | Roles that are never limited | `admin;moderator;gm` | semicolon-separated; never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included |
 | What a refused player is told | *(empty)* | empty means the mod says it in each player's own language; set it to use your own wording instead, the same for everyone. It cannot contain a comma, because the sandbox file splits on them |
-| Seconds to read the notice | `12` | how long a refused player gets before their game disconnects itself |
+| Seconds to read the notice | `5` | how long a refused player gets before their game disconnects itself |
 
 Whatever the wording, the numbers are the mod's own and always follow
 underneath, in the player's language, so rewriting the message cannot hide what
@@ -102,14 +102,14 @@ No more for you this week.
 You have used 612 of your 600 minutes this week.
 Your allowance resets on 2026-10-19.
 
-Disconnecting in 12 seconds.
+Disconnecting in 5 seconds.
 ```
 
 Sandbox options are read when the server boots, so a change takes a restart. On
 start-up the mod logs what it is enforcing:
 
 ```
-[MaxTimeInServer] ready: cap 600 minutes per week resetting Fridays at 00:00, exempt roles: admin, moderator, gm, 12 seconds to read the notice, counting in MaxTimeInServer_MyServer.txt, week starting 2026-10-16T00:00:00+0000, 3 accounts on record
+[MaxTimeInServer] ready: cap 600 minutes per week resetting Fridays at 00:00, exempt roles: admin, moderator, gm, 5 seconds to read the notice, counting in MaxTimeInServer_MyServer.txt, week starting 2026-10-16T00:00:00+0000, 3 accounts on record
 ```
 
 If it cannot find its settings page it says so and falls back to the defaults

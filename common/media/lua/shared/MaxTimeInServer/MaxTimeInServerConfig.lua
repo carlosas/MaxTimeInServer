@@ -16,7 +16,7 @@ server restart.
 
 local DEFAULT_CAP_MINUTES = 600
 local DEFAULT_EXEMPT_ROLES = { "admin", "moderator", "gm" }
-local DEFAULT_GRACE_SECONDS = 12
+local DEFAULT_GRACE_SECONDS = 5
 -- The weekday the week turns over on, 1 = Monday .. 7 = Sunday, which is the
 -- contract MaxTimeInServerClock works in. 5 is Friday.
 local DEFAULT_RESET_DAY = 5
