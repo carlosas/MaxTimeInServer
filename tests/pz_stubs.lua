@@ -62,6 +62,15 @@ function S.loadModules(moduleList, side)
         return nil
     end
     _G.getPlayer = function() return S.localPlayer end
+    -- What the engine tells each side about the server it is on. The server
+    -- names its counter file from this; the client tells two servers apart
+    -- with it.
+    S.serverName = "TestServer"
+    S.serverIP = "10.0.0.1"
+    S.serverPort = 16261
+    _G.getServerName = function() return S.serverName end
+    _G.getServerIP = function() return S.serverIP end
+    _G.getServerPort = function() return S.serverPort end
     for _, name in ipairs(moduleList) do
         local chunk, err = loadfile(LUA_ROOT .. name)
         if not chunk then

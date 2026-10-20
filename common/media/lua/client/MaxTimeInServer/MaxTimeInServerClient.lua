@@ -13,6 +13,10 @@ answers - "you may play" or "you may not" - which is what stops the retries.
 If the answer is no, the player is shown the numbers and the game disconnects
 itself: immediately if they dismiss the notice, and in any case once the grace
 period is up.
+
+Everything it remembers belongs to one server. A game process can visit several
+servers without restarting, and more than one of them may be running this mod,
+so each session starts over: see syncSession.
 ]]
 
 MaxTimeInServerClient = MaxTimeInServerClient or {}
@@ -21,6 +25,9 @@ local acknowledged = false
 local attempts = 0
 local nextHelloMs = nil
 local disconnectAtMs = nil
+-- Which server the four above belong to, and when we last looked.
+local sessionKey = nil
+local lastKeyCheckMs = nil
 
 --- True only on a machine with a local player, i.e. not a dedicated server.
 -- Checked when an event fires rather than when this file loads, because the
@@ -74,6 +81,16 @@ MaxTimeInServerClient.hooks = {
     end,
     showNotice = defaultShowNotice,
     disconnect = function() forceDisconnect() end,
+    -- Identifies the server this client is connected to. The base game reads
+    -- the same three for the connection line in its own watermark, inside an
+    -- isClient() branch (media/lua/client/ISUI/ISVersionWaterMark.lua).
+    serverKey = function()
+        local parts = {}
+        if getServerName ~= nil then table.insert(parts, tostring(getServerName() or "")) end
+        if getServerIP ~= nil then table.insert(parts, tostring(getServerIP() or "")) end
+        if getServerPort ~= nil then table.insert(parts, tostring(getServerPort() or "")) end
+        return table.concat(parts, "|")
+    end,
     nowMs = function() return getTimestampMs() end,
 }
 
@@ -89,6 +106,35 @@ function MaxTimeInServerClient.reset()
     attempts = 0
     nextHelloMs = nil
     disconnectAtMs = nil
+    sessionKey = nil
+    lastKeyCheckMs = nil
+end
+
+-- The server we are connected to, or nil when the engine will not say. "Do not
+-- know" must not become a key of its own: every session would look new.
+local function currentKey()
+    local ok, value = pcall(MaxTimeInServerClient.hooks.serverKey)
+    if not ok or value == nil then return nil end
+    value = tostring(value)
+    if (value:gsub("|", "")) == "" then return nil end
+    return value
+end
+
+--- Ties this session's state to one server and drops it on reaching another.
+-- The quota is enforced by this half acting on one server's answer, so a
+-- carried-over "you may play" would be a way past another server's quota, and
+-- a carried-over disconnect would drop a player who did nothing wrong.
+-- Adopting a key discards nothing; only a proven change of server does.
+local function syncSession()
+    local key = currentKey()
+    if key == nil or key == sessionKey then return end
+    if sessionKey == nil then
+        sessionKey = key
+        return
+    end
+    print("[MaxTimeInServer] this is a different server, forgetting the previous answer")
+    MaxTimeInServerClient.reset()
+    sessionKey = key
 end
 
 local function localCharacter(playerIndex)
@@ -104,6 +150,7 @@ end
 -- Sends the greeting, unless the server has already answered or the last
 -- attempt was too recent. Returns true when something was actually sent.
 local function greet(character)
+    syncSession()
     if acknowledged then return false end
     if attempts >= (MaxTimeInServerConfig.helloAttempts or 15) then return false end
 
@@ -188,9 +235,43 @@ end
 function MaxTimeInServerClient.update()
     if not actingAsClient() then return end
 
+    -- Once a second notices a different server soon enough, and spares the
+    -- engine three calls per frame. This is the check that matters once the
+    -- answer is in: greet() has stopped running by then.
+    local moment = now()
+    if lastKeyCheckMs == nil or (moment - lastKeyCheckMs) >= 1000 then
+        lastKeyCheckMs = moment
+        syncSession()
+    end
+
     if not acknowledged then greet(nil) end
 
     if disconnectAtMs ~= nil and now() >= disconnectAtMs then dropNow() end
+end
+
+--- A session is starting. ConnectToServerState fires this before the world is
+-- loaded, so it cannot throw away an answer meant for the session it begins.
+function MaxTimeInServerClient.onConnected()
+    if not actingAsClient() then return end
+    MaxTimeInServerClient.reset()
+end
+
+--- A session is over. What matters here is a disconnect still pending: it must
+-- not fire on whatever server the player joins next. GameClient fires
+-- OnDisconnect; OnMainMenuEnter covers leaving by some other road.
+function MaxTimeInServerClient.onSessionEnd()
+    if not actingAsClient() then return end
+    MaxTimeInServerClient.reset()
+end
+
+-- A name this build does not have would raise here and take the rest of this
+-- file's registration with it, so each one stands on its own.
+local function listen(eventName, handler)
+    local ok, err = pcall(function() Events[eventName].Add(handler) end)
+    if not ok then
+        print("[MaxTimeInServer] no " .. eventName .. " event in this build: " .. tostring(err))
+    end
+    return ok
 end
 
 function MaxTimeInServerClient.registerEvents()
@@ -198,10 +279,14 @@ function MaxTimeInServerClient.registerEvents()
     -- boolean that would survive the reload and skip it.
     if MaxTimeInServerClient.registeredOn == Events.OnServerCommand then return end
     MaxTimeInServerClient.registeredOn = Events.OnServerCommand
-    Events.OnCreatePlayer.Add(MaxTimeInServerClient.onCreatePlayer)
-    Events.OnGameStart.Add(MaxTimeInServerClient.onGameStart)
-    Events.OnServerCommand.Add(MaxTimeInServerClient.onServerCommand)
-    Events.OnTick.Add(MaxTimeInServerClient.update)
+    listen("OnCreatePlayer", MaxTimeInServerClient.onCreatePlayer)
+    listen("OnGameStart", MaxTimeInServerClient.onGameStart)
+    listen("OnServerCommand", MaxTimeInServerClient.onServerCommand)
+    listen("OnTick", MaxTimeInServerClient.update)
+    -- The two ends of a session, so nothing from one server reaches the next.
+    listen("OnConnected", MaxTimeInServerClient.onConnected)
+    listen("OnDisconnect", MaxTimeInServerClient.onSessionEnd)
+    listen("OnMainMenuEnter", MaxTimeInServerClient.onSessionEnd)
 end
 
 MaxTimeInServerClient.registerEvents()

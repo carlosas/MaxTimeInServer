@@ -31,7 +31,16 @@ MaxTimeInServerConfig = {
 
     -- Not worth a server setting: changing either breaks the data file or the
     -- handshake rather than tuning anything.
+    --
+    -- The counter file is named after the server, because ~/Zomboid/Lua is
+    -- shared by every server run out of one data folder while Server/ and
+    -- Saves/ are not. Two servers writing one file would not interleave their
+    -- counters, they would overwrite them: each sweep rewrites the whole file.
+    -- The server fills this in at start-up from resolveDataFile;
+    -- legacyDataFile is what the file was called before that, and is read once
+    -- to carry the counters over.
     dataFile = "MaxTimeInServer.txt",
+    legacyDataFile = "MaxTimeInServer.txt",
     netModule = "MaxTimeInServer",
     netHello = "hello",
     netBlocked = "blocked",
@@ -143,6 +152,35 @@ function MaxTimeInServerConfig.applySandboxOptions(vars)
     end
 
     return true
+end
+
+-- Keeps a server name to characters that are safe in a file name. A server
+-- name already is one as far as the engine is concerned - Server/<name>.ini,
+-- db/<name>.db - so this should never have anything to do, which is exactly
+-- why it is cheap to keep.
+local function fileSafe(name)
+    local out = (tostring(name or ""):gsub("[^%w%._%-]", "_"))
+    out = (out:gsub("^_+", ""):gsub("_+$", ""))
+    if #out > 48 then out = string.sub(out, 1, 48) end
+    return out
+end
+
+--- Names this server's own counter file, without storing it anywhere.
+-- Returns the name and whether the server could be identified at all; the
+-- caller is the one that owns a config table and assigns it. The fallback is
+-- the old shared name, so a single server behaves exactly as before and only a
+-- second server in the same folder is at risk, which is what the caller logs.
+-- getServerName() is what the base game itself builds its per-server file
+-- names from, inside an isServer() branch (media/lua/shared/SpawnRegions.lua).
+function MaxTimeInServerConfig.resolveDataFile(serverName)
+    if serverName == nil and getServerName ~= nil then
+        local ok, value = pcall(getServerName)
+        if ok then serverName = value end
+    end
+
+    local safe = fileSafe(serverName)
+    if safe == "" then return MaxTimeInServerConfig.legacyDataFile, false end
+    return "MaxTimeInServer_" .. safe .. ".txt", true
 end
 
 --- One line naming the settings that decide who may play, for the start-up log.

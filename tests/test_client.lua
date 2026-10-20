@@ -5,7 +5,8 @@ S.loadModules(S.CLIENT_MODULES, "client")
 
 local function wire(opts)
     opts = opts or {}
-    local world = { nowMs = 1000, hellos = 0, notices = {}, disconnects = 0 }
+    local world = { nowMs = 1000, hellos = 0, notices = {}, disconnects = 0,
+                    serverKey = opts.serverKey or "Alpha|10.0.0.1|16261" }
     MaxTimeInServerClient.hooks = {
         sendHello = function(character)
             world.hellos = world.hellos + 1
@@ -17,6 +18,7 @@ local function wire(opts)
         end,
         disconnect = function() world.disconnects = world.disconnects + 1 end,
         nowMs = function() return world.nowMs end,
+        serverKey = function() return world.serverKey end,
     }
     MaxTimeInServerClient.reset()
     return world
@@ -193,6 +195,83 @@ H.test("the client registers itself on the events it needs", function()
     H.assertTrue(#Events.OnServerCommand.handlers > 0, "OnServerCommand")
     H.assertTrue(#Events.OnCreatePlayer.handlers > 0, "OnCreatePlayer")
     H.assertTrue(#Events.OnTick.handlers > 0, "OnTick")
+    H.assertTrue(#Events.OnConnected.handlers > 0, "OnConnected")
+    H.assertTrue(#Events.OnDisconnect.handlers > 0, "OnDisconnect")
+    H.assertTrue(#Events.OnMainMenuEnter.handlers > 0, "OnMainMenuEnter")
+end)
+
+-- One game process can visit several servers, and more than one of them may be
+-- running this mod. Anything remembered from the last one is either a way past
+-- this one's quota or a disconnect nobody earned.
+
+H.test("a second server is greeted even after the first said yes", function()
+    local world = wire()
+    MaxTimeInServerClient.onCreatePlayer(0)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netAllowed, { ok = true })
+    H.assertEqual(world.hellos, 1, "answered by the first server")
+
+    world.serverKey = "Bravo|10.0.0.2|16261"
+    world.nowMs = world.nowMs + 1000
+    MaxTimeInServerClient.update()
+    H.assertEqual(world.hellos, 2, "the new server is asked on its own account")
+end)
+
+H.test("a pending disconnect does not follow the player to another server", function()
+    local world = wire()
+    MaxTimeInServerClient.onCreatePlayer(0)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netBlocked, BLOCKED)
+
+    world.serverKey = "Bravo|10.0.0.2|16261"
+    world.nowMs = world.nowMs + 1000
+    MaxTimeInServerClient.update()
+    world.nowMs = world.nowMs + 60000
+    MaxTimeInServerClient.update()
+    H.assertEqual(world.disconnects, 0, "nobody is dropped for the other server's quota")
+    -- Asked again, and asked until answered: the retries start over too.
+    H.assertTrue(world.hellos > 1, "and this server is asked on its own account")
+end)
+
+H.test("leaving a server forgets its answer, so a reconnect is checked again", function()
+    local world = wire()
+    MaxTimeInServerClient.onCreatePlayer(0)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netAllowed, { ok = true })
+
+    MaxTimeInServerClient.onSessionEnd()
+    MaxTimeInServerClient.onConnected()
+    MaxTimeInServerClient.onCreatePlayer(0)
+    H.assertEqual(world.hellos, 2, "greeted again on the new session")
+end)
+
+H.test("a grace period still running is dropped when the session ends", function()
+    local world = wire()
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netBlocked, BLOCKED)
+    MaxTimeInServerClient.onSessionEnd()
+    world.nowMs = world.nowMs + 60000
+    MaxTimeInServerClient.update()
+    H.assertEqual(world.disconnects, 0, "the player has already gone")
+end)
+
+H.test("a server that will not identify itself is not mistaken for a new one", function()
+    local world = wire({ serverKey = "||" })
+    MaxTimeInServerClient.onCreatePlayer(0)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netAllowed, { ok = true })
+    for _ = 1, 10 do
+        world.nowMs = world.nowMs + 2000
+        MaxTimeInServerClient.update()
+    end
+    H.assertEqual(world.hellos, 1, "no greeting storm from an unreadable key")
+end)
+
+H.test("an identity the engine refuses to give does not stop the handshake", function()
+    local world = wire()
+    MaxTimeInServerClient.hooks.serverKey = function() error("no connection yet") end
+    MaxTimeInServerClient.onCreatePlayer(0)
+    H.assertEqual(world.hellos, 1, "greeted anyway")
 end)
 
 H.run("client")

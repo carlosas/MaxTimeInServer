@@ -154,7 +154,7 @@ Sandbox options are read once when the server boots, so a change takes a
 restart. On start-up the mod prints the settings it is actually enforcing:
 
 ```
-[MaxTimeInServer] ready: cap 600 minutes per week, exempt roles: admin, moderator, gm, 12 seconds to read the notice, refusal reads: Weekly play limit reached., week starting ...
+[MaxTimeInServer] ready: cap 600 minutes per week, exempt roles: admin, moderator, gm, 12 seconds to read the notice, counting in MaxTimeInServer_MyServer.txt, week starting 2026-10-19T00:00:00+0000, 3 accounts on record
 ```
 
 If the mod cannot find its settings page it says so and falls back to those same
@@ -167,8 +167,17 @@ make sandbox   # what the server has written down for these settings
 
 ## The counter file
 
-`~/Zomboid/Lua/MaxTimeInServer.txt` on the server. Safe to edit while the server
-is running: it is re-read every minute, so changes take effect by themselves.
+`~/Zomboid/Lua/MaxTimeInServer_<ServerName>.txt` on the server, named after the
+server itself — the `-servername` its `.ini` is called after. Safe to edit while
+the server is running: it is re-read every minute, so changes take effect by
+themselves.
+
+The name is not decoration. `~/Zomboid/Lua/` is shared by every server run out
+of one data folder, while `Server/` and `Saves/` are not, and every sweep
+rewrites the whole file: two servers sharing one would overwrite each other's
+counters rather than mix them. A file left by an earlier version of the mod,
+called plain `MaxTimeInServer.txt`, is carried over once at start-up and then
+left alone.
 
 ```
 version=1
@@ -230,6 +239,27 @@ make demo-restore PLAYER=someplayer   # puts their counter back to zero
 
 It works on the counter file rather than on the cap, so it needs no restart and
 leaves everyone else alone.
+
+## More than one server
+
+The budget belongs to a server, not to a player across the world. Two servers
+running this mod count their own minutes, in their own file, against their own
+sandbox cap: ten hours spent on one does not spend the other's. If instead you
+want one shared budget across several servers, this mod does not do it — the
+counters would have to live somewhere both servers can write.
+
+Nothing leaks the other way either. One game process can visit several servers
+without restarting, so the client half keeps everything it is told against the
+server that said it, and throws it away when it reaches a different one, when
+it disconnects, and when it returns to the main menu. A "you may play" from one
+server is not an answer for another, and a disconnect still counting down when
+a player leaves does not follow them to the next server.
+
+One thing to watch, and it is the game's rule rather than this mod's: a player
+holds one copy of a mod, and the server kicks clients whose Lua does not hash
+to the same thing. Two servers running different versions of this mod cannot
+both match that one copy, so keep servers that share players on the same
+version.
 
 ## How the counting behaves
 
