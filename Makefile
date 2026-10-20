@@ -40,12 +40,14 @@ deploy: test ## Copy the mod to the server (does not restart it)
 verify-sync: ## Check the server's copy of the mod matches this working tree
 	@# The server hashes the mod's Lua when it boots and kicks clients whose
 	@# copies disagree, so the zip handed to players must be the same bytes the
-	@# server actually booted with.
-	@find $(MOD_FILES) -type f | sort | xargs md5 -r | sed 's|^\([a-f0-9]*\) |\1  |' > /tmp/mts-local.txt
+	@# server actually booted with. LC_ALL=C on both sides because macOS and
+	@# Linux order "PT/" against "PTBR/" differently otherwise, which looks
+	@# exactly like a mismatch and is not one.
+	@find $(MOD_FILES) -type f | LC_ALL=C sort | xargs md5 -r | sed 's|^\([a-f0-9]*\) |\1  |' > /tmp/mts-local.txt
 	@if ! $(SSH) 'test -d $(MODS_DIR)/$(MOD_ID)'; then \
 		echo "the server has no copy of the mod installed - nothing to compare against"; \
 		exit 0; fi; \
-		$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | sort | xargs md5sum | sed "s|\./||"' > /tmp/mts-remote.txt; \
+		$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | LC_ALL=C sort | xargs md5sum | sed "s|\./||"' > /tmp/mts-remote.txt; \
 		if diff -u /tmp/mts-local.txt /tmp/mts-remote.txt; then echo "in sync"; else \
 			echo; echo "OUT OF SYNC - run 'make deploy' and restart, or the players' copies will"; \
 			echo "fail the server's Lua checksum and be kicked at the connection screen."; exit 1; fi
@@ -73,9 +75,9 @@ install-client: test verify-sync ## Install the mod into the game on THIS machin
 	@echo "installed into $(CLIENT_ZOMBOID)/mods/$(MOD_ID)"
 
 verify-client: ## Check this machine's copy matches the server's, byte for byte
-	@cd "$(CLIENT_ZOMBOID)/mods/$(MOD_ID)" && find . -type f | sort | xargs md5 -r \
+	@cd "$(CLIENT_ZOMBOID)/mods/$(MOD_ID)" && find . -type f | LC_ALL=C sort | xargs md5 -r \
 		| sed 's|^\([a-f0-9]*\) ./|\1  |' > /tmp/mts-client.txt
-	@$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | sort | xargs md5sum | sed "s|\./||"' > /tmp/mts-server.txt
+	@$(SSH) 'cd $(MODS_DIR)/$(MOD_ID) && find . -type f | LC_ALL=C sort | xargs md5sum | sed "s|\./||"' > /tmp/mts-server.txt
 	@if diff -u /tmp/mts-client.txt /tmp/mts-server.txt; then echo "identical to the server"; else \
 		echo; echo "DIFFERENT - this client would be kicked on the Lua checksum"; exit 1; fi
 
