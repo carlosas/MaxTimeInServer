@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Előzetes figyelmeztetés percei",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Hátralévő játékpercek pontosvesszővel elválasztva, amelyeknél a játékos figyelmeztetést kap, hogy felkészülhessen. Minden figyelmeztetés munkamenetenként egyszer hangzik el. Üresen nincs figyelmeztetés, amíg le nem telik az ideje.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Korlátozás alól mentes szerepkörök",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Szerepkörnevek pontosvesszővel elválasztva. Ezeket a fiókokat soha nem számolja és soha nem utasítja el, így te mindig be tudsz lépni. Üresen senki sem mentes, az adminisztrátorok sem.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Szerepkörnevek pontosvesszővel elválasztva. Az ilyen szerepkörrel rendelkező fiókokat soha nem dobja ki. Üresen senki sem mentes, az adminisztrátorok sem.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Mit kap üzenetként az elutasított játékos",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Hagyd üresen, és a mod minden játékos saját nyelvén mondja el. Írj ide valamit, és mindenki pontosan azt olvassa. Nem tartalmazhat vesszőt. A számok mindkét esetben alatta következnek.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Másodpercek az üzenet elolvasására",

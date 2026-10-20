@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minuten vooraf waarschuwen",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Resterende speelminuten, gescheiden door puntkomma's, waarbij een speler wordt gewaarschuwd zodat hij zich kan voorbereiden. Elke waarschuwing komt één keer per sessie. Leeg betekent geen waarschuwing tot zijn tijd op is.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Rollen zonder limiet",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Rolnamen gescheiden door puntkomma's. Deze accounts worden nooit geteld en nooit geweigerd, dus je komt er zelf altijd in. Leeg betekent dat niemand is vrijgesteld, beheerders inbegrepen.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Rolnamen gescheiden door puntkomma's. Accounts met een van deze rollen worden nooit verwijderd. Leeg betekent dat niemand is vrijgesteld, beheerders inbegrepen.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Wat een geweigerde speler te horen krijgt",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Laat dit leeg en de mod zegt het in de taal van elke speler. Schrijf je hier iets, dan leest iedereen precies dat. Mag geen komma bevatten. Hoe dan ook volgen de cijfers eronder.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Seconden om de melding te lezen",

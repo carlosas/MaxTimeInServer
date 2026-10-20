@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Uyarı dakikaları",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Noktalı virgülle ayrılmış kalan oyun dakikaları; oyuncu bu noktalarda hazırlanabilmesi için uyarılır. Her uyarı oturum başına bir kez verilir. Boş bırakılırsa süresi bitene kadar uyarı yapılmaz.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Sınırsız roller",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Noktalı virgülle ayrılmış rol adları. Bu hesaplar asla sayılmaz ve asla geri çevrilmez, böylece sen her zaman girebilirsin. Boş bırakılırsa kimse muaf değildir, yöneticiler de dahil.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Noktalı virgülle ayrılmış rol adları. Bu rollerden birine sahip hesaplar asla atılmaz. Boş bırakılırsa kimse muaf değildir, yöneticiler de dahil.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Geri çevrilen oyuncuya ne söylenir",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Boş bırak, mod bunu her oyuncunun kendi dilinde söyler. Bir şey yazarsan herkes tam olarak onu okur. Virgül içeremez. Her iki durumda da sayılar altında gelir.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Bildirimi okumak için saniye",

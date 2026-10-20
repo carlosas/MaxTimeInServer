@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minutters varsel",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Resterende spilminutter adskilt af semikolon, hvor spilleren advares, så han kan nå at forberede sig. Hver advarsel gives én gang pr. session. Tom betyder ingen advarsel, før tiden er brugt op.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roller uden grænse",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Rollenavne adskilt af semikolon. Disse konti tælles aldrig og afvises aldrig, så du kan altid selv komme ind. Tom betyder, at ingen er undtaget, heller ikke administratorer.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Rollenavne adskilt af semikolon. Konti med en af disse roller bliver aldrig smidt ud. Tom betyder, at ingen er undtaget, heller ikke administratorer.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Hvad en afvist spiller får at vide",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Lad den stå tom, så siger moddet det på hver spillers eget sprog. Skriv noget, og alle læser præcis det. Må ikke indeholde komma. Under alle omstændigheder følger tallene nedenunder.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Sekunder til at læse beskeden",

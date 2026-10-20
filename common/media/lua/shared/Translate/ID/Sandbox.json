@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Menit peringatan",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Sisa menit bermain, dipisahkan dengan titik koma, saat pemain diperingatkan agar bisa bersiap. Setiap peringatan diberikan sekali per sesi. Kosong berarti tidak ada peringatan sampai waktunya habis.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Peran tanpa batas",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nama peran dipisahkan dengan titik koma. Akun-akun ini tidak pernah dihitung dan tidak pernah ditolak, jadi kamu sendiri selalu bisa masuk. Kosong berarti tidak ada yang dikecualikan, termasuk administrator.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nama peran dipisahkan dengan titik koma. Akun dengan salah satu peran ini tidak pernah dikeluarkan. Kosong berarti tidak ada yang dikecualikan, termasuk administrator.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Apa yang diberitahukan kepada pemain yang ditolak",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Biarkan kosong dan mod akan mengatakannya dalam bahasa masing-masing pemain. Tulis sesuatu dan semua orang membaca persis itu. Tidak boleh mengandung koma. Bagaimanapun, angkanya menyusul di bawah.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Detik untuk membaca pemberitahuan",

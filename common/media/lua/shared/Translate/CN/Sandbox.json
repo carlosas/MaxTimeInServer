@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "提前提醒的分钟数",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "用分号分隔的剩余游戏分钟数，到达这些数值时提醒玩家，好让他做准备。每个提醒每次游戏只出现一次。留空表示在时间用完之前不提醒。",
     "Sandbox_MaxTimeInServer_ExemptRoles": "不受限制的角色",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "用分号分隔的角色名称。这些账号永远不会被计时，也不会被拒绝，所以你自己随时都能进来。留空表示没有人例外，管理员也一样。",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "用分号分隔的角色名称。拥有这些角色之一的账号永远不会被请出服务器。留空表示没有人例外，管理员也一样。",
     "Sandbox_MaxTimeInServer_BlockedMessage": "对被拒绝的玩家说什么",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "留空时，模组会用每位玩家自己的语言来说明。写了内容，所有人读到的就是这段话。不能包含逗号。无论哪种情况，数字都会显示在下面。",
     "Sandbox_MaxTimeInServer_GraceSeconds": "阅读提示的秒数",

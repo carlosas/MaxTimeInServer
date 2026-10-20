@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Vorwarnung in Minuten",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Verbleibende Spielminuten, durch Semikolon getrennt, bei denen ein Spieler gewarnt wird, damit er sich vorbereiten kann. Jede Warnung kommt einmal pro Sitzung. Leer bedeutet: keine Warnung, bis die Zeit abgelaufen ist.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Rollen ohne Begrenzung",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Rollennamen durch Semikolon getrennt. Diese Konten werden nie gezählt und nie abgewiesen, du kommst also immer selbst hinein. Leer bedeutet: niemand ist ausgenommen, auch keine Administratoren.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Rollennamen durch Semikolon getrennt. Konten mit einer dieser Rollen werden nie hinausgeworfen. Leer bedeutet: niemand ist ausgenommen, auch keine Administratoren.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Was einem abgewiesenen Spieler gesagt wird",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Leer lassen, und der Mod sagt es in der Sprache des jeweiligen Spielers. Steht hier etwas, lesen alle genau das. Darf kein Komma enthalten. So oder so folgen die Zahlen darunter.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Sekunden zum Lesen des Hinweises",

@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minutes de préavis",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minutes de jeu restantes, séparées par des points-virgules, auxquelles le joueur est prévenu pour qu'il puisse se préparer. Chaque avertissement est donné une fois par session. Vide : aucun avertissement jusqu'à ce que son temps soit écoulé.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Rôles sans limite",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Noms de rôles séparés par des points-virgules. Ces comptes ne sont jamais comptés ni refusés, vous pourrez donc toujours entrer. Vide : personne n'est exempté, pas même les administrateurs.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Noms de rôles séparés par des points-virgules. Les comptes qui ont l'un de ces rôles ne sont jamais expulsés. Vide : personne n'est exempté, pas même les administrateurs.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Ce qu'on dit au joueur refusé",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Laissez vide et le mod le dira dans la langue de chaque joueur. Écrivez quelque chose et tous liront exactement cela. Ne peut pas contenir de virgule. Dans les deux cas, les chiffres suivent en dessous.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Secondes pour lire l'avis",

@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minutes of warning",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minutes of play left, separated by semicolons, at which a player is warned so they can get ready. Each one is said once per session. Empty means no warning until their time is up.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roles that are never limited",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Role names separated by semicolons. These accounts are never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Role names separated by semicolons. Accounts holding one of these roles are never turned out. Empty means nobody is exempt, administrators included.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "What a refused player is told",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Leave this empty and the mod says it in each player's own language. Write something and every player reads exactly that instead. It cannot contain a comma. Either way the numbers follow underneath.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Seconds to read the notice",

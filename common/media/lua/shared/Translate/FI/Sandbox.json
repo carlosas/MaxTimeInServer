@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Varoitusminuutit",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Jäljellä olevat peliminuutit puolipistein eroteltuina, joissa pelaajaa varoitetaan, jotta hän ehtii valmistautua. Kukin varoitus annetaan kerran istuntoa kohden. Tyhjä tarkoittaa, ettei varoiteta ennen kuin aika loppuu.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roolit ilman rajaa",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Roolien nimet puolipistein eroteltuina. Näitä tilejä ei lasketa eikä käännytetä koskaan, joten pääset itse aina sisään. Tyhjä tarkoittaa, ettei kukaan ole vapautettu, eivät myöskään ylläpitäjät.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Roolien nimet puolipistein eroteltuina. Näillä rooleilla varustettuja tilejä ei koskaan poisteta pelistä. Tyhjä tarkoittaa, ettei kukaan ole vapautettu, eivät myöskään ylläpitäjät.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Mitä käännytetylle pelaajalle kerrotaan",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Jätä tyhjäksi, niin modi kertoo sen kunkin pelaajan omalla kielellä. Kirjoita jotain, niin kaikki lukevat täsmälleen sen. Ei saa sisältää pilkkua. Kummassakin tapauksessa luvut tulevat alle.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Sekunteja ilmoituksen lukemiseen",

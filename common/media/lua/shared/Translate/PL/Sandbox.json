@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minuty ostrzeżenia",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Pozostałe minuty gry, oddzielone średnikami, przy których gracz dostaje ostrzeżenie, by zdążył się przygotować. Każde ostrzeżenie pada raz na sesję. Puste oznacza brak ostrzeżeń, dopóki czas się nie skończy.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Role bez limitu",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nazwy ról oddzielone średnikami. Te konta nigdy nie są liczone ani odrzucane, więc sam zawsze wejdziesz. Puste oznacza, że nikt nie jest zwolniony, łącznie z administratorami.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nazwy ról oddzielone średnikami. Konta z jedną z tych ról nigdy nie są wyrzucane. Puste oznacza, że nikt nie jest zwolniony, łącznie z administratorami.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Co słyszy odrzucony gracz",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Zostaw puste, a mod powie to w języku każdego gracza. Wpisz coś, a wszyscy przeczytają dokładnie to. Nie może zawierać przecinka. Tak czy inaczej liczby pojawią się poniżej.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Sekundy na przeczytanie komunikatu",

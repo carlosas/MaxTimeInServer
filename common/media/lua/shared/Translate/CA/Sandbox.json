@@ -14,7 +14,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minuts d'avís previ",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minuts de joc restants, separats per punt i coma, en què s'avisa el jugador perquè es prepari. Cada avís es dona un cop per sessió. Buit vol dir que no s'avisa fins que se li acaba el temps.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Rols sense límit",
-    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Noms de rols separats per punt i coma. Aquests comptes no es compten mai ni es rebutgen, així sempre hi podràs entrar tu. Buit vol dir que ningú no queda exempt, tampoc els administradors.",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Noms de rols separats per punt i coma. Els comptes amb un d'aquests rols no seran expulsats. Buit vol dir que ningú no queda exempt, tampoc els administradors.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Què se li diu a qui és rebutjat",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Deixa-ho buit i el mod ho dirà en la llengua de cada jugador. Escriu-hi alguna cosa i tothom llegirà exactament això. No pot contenir comes. En tots dos casos els números apareixen a sota.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Segons per llegir l'avís",
