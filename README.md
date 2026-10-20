@@ -215,10 +215,11 @@ copy, so keep servers that share players on the same version.
   meantime, because a counter belonging to a week that has rolled over is
   ignored.
 
-A dedicated server has no real-time clock tick in Lua; the only periodic event
-runs on game time, which stops entirely while the server is empty. So the mod
-measures elapsed real time whenever it does get a tick, and never trusts the
-game clock.
+The counting is driven by two events: one that runs on game time and one that
+runs on the real loop. Game time stops entirely while the server is empty and
+while the only player is still loading in, which on a live server left five real
+minutes between two looks. Whichever event arrives, the mod measures elapsed
+real time with the system clock and never trusts the game clock for the amount.
 
 ## Development
 

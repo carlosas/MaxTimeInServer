@@ -1,11 +1,13 @@
 --[[
 The engine: counts connected time, and answers whether an account may play.
 
-Counting is driven by EveryOneMinute, which the engine fires on game time
-(roughly every 7.5 real seconds on this server, and not at all while the server
-is empty with PauseEmpty=true). The interval is therefore enforced against
-getTimestamp() rather than against the event, and nothing is credited for time
-the server spent empty or down.
+Counting is driven by two events for one body. EveryOneMinute runs on game
+time, which stops entirely while the server is empty with PauseEmpty=true and
+while the only player is still loading in - five real minutes passed between
+two looks on a live server that way. A tick event runs on the real loop and
+covers that. Either way the interval is enforced against getTimestamp() rather
+than against the event, so nothing is credited for time the server spent empty
+or down, and the extra calls cost one clock comparison each.
 
 Every sweep re-reads the data file and rewrites it when something changed, which
 is what lets the operator edit a player's minutes, bonus or exemption by hand
@@ -50,6 +52,10 @@ local lastSeenEpoch = {}         -- username -> when this sweep last saw them on
 -- it never reaches the counter file, and it is forgotten when they leave.
 local warnedMarks = {}           -- username -> { [minutes left] = true }
 local toldOver = {}              -- username -> true once the log has said it
+-- Set by start(), which runs on OnServerStarted. A tick can fire before that,
+-- and a sweep before start-up would read the counters under the settings and
+-- the file name the mod has not resolved yet.
+local started = false
 
 local function defaultDeps()
     return {
@@ -85,6 +91,7 @@ function MaxTimeInServerQuota.configure(overrides)
     lastSeenEpoch = {}
     warnedMarks = {}
     toldOver = {}
+    started = false
 end
 
 local function dependencies()
@@ -351,6 +358,7 @@ end
 --- Runs a sweep if enough real time has passed. Returns true when it did.
 -- EveryOneMinute fires on clients too, so this checks which side it is on.
 function MaxTimeInServerQuota.tick()
+    if not started then return false end
     if not actingAsServer() then return false end
     local d = dependencies()
     local now = d.clock.now()
@@ -364,6 +372,7 @@ end
 --- Anchors the clock, so the time the server spent down is never credited.
 function MaxTimeInServerQuota.start()
     local d = dependencies()
+    started = true
     lastSweepEpoch = d.clock.now()
     carriedSeconds = {}
     lastSeenEpoch = {}
@@ -423,6 +432,17 @@ local function onSaving()
     if not ok then log("save-time sweep failed: " .. tostring(err)) end
 end
 
+-- A name this build does not have would raise and take the rest of the
+-- registration with it, so each one stands on its own. The client half keeps
+-- its own copy of this: the two sides are loaded independently.
+local function listen(eventName, handler)
+    local ok, err = pcall(function() Events[eventName].Add(handler) end)
+    if not ok then
+        log("no " .. eventName .. " event in this build: " .. tostring(err))
+    end
+    return ok
+end
+
 function MaxTimeInServerQuota.registerEvents()
     -- The guard is keyed to the identity of the event object, not to a boolean.
     -- A plain flag kept on this table survives a Lua reload while the Events
@@ -430,9 +450,16 @@ function MaxTimeInServerQuota.registerEvents()
     -- and attached to event objects nobody triggers any more.
     if MaxTimeInServerQuota.registeredOn == Events.OnServerStarted then return end
     MaxTimeInServerQuota.registeredOn = Events.OnServerStarted
-    Events.OnServerStarted.Add(onServerStarted)
-    Events.EveryOneMinute.Add(MaxTimeInServerQuota.tick)
-    Events.OnServerStartSaving.Add(onSaving)
+    listen("OnServerStarted", onServerStarted)
+    listen("OnServerStartSaving", onSaving)
+
+    -- Game time and real time, because each covers the other's blind spot.
+    -- tick() returns after a clock comparison unless the interval has really
+    -- passed, so being called every frame costs that and nothing else.
+    listen("EveryOneMinute", MaxTimeInServerQuota.tick)
+    if not listen("OnTickEvenPaused", MaxTimeInServerQuota.tick) then
+        listen("OnTick", MaxTimeInServerQuota.tick)
+    end
 end
 
 -- Registered every time this file is executed, whatever side we are on:

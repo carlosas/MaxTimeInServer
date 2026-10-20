@@ -458,6 +458,7 @@ H.test("the mod registers itself on the server's events", function()
     MaxTimeInServerQuota.registerEvents()
     H.assertTrue(#Events.OnServerStarted.handlers > 0, "OnServerStarted")
     H.assertTrue(#Events.EveryOneMinute.handlers > 0, "EveryOneMinute")
+    H.assertTrue(#Events.OnTickEvenPaused.handlers > 0, "a real-time driver too")
     H.assertTrue(#Events.OnServerStartSaving.handlers > 0, "OnServerStartSaving")
 end)
 
@@ -478,6 +479,19 @@ H.test("a rebuilt Events table is registered on again", function()
     MaxTimeInServerQuota.registerEvents()
     H.assertTrue(#fresh.handlers > 0, "re-registered on the new table")
     Events.OnServerStarted = saved
+end)
+
+H.test("a tick before start-up does nothing, so it cannot read the wrong file", function()
+    local files = S.fakeFiles()
+    MaxTimeInServerQuota.configure({
+        config = MaxTimeInServerConfig,
+        clock = MaxTimeInServerClock,
+        store = MaxTimeInServerStore,
+        files = files,
+        players = S.fakePlayers({}),
+    })
+    H.assertFalse(MaxTimeInServerQuota.tick(), "no sweep before OnServerStarted")
+    H.assertNil(next(files.files), "and nothing written under the default name")
 end)
 
 H.run("quota")
