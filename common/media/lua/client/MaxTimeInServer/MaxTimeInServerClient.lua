@@ -44,21 +44,16 @@ end
 -- wrote it. The numbers are the mod's own and always follow in the same shape,
 -- in the player's language, so an operator rewriting the message cannot
 -- accidentally hide what the player needs to know.
-local function noticeText(message, minutes, cap, resetsAt, graceSeconds, reason, resetsDay)
+--
+-- There is no headline of the mod's own: the numbers say what happened more
+-- precisely than a sentence about limits would, and the operator's message, if
+-- they wrote one, goes above them.
+local function noticeText(message, minutes, cap, resetsAt, graceSeconds, resetsDay)
     local blocks = {}
 
     local wording = tostring(message or "")
     wording = (wording:gsub("^%s+", ""):gsub("%s+$", ""))
-    if wording == "" then
-        -- Being turned away at the door and running out while playing are not
-        -- the same news, so they do not read the same.
-        if reason == "timeUp" then
-            wording = MaxTimeInServerText.format("timeUp")
-        else
-            wording = MaxTimeInServerText.format("limitReached")
-        end
-    end
-    table.insert(blocks, wording)
+    if wording ~= "" then table.insert(blocks, wording) end
 
     if cap and cap > 0 then
         table.insert(blocks,
@@ -352,7 +347,7 @@ function MaxTimeInServerClient.onServerCommand(module, command, args)
     disconnectAtMs = moment + graceSeconds * 1000
 
     local shown = pcall(MaxTimeInServerClient.hooks.showNotice,
-        noticeText(args.message, minutes, cap, args.resetsAt, graceSeconds, args.reason,
+        noticeText(args.message, minutes, cap, args.resetsAt, graceSeconds,
             args.resetsDay))
     if not shown then
         -- Nothing was put on screen, so the grace period buys the player

@@ -200,7 +200,7 @@ local function tellPlayer(entry, record, now, weekStart, d, exempt)
     if remaining <= 0 then
         -- Told again on every sweep while they are still here: a client whose
         -- notice failed to open gets another chance. The log says it once.
-        local ok, err = pcall(d.notify.tellBlocked, entry.player, verdict, "timeUp")
+        local ok, err = pcall(d.notify.tellBlocked, entry.player, verdict)
         if not ok then
             log("could not tell " .. username .. " their time is up: " .. tostring(err))
             return

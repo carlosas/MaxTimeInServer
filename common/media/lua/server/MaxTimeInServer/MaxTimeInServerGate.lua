@@ -51,14 +51,11 @@ local function dependencies()
     return deps
 end
 
---- Tells a player they may not play, with the numbers and what happened.
--- `reason` is "join" when they were turned away at the door and "timeUp" when
--- they ran out while playing; the client picks its opening line from it.
-function MaxTimeInServerGate.tellBlocked(player, verdict, reason)
+--- Tells a player they may not play, with the numbers of it.
+function MaxTimeInServerGate.tellBlocked(player, verdict)
     local d = dependencies()
     d.net.send(player, d.config.netModule, d.config.netBlocked, {
         message = d.config.blockedMessage,
-        reason = reason or "join",
         minutes = verdict.minutes,
         cap = verdict.cap,
         resetsAt = verdict.resetsAt,
@@ -131,7 +128,7 @@ function MaxTimeInServerGate.onClientCommand(module, command, player)
             return
         end
 
-        MaxTimeInServerGate.tellBlocked(player, verdict, "join")
+        MaxTimeInServerGate.tellBlocked(player, verdict)
         log("refused " .. username .. ": " .. tostring(verdict.minutes or 0) ..
             "/" .. tostring(verdict.cap or 0) .. " minutes this week, resets " ..
             tostring(verdict.resetsAt))

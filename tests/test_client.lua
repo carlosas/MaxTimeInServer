@@ -117,7 +117,7 @@ H.test("a refusal is shown with the numbers in it", function()
     H.assertMatch(world.notices[1], "Monday October 19", "when it resets, in words")
 end)
 
-H.test("the mod speaks the player's language when the operator said nothing", function()
+H.test("with no message from the operator the notice is numbers alone", function()
     local world = wire()
     _G.Translator = { getLanguage = function() return { name = function() return "ES" end } end }
     local silent = {}
@@ -126,9 +126,8 @@ H.test("the mod speaks the player's language when the operator said nothing", fu
     MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
         MaxTimeInServerConfig.netBlocked, silent)
     local notice = world.notices[1]
-    H.assertMatch(notice, "Has alcanzado", "its own wording in Spanish")
-    H.assertMatch(notice, "Has jugado 612 de tus 600", "and the numbers too")
-    H.assertMatch(notice, "Desconectando en 12", "and the countdown")
+    H.assertMatch(notice, "^Has jugado 612 de tus 600", "it opens on the numbers")
+    H.assertMatch(notice, "Desconectando en 12", "and ends on the countdown")
     _G.Translator = nil
 end)
 
@@ -205,35 +204,6 @@ H.test("a warning is shown and nothing is armed by it", function()
     world.nowMs = world.nowMs + 600000
     MaxTimeInServerClient.update()
     H.assertEqual(world.disconnects, 0, "a warning ends nothing")
-end)
-
-H.test("running out mid-session does not read like being turned away", function()
-    local world = wire()
-    local timeUp = {}
-    for key, value in pairs(BLOCKED) do timeUp[key] = value end
-    timeUp.message = ""
-    timeUp.reason = "timeUp"
-    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
-        MaxTimeInServerConfig.netBlocked, timeUp)
-    H.assertMatch(world.notices[1], "time for this week is up", "the mid-session wording")
-
-    local atTheDoor = {}
-    for key, value in pairs(timeUp) do atTheDoor[key] = value end
-    atTheDoor.reason = "join"
-    local door = wire()
-    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
-        MaxTimeInServerConfig.netBlocked, atTheDoor)
-    H.assertMatch(door.notices[1], "Weekly play limit reached", "the door's wording")
-end)
-
-H.test("the operator's wording still wins over either of them", function()
-    local world = wire()
-    local timeUp = {}
-    for key, value in pairs(BLOCKED) do timeUp[key] = value end
-    timeUp.reason = "timeUp"
-    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
-        MaxTimeInServerConfig.netBlocked, timeUp)
-    H.assertMatch(world.notices[1], "No more for you this week%.", "the operator's line")
 end)
 
 H.test("a warning the UI refuses to show costs the player nothing", function()

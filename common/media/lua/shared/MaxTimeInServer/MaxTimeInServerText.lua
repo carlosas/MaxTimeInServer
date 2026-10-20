@@ -32,8 +32,6 @@ local STRINGS = {
         used = "You have used %1 of your %2 minutes this week.",
         resets = "Your allowance resets on %1.",
         leaving = "Disconnecting in %1 seconds.",
-        limitReached = "Weekly play limit reached.",
-        timeUp = "Your time for this week is up.",
         warning = "%1 minutes of play left this week.",
         played = "You have played %1 minutes this week (limit %2).",
         -- %1 is the day of the month, %2 the name of the month, %3 the day
@@ -64,8 +62,6 @@ local STRINGS = {
         used = "Has jugado %1 de tus %2 minutos de esta semana.",
         resets = "Tu tiempo se renueva el %1.",
         leaving = "Desconectando en %1 segundos.",
-        limitReached = "Has alcanzado tu limite de juego semanal.",
-        timeUp = "Se te ha acabado el tiempo de esta semana.",
         warning = "Te quedan %1 minutos de juego esta semana.",
         played = "Has jugado %1 minutos esta semana (maximo %2).",
         date = "%1 de %2",

@@ -29,9 +29,9 @@ local function makeWorld(opts)
     -- Everything the server would say to a connected player lands here.
     world.told = { blocked = {}, warned = {} }
     world.notify = {
-        tellBlocked = function(player, verdict, reason)
+        tellBlocked = function(player, verdict)
             table.insert(world.told.blocked, { username = player.username,
-                reason = reason, minutes = verdict.minutes, cap = verdict.cap })
+                minutes = verdict.minutes, cap = verdict.cap })
         end,
         tellWarning = function(player, verdict, remaining)
             table.insert(world.told.warned, { username = player.username,
@@ -188,7 +188,6 @@ H.test("running out while playing is told to the player, once in the log", funct
 
     world.sweepAfter(60)
     H.assertEqual(#world.told.blocked, 1, "told when the minute ran out")
-    H.assertEqual(world.told.blocked[1].reason, "timeUp", "and told why")
     H.assertEqual(world.told.blocked[1].username, "darkkz", "the right player")
 
     S.logLines = {}

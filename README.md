@@ -103,9 +103,9 @@ Time In Server*. Set them from the admin panel or by editing
 | Minutes of warning | `30;5` | minutes left, separated by semicolons, at which a player is warned so they can get ready. Each mark is said once per session; empty means no warning until their time is up |
 | Seconds to read the notice | `5` | how long a refused player gets before their game disconnects itself |
 
-Whatever the wording, the numbers are the mod's own and always follow
-underneath, in the player's language, so rewriting the message cannot hide what
-the player needs to know:
+Whatever you write goes on top, and the numbers follow underneath in the
+player's own language, so a message of yours cannot hide what the player needs
+to know:
 
 ```
 No more for you this week.
@@ -115,6 +115,9 @@ Your allowance resets on Friday October 23.
 
 Disconnecting in 5 seconds.
 ```
+
+With nothing written there, the notice is the numbers and the countdown: the
+mod has no headline of its own to lose.
 
 Sandbox options are read when the server boots, so a change takes a restart. On
 start-up the mod logs what it is enforcing:
