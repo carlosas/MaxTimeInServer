@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Your allowance resets on %1.",
     "MaxTimeInServer_leaving": "Disconnecting in %1 seconds.",
     "MaxTimeInServer_warning": "%1 minutes of play left this week.",
+    "MaxTimeInServer_played": "You have played %1 minutes this week (limit %2).",
     "MaxTimeInServer_date": "%2 %1",
     "MaxTimeInServer_dateWithDay": "%3 %2 %1",
     "MaxTimeInServer_day1": "Monday",

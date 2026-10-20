@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "เวลาของคุณจะเริ่มใหม่วันที่ %1",
     "MaxTimeInServer_leaving": "จะตัดการเชื่อมต่อใน %1 วินาที",
     "MaxTimeInServer_warning": "สัปดาห์นี้คุณเหลือเวลาเล่นอีก %1 นาที",
+    "MaxTimeInServer_played": "สัปดาห์นี้คุณเล่นไปแล้ว %1 นาที (สูงสุด %2)",
     "MaxTimeInServer_date": "%1 %2",
     "MaxTimeInServer_dateWithDay": "%3 %1 %2",
     "MaxTimeInServer_day1": "วันจันทร์",

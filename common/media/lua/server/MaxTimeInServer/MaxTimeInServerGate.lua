@@ -69,6 +69,19 @@ function MaxTimeInServerGate.tellBlocked(player, verdict, reason)
     })
 end
 
+--- Lets a player in, with where they stand. An exempt account is sent the bare
+-- yes: it is never counted, so its minutes would read zero and say something
+-- true about the file and false about the player.
+function MaxTimeInServerGate.tellAllowed(player, verdict)
+    local d = dependencies()
+    local args = { ok = true }
+    if not verdict.exempt then
+        args.minutes = verdict.minutes
+        args.cap = verdict.cap
+    end
+    d.net.send(player, d.config.netModule, d.config.netAllowed, args)
+end
+
 --- Tells a player how little is left. Threatens nothing and ends nothing.
 function MaxTimeInServerGate.tellWarning(player, verdict, remaining)
     local d = dependencies()
@@ -114,7 +127,7 @@ function MaxTimeInServerGate.onClientCommand(module, command, player)
 
         if verdict.allowed then
             -- Answering is what stops the client retrying its greeting.
-            d.net.send(player, d.config.netModule, d.config.netAllowed, { ok = true })
+            MaxTimeInServerGate.tellAllowed(player, verdict)
             return
         end
 

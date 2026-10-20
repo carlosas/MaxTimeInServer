@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Süren %1 tarihinde yenilenir.",
     "MaxTimeInServer_leaving": "%1 saniye içinde bağlantı kesiliyor.",
     "MaxTimeInServer_warning": "Bu hafta %1 dakikalık oyun süren kaldı.",
+    "MaxTimeInServer_played": "Bu hafta %1 dakika oynadın (sınır %2).",
     "MaxTimeInServer_date": "%1 %2",
     "MaxTimeInServer_dateWithDay": "%1 %2 %3",
     "MaxTimeInServer_day1": "Pazartesi",

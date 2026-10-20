@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Az időd ekkor újul meg: %1.",
     "MaxTimeInServer_leaving": "Lecsatlakozás %1 másodperc múlva.",
     "MaxTimeInServer_warning": "Ezen a héten még %1 perc játékidőd van.",
+    "MaxTimeInServer_played": "Ezen a héten %1 percet játszottál (határ: %2).",
     "MaxTimeInServer_date": "%2 %1.",
     "MaxTimeInServer_dateWithDay": "%2 %1., %3",
     "MaxTimeInServer_day1": "hétfő",

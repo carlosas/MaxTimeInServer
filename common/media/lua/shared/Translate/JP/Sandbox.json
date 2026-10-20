@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "持ち時間は %1 に回復します。",
     "MaxTimeInServer_leaving": "%1 秒後に切断します。",
     "MaxTimeInServer_warning": "今週の残りプレイ時間は %1 分です。",
+    "MaxTimeInServer_played": "今週は %1 分プレイしました（上限 %2 分）。",
     "MaxTimeInServer_date": "%2%1日",
     "MaxTimeInServer_dateWithDay": "%2%1日（%3）",
     "MaxTimeInServer_day1": "月曜日",

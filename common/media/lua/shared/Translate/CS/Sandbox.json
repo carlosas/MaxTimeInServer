@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Tvůj čas se obnoví %1.",
     "MaxTimeInServer_leaving": "Odpojení za %1 sekund.",
     "MaxTimeInServer_warning": "Zbývá ti %1 minut hry v tomto týdnu.",
+    "MaxTimeInServer_played": "Tento týden jsi odehrál %1 minut (limit %2).",
     "MaxTimeInServer_date": "%1. %2",
     "MaxTimeInServer_dateWithDay": "%3 %1. %2",
     "MaxTimeInServer_day1": "pondělí",

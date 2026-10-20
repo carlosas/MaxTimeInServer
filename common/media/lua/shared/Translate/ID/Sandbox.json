@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Waktumu diperbarui pada %1.",
     "MaxTimeInServer_leaving": "Memutus koneksi dalam %1 detik.",
     "MaxTimeInServer_warning": "Sisa waktu bermainmu minggu ini %1 menit.",
+    "MaxTimeInServer_played": "Kamu telah bermain %1 menit minggu ini (batas %2).",
     "MaxTimeInServer_date": "%1 %2",
     "MaxTimeInServer_dateWithDay": "%3, %1 %2",
     "MaxTimeInServer_day1": "Senin",

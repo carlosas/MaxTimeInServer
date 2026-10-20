@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "시간은 %1에 다시 채워집니다.",
     "MaxTimeInServer_leaving": "%1초 후에 연결이 끊어집니다.",
     "MaxTimeInServer_warning": "이번 주에 %1분 남았습니다.",
+    "MaxTimeInServer_played": "이번 주에 %1분 플레이했습니다 (최대 %2분).",
     "MaxTimeInServer_date": "%2 %1일",
     "MaxTimeInServer_dateWithDay": "%2 %1일 %3",
     "MaxTimeInServer_day1": "월요일",

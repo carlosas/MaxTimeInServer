@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "你的时间将在 %1 重置。",
     "MaxTimeInServer_leaving": "%1 秒后断开连接。",
     "MaxTimeInServer_warning": "本周你还剩 %1 分钟的游戏时间。",
+    "MaxTimeInServer_played": "本周你已游玩 %1 分钟（上限 %2 分钟）。",
     "MaxTimeInServer_date": "%2%1日",
     "MaxTimeInServer_dateWithDay": "%2%1日 %3",
     "MaxTimeInServer_day1": "星期一",

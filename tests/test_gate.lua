@@ -57,6 +57,30 @@ end
 local OVER_CAP = "version=1\nweekStartEpoch=" .. MONDAY ..
     "\n\n[darkkz]\nminutes=612\n"
 
+H.test("a player who is let in is told where they stand", function()
+    local gate = makeGate({ files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
+        "\n\n[darkkz]\nminutes=132\n" } })
+    MaxTimeInServerGate.onClientCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netHello, fakePlayer("darkkz", "user"))
+
+    local message = gate.net.lastTo("darkkz")
+    H.assertEqual(message.command, MaxTimeInServerConfig.netAllowed, "let in")
+    H.assertEqual(message.args.minutes, 132, "with the minutes")
+    H.assertEqual(message.args.cap, 600, "and the cap")
+end)
+
+H.test("an exempt player is let in without numbers about themselves", function()
+    local gate = makeGate({ files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
+        "\n\n[theboss]\nminutes=0\n" } })
+    MaxTimeInServerGate.onClientCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netHello, fakePlayer("theboss", "admin"))
+
+    local message = gate.net.lastTo("theboss")
+    H.assertEqual(message.command, MaxTimeInServerConfig.netAllowed, "let in")
+    H.assertNil(message.args.minutes, "nothing is counted for them, so nothing is said")
+    H.assertNil(message.args.cap, "nor a cap they are not held to")
+end)
+
 H.test("the door says it is the door, so the client can word it", function()
     local gate = makeGate({ files = { [DATA] = OVER_CAP } })
     MaxTimeInServerGate.onClientCommand(MaxTimeInServerConfig.netModule,

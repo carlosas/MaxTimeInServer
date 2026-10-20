@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Din tid fornyes den %1.",
     "MaxTimeInServer_leaving": "Afbryder om %1 sekunder.",
     "MaxTimeInServer_warning": "Du har %1 spilminutter tilbage i denne uge.",
+    "MaxTimeInServer_played": "Du har spillet %1 minutter i denne uge (grænse %2).",
     "MaxTimeInServer_date": "%1. %2",
     "MaxTimeInServer_dateWithDay": "%3 den %1. %2",
     "MaxTimeInServer_day1": "mandag",

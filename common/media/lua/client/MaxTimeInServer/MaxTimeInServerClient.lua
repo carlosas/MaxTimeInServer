@@ -28,6 +28,10 @@ local disconnectAtMs = nil
 -- Which server the four above belong to, and when we last looked.
 local sessionKey = nil
 local lastKeyCheckMs = nil
+-- Where this player stands, as the server answered it, waiting for a moment
+-- when they can actually see it. See onServerCommand and onGameStart.
+local arrivalNote = nil
+local inTheWorld = false
 
 --- True only on a machine with a local player, i.e. not a dedicated server.
 -- Checked when an event fires rather than when this file loads, because the
@@ -127,6 +131,20 @@ function MaxTimeInServerClient.reset()
     disconnectAtMs = nil
     sessionKey = nil
     lastKeyCheckMs = nil
+    arrivalNote = nil
+    inTheWorld = false
+end
+
+-- The server's yes arrives while the world is still loading - measured at five
+-- real minutes on a live server - so the note waits for the player to be in it.
+local function showArrivalNote()
+    if arrivalNote == nil then return end
+    local note = arrivalNote
+    arrivalNote = nil
+    local shown = pcall(MaxTimeInServerClient.hooks.showWarning,
+        MaxTimeInServerText.format("played", note.minutes, note.cap))
+    print("[MaxTimeInServer] " .. tostring(note.minutes) .. "/" .. tostring(note.cap) ..
+        " minutes this week" .. (shown and "" or " (could not show it)"))
 end
 
 -- The server we are connected to, or nil when the engine will not say. "Do not
@@ -213,7 +231,9 @@ end
 
 function MaxTimeInServerClient.onGameStart()
     if not actingAsClient() then return end
+    inTheWorld = true
     greet(nil)
+    showArrivalNote()
 end
 
 function MaxTimeInServerClient.onServerCommand(module, command, args)
@@ -223,6 +243,15 @@ function MaxTimeInServerClient.onServerCommand(module, command, args)
     if command == MaxTimeInServerConfig.netAllowed then
         acknowledged = true
         print("[MaxTimeInServer] the server says we may play")
+
+        args = args or {}
+        local minutes = tonumber(args.minutes)
+        local cap = tonumber(args.cap)
+        -- No numbers means an exempt account, which has nothing to report.
+        if minutes ~= nil and cap ~= nil then
+            arrivalNote = { minutes = math.floor(minutes), cap = math.floor(cap) }
+            if inTheWorld then showArrivalNote() end
+        end
         return
     end
 

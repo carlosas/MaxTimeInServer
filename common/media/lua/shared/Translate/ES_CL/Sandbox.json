@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Tu tiempo se renueva el %1.",
     "MaxTimeInServer_leaving": "Desconectando en %1 segundos.",
     "MaxTimeInServer_warning": "Te quedan %1 minutos de juego esta semana.",
+    "MaxTimeInServer_played": "Has jugado %1 minutos esta semana (máximo %2).",
     "MaxTimeInServer_date": "%1 de %2",
     "MaxTimeInServer_dateWithDay": "%3 %1 de %2",
     "MaxTimeInServer_day1": "lunes",

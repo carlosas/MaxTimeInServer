@@ -28,6 +28,13 @@ client        shows them, then disconnects itself
 The player reads how much they have used and when it resets, and gets a few
 seconds before their game drops the connection.
 
+A player who is let in is told the same thing in one line over their character,
+once the world has finished loading:
+
+```
+You have played 132 minutes this week (limit 600).
+```
+
 Since the client is the half that acts, keep **`DoLuaChecksum=true`** in the
 server config. The server then hashes the Lua both sides load, the client half
 of every mod included, and vanilla kicks anyone whose copy differs: editing this

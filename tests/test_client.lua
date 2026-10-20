@@ -256,6 +256,56 @@ H.test("the client registers itself on the events it needs", function()
     H.assertTrue(#Events.OnMainMenuEnter.handlers > 0, "OnMainMenuEnter")
 end)
 
+-- Walking in: the server answers with the numbers, and they wait for a moment
+-- when the player can see them.
+
+local function allowedWith(minutes, cap)
+    return { ok = true, minutes = minutes, cap = cap }
+end
+
+H.test("the standing waits for the world, which is where it can be read", function()
+    local world = wire()
+    MaxTimeInServerClient.onCreatePlayer(0)
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netAllowed, allowedWith(132, 600))
+    H.assertEqual(#world.warnings, 0, "not against the loading screen")
+
+    MaxTimeInServerClient.onGameStart()
+    H.assertEqual(#world.warnings, 1, "shown once the world is up")
+    H.assertMatch(world.warnings[1], "132", "the minutes played")
+    H.assertMatch(world.warnings[1], "600", "and the cap")
+end)
+
+H.test("and is shown at once if the world was already up", function()
+    local world = wire()
+    MaxTimeInServerClient.onGameStart()
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netAllowed, allowedWith(5, 600))
+    H.assertEqual(#world.warnings, 1, "straight away")
+end)
+
+H.test("it is said once, not on every tick", function()
+    local world = wire()
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netAllowed, allowedWith(132, 600))
+    MaxTimeInServerClient.onGameStart()
+    MaxTimeInServerClient.onGameStart()
+    for _ = 1, 5 do
+        world.nowMs = world.nowMs + 2000
+        MaxTimeInServerClient.update()
+    end
+    H.assertEqual(#world.warnings, 1, "one note")
+    H.assertEqual(world.disconnects, 0, "and it ends nothing")
+end)
+
+H.test("a yes without numbers says nothing, which is what an exempt player gets", function()
+    local world = wire()
+    MaxTimeInServerClient.onServerCommand(MaxTimeInServerConfig.netModule,
+        MaxTimeInServerConfig.netAllowed, { ok = true })
+    MaxTimeInServerClient.onGameStart()
+    H.assertEqual(#world.warnings, 0, "nothing to report")
+end)
+
 -- One game process can visit several servers, and more than one of them may be
 -- running this mod. Anything remembered from the last one is either a way past
 -- this one's quota or a disconnect nobody earned.

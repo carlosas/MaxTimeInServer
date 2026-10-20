@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Je tijd begint opnieuw op %1.",
     "MaxTimeInServer_leaving": "Verbinding wordt over %1 seconden verbroken.",
     "MaxTimeInServer_warning": "Je hebt deze week nog %1 speelminuten.",
+    "MaxTimeInServer_played": "Je hebt deze week %1 minuten gespeeld (maximum %2).",
     "MaxTimeInServer_date": "%1 %2",
     "MaxTimeInServer_dateWithDay": "%3 %1 %2",
     "MaxTimeInServer_day1": "maandag",

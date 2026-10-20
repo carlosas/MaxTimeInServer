@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Timpul tău se reînnoiește pe %1.",
     "MaxTimeInServer_leaving": "Deconectare în %1 secunde.",
     "MaxTimeInServer_warning": "Îți mai rămân %1 minute de joc săptămâna aceasta.",
+    "MaxTimeInServer_played": "Ai jucat %1 minute săptămâna aceasta (maximum %2).",
     "MaxTimeInServer_date": "%1 %2",
     "MaxTimeInServer_dateWithDay": "%3, %1 %2",
     "MaxTimeInServer_day1": "luni",

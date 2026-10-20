@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Твій час поновиться %1.",
     "MaxTimeInServer_leaving": "Від'єднання через %1 секунд.",
     "MaxTimeInServer_warning": "Цього тижня в тебе лишилося %1 хвилин гри.",
+    "MaxTimeInServer_played": "Цього тижня ти награв %1 хвилин (межа %2).",
     "MaxTimeInServer_date": "%1 %2",
     "MaxTimeInServer_dateWithDay": "%3, %1 %2",
     "MaxTimeInServer_day1": "понеділок",

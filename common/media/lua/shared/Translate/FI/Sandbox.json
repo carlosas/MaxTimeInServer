@@ -25,6 +25,7 @@
     "MaxTimeInServer_resets": "Aikasi uusiutuu %1.",
     "MaxTimeInServer_leaving": "Yhteys katkaistaan %1 sekunnin kuluttua.",
     "MaxTimeInServer_warning": "Sinulla on %1 peliminuuttia jäljellä tällä viikolla.",
+    "MaxTimeInServer_played": "Olet pelannut tällä viikolla %1 minuuttia (enintään %2).",
     "MaxTimeInServer_date": "%1. %2",
     "MaxTimeInServer_dateWithDay": "%3 %1. %2",
     "MaxTimeInServer_day1": "maanantai",

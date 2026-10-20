@@ -31,6 +31,7 @@ local STRINGS = {
         limitReached = "Weekly play limit reached.",
         timeUp = "Your time for this week is up.",
         warning = "%1 minutes of play left this week.",
+        played = "You have played %1 minutes this week (limit %2).",
         -- %1 is the day of the month, %2 the name of the month, %3 the day
         -- of the week. Each language puts them in its own order.
         date = "%2 %1",
@@ -62,6 +63,7 @@ local STRINGS = {
         limitReached = "Has alcanzado tu limite de juego semanal.",
         timeUp = "Se te ha acabado el tiempo de esta semana.",
         warning = "Te quedan %1 minutos de juego esta semana.",
+        played = "Has jugado %1 minutos esta semana (máximo %2).",
         date = "%1 de %2",
         dateWithDay = "%3 %1 de %2",
         day1 = "lunes",
