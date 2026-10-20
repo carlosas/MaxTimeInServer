@@ -1,5 +1,5 @@
 {
-    "Sandbox_MaxTimeInServer": "Tiempo máximo en el servidor (solo multijugador)",
+    "Sandbox_MaxTimeInServer": "Max Time In Server (multijugador)",
 
     "Sandbox_MaxTimeInServer_CapMinutes": "Minutos semanales por cuenta",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Cuántos minutos reales puede pasar conectada cada cuenta en una semana. 600 son diez horas.",
