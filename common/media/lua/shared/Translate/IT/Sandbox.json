@@ -12,7 +12,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Sabato",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Domenica",
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minuti di preavviso",
-    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minuti di gioco rimasti, separati da punto e virgola, ai quali il giocatore viene avvisato che il tempo sta finendo. Ogni soglia viene detta una volta per sessione. Vuoto significa che non sente nulla finché il tempo non finisce e viene disconnesso.",
+    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minuti di gioco rimasti, separati da punto e virgola, ai quali il giocatore viene avvisato per potersi preparare. Ogni avviso viene dato una volta per sessione. Vuoto significa nessun avviso finché il tempo non finisce.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Ruoli senza limite",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nomi di ruolo separati da punto e virgola. Questi account non vengono mai contati né respinti, quindi potrai sempre entrare tu. Vuoto significa che nessuno è esente, amministratori compresi.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Cosa si dice a chi viene respinto",

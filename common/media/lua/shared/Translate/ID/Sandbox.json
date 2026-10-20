@@ -12,7 +12,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Sabtu",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Minggu",
     "Sandbox_MaxTimeInServer_WarnMinutes": "Menit peringatan",
-    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Sisa menit bermain, dipisahkan dengan titik koma, saat pemain diperingatkan bahwa waktunya hampir habis. Setiap batas disebut sekali per sesi. Kosong berarti dia tidak mendengar apa pun sampai waktunya habis dan koneksinya diputus.",
+    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Sisa menit bermain, dipisahkan dengan titik koma, saat pemain diperingatkan agar bisa bersiap. Setiap peringatan diberikan sekali per sesi. Kosong berarti tidak ada peringatan sampai waktunya habis.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Peran tanpa batas",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nama peran dipisahkan dengan titik koma. Akun-akun ini tidak pernah dihitung dan tidak pernah ditolak, jadi kamu sendiri selalu bisa masuk. Kosong berarti tidak ada yang dikecualikan, termasuk administrator.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Apa yang diberitahukan kepada pemain yang ditolak",

@@ -12,7 +12,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Субота",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Неділя",
     "Sandbox_MaxTimeInServer_WarnMinutes": "Хвилини попередження",
-    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Залишок хвилин гри через крапку з комою, на яких гравець отримує попередження, що час спливає. Кожен поріг називається один раз за сесію. Порожньо — він нічого не почує, доки час не скінчиться і його не від'єднає.",
+    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Залишок хвилин гри через крапку з комою, на яких гравець отримує попередження, щоб устигнути підготуватися. Кожне попередження дається один раз за сесію. Порожньо — попереджень немає, доки час не скінчиться.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Ролі без обмеження",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Назви ролей через крапку з комою. Ці акаунти ніколи не рахуються і ніколи не відхиляються, тож сам ти завжди зайдеш. Порожньо — ніхто не звільнений, включно з адміністраторами.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Що скажуть відхиленому гравцеві",

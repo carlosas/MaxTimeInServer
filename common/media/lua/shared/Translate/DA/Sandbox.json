@@ -12,7 +12,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Lørdag",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Søndag",
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minutters varsel",
-    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Resterende spilminutter adskilt af semikolon, hvor spilleren advares om, at tiden er ved at løbe ud. Hver grænse siges én gang pr. session. Tom betyder, at han intet hører, før tiden er brugt op og forbindelsen afbrydes.",
+    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Resterende spilminutter adskilt af semikolon, hvor spilleren advares, så han kan nå at forberede sig. Hver advarsel gives én gang pr. session. Tom betyder ingen advarsel, før tiden er brugt op.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roller uden grænse",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Rollenavne adskilt af semikolon. Disse konti tælles aldrig og afvises aldrig, så du kan altid selv komme ind. Tom betyder, at ingen er undtaget, heller ikke administratorer.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Hvad en afvist spiller får at vide",

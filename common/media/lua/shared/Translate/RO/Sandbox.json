@@ -12,7 +12,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Sâmbătă",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Duminică",
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minute de avertizare",
-    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minutele de joc rămase, separate prin punct și virgulă, la care jucătorul este avertizat că i se termină timpul. Fiecare prag este spus o dată pe sesiune. Gol înseamnă că nu aude nimic până când timpul se termină și este deconectat.",
+    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minutele de joc rămase, separate prin punct și virgulă, la care jucătorul este avertizat ca să se poată pregăti. Fiecare avertisment este dat o dată pe sesiune. Gol înseamnă fără avertisment până când i se termină timpul.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roluri fără limită",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nume de roluri separate prin punct și virgulă. Aceste conturi nu sunt niciodată numărate și niciodată refuzate, așa că tu vei putea intra mereu. Gol înseamnă că nimeni nu este scutit, nici administratorii.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Ce i se spune unui jucător refuzat",

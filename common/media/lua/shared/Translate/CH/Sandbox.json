@@ -12,7 +12,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option6": "星期六",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "星期日",
     "Sandbox_MaxTimeInServer_WarnMinutes": "提前提醒的分鐘數",
-    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "用分號分隔的剩餘遊戲分鐘數，到達這些數值時會提醒玩家時間快用完了。每個節點每次遊戲只提醒一次。留空表示在時間用完被斷線之前什麼都不提醒。",
+    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "用分號分隔的剩餘遊戲分鐘數，到達這些數值時提醒玩家，好讓他做準備。每個提醒每次遊戲只出現一次。留空表示在時間用完之前不提醒。",
     "Sandbox_MaxTimeInServer_ExemptRoles": "不受限制的角色",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "用分號分隔的角色名稱。這些帳號永遠不會被計時，也不會被拒絕，所以你自己隨時都能進來。留空表示沒有人例外，管理員也一樣。",
     "Sandbox_MaxTimeInServer_BlockedMessage": "對被拒絕的玩家說什麼",

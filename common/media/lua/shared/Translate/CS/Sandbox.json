@@ -12,7 +12,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Sobota",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Neděle",
     "Sandbox_MaxTimeInServer_WarnMinutes": "Minuty předem",
-    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Zbývající minuty hry oddělené středníky, při kterých hráč dostane varování, že mu dochází čas. Každá hranice se řekne jednou za sezení. Prázdné znamená, že neuslyší nic, dokud mu čas nedojde a není odpojen.",
+    "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Zbývající minuty hry oddělené středníky, při kterých hráč dostane varování, aby se stihl připravit. Každé varování zazní jednou za sezení. Prázdné znamená žádné varování, dokud čas nedojde.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Role bez omezení",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Názvy rolí oddělené středníky. Tyto účty se nikdy nepočítají ani neodmítají, takže se vždy dostaneš dovnitř. Prázdné znamená, že nikdo není vyjmut, ani administrátoři.",
     "Sandbox_MaxTimeInServer_BlockedMessage": "Co se řekne odmítnutému hráči",
