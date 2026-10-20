@@ -76,8 +76,23 @@ end
 
 -- A line over the player's head, which is how the base game says something
 -- small to somebody who is busy (HaloTextHelper, used all over its own Lua).
+--
+-- Not through HaloTextHelper, though: that fixes the note at the engine's
+-- default of 150, and the note is counted down one per rendered frame -
+-- measured on a client, 69 left to 9 left in exactly one second. So 150 is two
+-- and a half seconds, and a sentence with two numbers in it wants longer.
+local FRAMES_PER_SECOND = 60
+
 local function defaultShowWarning(text)
-    HaloTextHelper.addBadText(getPlayer(), text)
+    local player = getPlayer()
+    if player == nil then return end
+
+    local seconds = tonumber(MaxTimeInServerConfig.noteSeconds) or 10
+    local ok = pcall(function()
+        player:setHaloNote(text, 255, 70, 70, seconds * FRAMES_PER_SECOND)
+    end)
+    -- Whatever the engine will give us is better than silence.
+    if not ok then HaloTextHelper.addBadText(player, text) end
 end
 
 local function defaultShowNotice(text)

@@ -57,6 +57,12 @@ MaxTimeInServerConfig = {
     netAllowed = "allowed",
     netWarning = "warning",
 
+    -- How long the lines over a player's head stay there. The engine's own
+    -- default is 2.5 seconds, which is enough for "you picked up a nail" and
+    -- not for a sentence with two numbers in it. Not a server setting: it is
+    -- about reading speed, not about the quota.
+    noteSeconds = 10,
+
     -- The greeting is retried until the server answers. A command sent before
     -- the connection can carry it is dropped without an error, so one attempt
     -- is not enough to rely on.

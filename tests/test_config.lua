@@ -39,6 +39,10 @@ H.test("a day outside the week is refused and friday stands", function()
     H.assertMatch(S.logText(), "ResetDay", "and said which option it was")
 end)
 
+H.test("the notes stay long enough to read a sentence with numbers in it", function()
+    H.assertTrue(C.noteSeconds >= 5, "at least five seconds, got " .. tostring(C.noteSeconds))
+end)
+
 H.test("the warning marks are a list, largest first and without repeats", function()
     C.applySandboxOptions({ MaxTimeInServer = { WarnMinutes = "5;30;5" } })
     H.assertEqual(table.concat(C.warnMinutes, ","), "30,5", "sorted and deduplicated")
