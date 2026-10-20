@@ -153,6 +153,34 @@ wrong month. And the mod's name, which is not translated anywhere — only the
 Spanish beside it, as the last resort for a client that cannot reach the
 engine's translations.
 
+## Publishing it to the Workshop
+
+```sh
+make workshop   # builds ~/Zomboid/Workshop/MaxTimeInServer and checks it over
+```
+
+The game insists on an exact shape and validates it when you press submit, so
+the target builds that shape and then checks the same rules the game does:
+
+```
+<item>/preview.png              exactly 256x256, PNG, 1000KB at most
+<item>/workshop.txt             title, description lines, tags
+<item>/Contents/mods/<mod>/     the mod itself, nothing loose beside it
+```
+
+Only `buildings/`, `creative/` and `mods/` may sit in `Contents/`, and
+`.exe .dll .bat .app .dylib .sh .so .zip` are refused anywhere in the item.
+
+The words on the Steam page come from `workshop/workshop.txt` in this repo, so
+a correction there reaches the page on the next `make workshop`. The two lines
+the game owns — the item id Steam assigns and the visibility you pick — are
+carried over from the copy already in your Zomboid folder, and the preview is
+only generated when there is none, so anything drawn by hand stays.
+
+Uploading itself is done from the game: Mods, then Workshop. Afterwards the
+server lists the item id in `WorkshopItems=` and keeps `Mods=MaxTimeInServer`,
+and every hand-installed copy should go, so that nobody ends up running two.
+
 ## The counter file
 
 `~/Zomboid/Lua/MaxTimeInServer_<ServerName>.txt` on the server, named after the

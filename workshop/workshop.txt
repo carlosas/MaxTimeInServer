@@ -1,0 +1,22 @@
+version=1
+title=Max Time In Server
+description=Caps how long each account may play per week on a dedicated server.
+description=
+description=The server counts the real minutes every account spends connected and turns away anyone who has spent their weekly budget, telling them how much they used and when it comes back. Out of the box that is 600 minutes a week, resetting at 00:00 every Friday, and both of those are settings.
+description=
+description=Nobody is caught by surprise: a player is told where they stand as they walk in, warned over their head as their time runs low, and shown the numbers before the connection goes.
+description=
+description=Everything is set from the server's sandbox options, under a page of its own: the weekly budget, the day the counter resets, the minutes of warning, the roles that are never limited, an extra message in your own words, and how long a kicked player gets to read it.
+description=
+description=Every line a player or an operator reads is translated into all 28 languages the game ships, including the Spanish and Portuguese variants.
+description=
+description=[b]Before you install it[/b]
+description=
+description=[list]
+description=[*]Every player needs the mod. Subscribing your server to it is what hands it out; a client without it is turned away at the connection screen.
+description=[*]Keep DoLuaChecksum=true in your server config. The quota is carried out by the client on the server's instruction, and that setting is what stops somebody editing the mod to walk past it.
+description=[*]A player who crosses the cap while connected is warned and then disconnected. They are never kicked without being told why.
+description=[*]Minutes are counted per account, not per character, and only while the player is really connected.
+description=[/list]
+tags=Build 42;Multiplayer;Balance;QoL
+visibility=public

@@ -12,6 +12,7 @@ ZOMBOID     ?= $$HOME/Zomboid
 
 # The game's user folder on THIS machine, for install-client.
 CLIENT_ZOMBOID ?= $(HOME)/Zomboid
+WORKSHOP_DIR   ?= $(CLIENT_ZOMBOID)/Workshop/$(MOD_ID)
 MODS_DIR    ?= $(ZOMBOID)/mods
 CONSOLE     ?= $(ZOMBOID)/server-console.txt
 # The counter file is named after the server.
@@ -65,6 +66,60 @@ handout: verify-sync package ## Build the archive to hand out while the mod is u
 	@echo
 	@echo "Safe to hand out: the server booted these same files, so these copies"
 	@echo "will pass its Lua checksum."
+
+workshop: test ## Build the Steam Workshop upload folder in your Zomboid dir
+	@# The game wants an exact shape, and it checks it when you press submit:
+	@#   <item>/preview.png        256x256, PNG, at most 1000KB
+	@#   <item>/workshop.txt       version, title, description lines, tags
+	@#   <item>/Contents/mods/<mod>/...
+	@# Only buildings/, creative/ and mods/ may sit in Contents/, nothing loose,
+	@# and no .exe .dll .bat .app .dylib .sh .so .zip anywhere in it.
+	@test -d "$(CLIENT_ZOMBOID)" || { echo "no $(CLIENT_ZOMBOID) here - set CLIENT_ZOMBOID to your game's user folder"; exit 1; }
+	@mkdir -p "$(WORKSHOP_DIR)"
+	@rm -rf "$(WORKSHOP_DIR)/Contents/mods/$(MOD_ID)"
+	@mkdir -p "$(WORKSHOP_DIR)/Contents/mods/$(MOD_ID)"
+	@COPYFILE_DISABLE=1 tar --no-xattrs -cf - $(MOD_FILES) | tar xf - -C "$(WORKSHOP_DIR)/Contents/mods/$(MOD_ID)"
+	@find "$(WORKSHOP_DIR)/Contents/mods/$(MOD_ID)" -name "._*" -delete
+	@# The words come from this repo, so a correction here reaches the page. The
+	@# two lines Steam and the submit screen own - the item id and the chosen
+	@# visibility - are carried over from whatever is already there.
+	@f="$(WORKSHOP_DIR)/workshop.txt"; \
+	keep=$$(grep -E '^(id|visibility)=' "$$f" 2>/dev/null || true); \
+	if [ -n "$$keep" ]; then \
+		grep -vE '^(id|visibility)=' workshop/workshop.txt > "$$f.new"; \
+		printf '%s\n' "$$keep" >> "$$f.new"; \
+		mv "$$f.new" "$$f"; \
+		echo "workshop.txt rewritten, keeping $$(printf '%s' "$$keep" | tr '\n' ' ')"; \
+	else \
+		cp workshop/workshop.txt "$$f"; \
+		echo "wrote workshop.txt from workshop/workshop.txt"; \
+	fi
+	@if [ ! -f "$(WORKSHOP_DIR)/preview.png" ]; then \
+		sips -z 256 256 42/poster.png --out "$(WORKSHOP_DIR)/preview.png" >/dev/null; \
+		echo "wrote preview.png - the poster scaled to 256x256, replace it with something drawn for the size"; \
+	else echo "kept the preview.png already there"; fi
+	@$(MAKE) --no-print-directory workshop-check
+
+workshop-check: ## Check the upload folder against the rules the game enforces
+	@fail=0; \
+	d="$(WORKSHOP_DIR)"; \
+	test -f "$$d/workshop.txt" || { echo "MISSING $$d/workshop.txt"; fail=1; }; \
+	if [ -f "$$d/preview.png" ]; then \
+		size=$$(sips -g pixelWidth -g pixelHeight "$$d/preview.png" | awk '/pixel/ {print $$2}' | paste -sd x -); \
+		bytes=$$(wc -c < "$$d/preview.png"); \
+		[ "$$size" = "256x256" ] || { echo "preview.png is $$size, must be 256x256"; fail=1; }; \
+		[ "$$bytes" -le 1024000 ] || { echo "preview.png is $$bytes bytes, must be at most 1024000"; fail=1; }; \
+	else echo "MISSING $$d/preview.png"; fail=1; fi; \
+	ls "$$d/Contents" | grep -qvE '^(buildings|creative|mods)$$' && { echo "only buildings/ creative/ mods/ may be in Contents/"; fail=1; }; \
+	find "$$d/Contents" -maxdepth 1 -type f | grep -q . && { echo "no loose files allowed in Contents/"; fail=1; }; \
+	find "$$d/Contents/mods" -maxdepth 1 -type f | grep -q . && { echo "no loose files allowed in Contents/mods/"; fail=1; }; \
+	bad=$$(find "$$d" \( -name "*.exe" -o -name "*.dll" -o -name "*.bat" -o -name "*.app" -o -name "*.dylib" -o -name "*.sh" -o -name "*.so" -o -name "*.zip" -o -name "._*" \) | head -5); \
+	[ -z "$$bad" ] || { echo "file types the Workshop refuses:"; echo "$$bad"; fail=1; }; \
+	test -f "$$d/Contents/mods/$(MOD_ID)/42/mod.info" || { echo "MISSING 42/mod.info"; fail=1; }; \
+	if [ "$$fail" = "0" ]; then \
+		echo "ready to upload: $$d"; \
+		echo "  $$(find "$$d/Contents" -type f | wc -l | tr -d ' ') files in Contents/, $$(grep -c '^description=' "$$d/workshop.txt") lines of description"; \
+	else echo; echo "NOT ready - fix the above and run make workshop again"; exit 1; fi
 
 install-client: test verify-sync ## Install the mod into the game on THIS machine
 	@test -d "$(CLIENT_ZOMBOID)" || { echo "no $(CLIENT_ZOMBOID) here - set CLIENT_ZOMBOID to your game's user folder"; exit 1; }
