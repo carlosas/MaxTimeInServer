@@ -31,15 +31,6 @@ H.test("a fresh state has no week and no players", function()
     H.assertNil(next(state.players), "players")
 end)
 
-H.test("capMinutes left over in an old file is ignored, and says so", function()
-    local state = MaxTimeInServerStore.parse("version=1\ncapMinutes=42\n\n[someone]\nminutes=3\n")
-    H.assertNil(state.capMinutes, "not carried as a setting")
-    H.assertEqual(state.players.someone.minutes, 3, "the rest still parses")
-    H.assertMatch(table.concat(state.warnings, " "), "sandbox option", "explains itself")
-    H.assertFalse(MaxTimeInServerStore.serialize(state):find("capMinutes") ~= nil,
-        "and is not written back")
-end)
-
 H.test("parse reads the header and every player section", function()
     local state = MaxTimeInServerStore.parse(SAMPLE)
     H.assertEqual(state.weekStartEpoch, MONDAY, "weekStartEpoch")

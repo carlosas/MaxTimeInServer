@@ -13,10 +13,6 @@ local KNOWN_HEADER = {
     version = true, weekStart = true, weekStartEpoch = true, savedAt = true,
 }
 
--- Was a header key until the cap became a sandbox option. Recognised only so
--- that an old file can be told it no longer does anything.
-local RETIRED_HEADER = { capMinutes = true }
-
 local KNOWN_RECORD = {
     role = true, minutes = true, bonusMinutes = true, exempt = true,
 }
@@ -134,11 +130,7 @@ function MaxTimeInServerStore.parse(text)
                             setExtra(current, key, value)
                         end
                     else
-                        if RETIRED_HEADER[key] then
-                            table.insert(state.warnings, "capMinutes is a server " ..
-                                "sandbox option now and is ignored here")
-                            recognised = recognised + 1
-                        elseif key == "weekStartEpoch" or key == "version" then
+                        if key == "weekStartEpoch" or key == "version" then
                             state[key] = parseNumber(state, "header", key, value)
                             recognised = recognised + 1
                         elseif KNOWN_HEADER[key] then

@@ -3,14 +3,10 @@ VERSION = 1,
 /*
  * Server settings for MaxTimeInServer. They appear under their own page in the
  * server's sandbox options, so they can be set from the admin panel or by
- * editing <World>_SandboxVars.lua. Sandbox options are read when the server
- * boots, so changing one takes a restart.
- *
- * The option names show as these raw keys rather than as prose. Giving them
- * readable names needs a media/lua/shared/Translate/<LANG>/Sandbox.json, and
- * that path belongs to the base game: shipping one from a mod shadows the
- * game's own file, which holds hundreds of keys. Raw keys are the lesser
- * problem.
+ * editing <World>_SandboxVars.lua, and are read when the server boots: changing
+ * one takes a restart. They show as these raw keys because the file that would
+ * give them readable names belongs to the base game, and a mod shipping it
+ * shadows hundreds of the game's own entries.
  */
 
 option MaxTimeInServer.CapMinutes
@@ -32,11 +28,11 @@ option MaxTimeInServer.ExemptRoles
 }
 
 /*
- * Left empty, the mod says it in the player's own language. Set it only to
- * override that with your own wording, in which case every player reads it
- * exactly as written. The parser splits a block on commas, so this value cannot
- * contain one. Either way the numbers - minutes used, the cap, when it resets -
- * are added by the mod underneath, translated.
+ * Left empty, the mod says it in each player's own language. Set it to use your
+ * own wording instead, which every player then reads exactly as written. It
+ * cannot contain a comma: the parser splits a block on them. Either way the
+ * numbers - minutes used, the cap, when it resets - follow underneath,
+ * translated.
  */
 option MaxTimeInServer.BlockedMessage
 {
