@@ -2,7 +2,7 @@
     "Sandbox_MaxTimeInServer": "Max Time In Server (マルチプレイ)",
     "Sandbox_MaxTimeInServer_CapMinutes": "アカウントごとの週間プレイ分数",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "各アカウントが1週間に接続していられる実時間の分数。600分は10時間です。",
-    "Sandbox_MaxTimeInServer_ResetDay": "週が始まる曜日",
+    "Sandbox_MaxTimeInServer_ResetDay": "カウンターがリセットされる曜日",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "この曜日の00:00、前日からこの日に変わる夜に、すべてのアカウントの分数がゼロに戻ります。この設定を変更すると、その曜日を待たずに1分以内に全員がゼロに戻ります。",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "月曜日",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "火曜日",

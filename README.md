@@ -97,7 +97,7 @@ Time In Server*. Set them from the admin panel or by editing
 | Setting | Default | What it is |
 |---|---|---|
 | Weekly minutes per account | `600` | the budget, in real minutes, per account per week |
-| Day the week resets | `Friday` | everyone's minutes go back to zero at 00:00 on this day, in the night between the day before and it. A dropdown of the seven days. Changing the setting puts everyone back to zero within a minute, without waiting for that day |
+| Day the counter resets | `Friday` | everyone's minutes go back to zero at 00:00 on this day, in the night between the day before and it. A dropdown of the seven days. Changing the setting puts everyone back to zero within a minute, without waiting for that day |
 | Roles that are never limited | `admin;moderator;gm` | semicolon-separated; never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included |
 | What a refused player is told | *(empty)* | empty means the mod says it in each player's own language; set it to use your own wording instead, the same for everyone. It cannot contain a comma, because the sandbox file splits on them |
 | Warn when this much is left | `30;5` | minutes left, separated by semicolons, at which a player is warned while they play. Each mark is said once per session; empty means they hear nothing until their time is up |

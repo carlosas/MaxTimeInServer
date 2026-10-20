@@ -2,7 +2,7 @@
     "Sandbox_MaxTimeInServer": "Max Time In Server (多人游戏)",
     "Sandbox_MaxTimeInServer_CapMinutes": "每个账号每周的分钟数",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "每个账号一周内可以在线的真实分钟数。600 分钟就是十小时。",
-    "Sandbox_MaxTimeInServer_ResetDay": "每周重新开始的日子",
+    "Sandbox_MaxTimeInServer_ResetDay": "计数器重置的日子",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "所有账号的分钟数会在这一天的 00:00 归零，也就是前一天到这一天之间的夜里。更改此设置后，所有人会在一分钟内归零，不必等到那一天。",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "星期一",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "星期二",

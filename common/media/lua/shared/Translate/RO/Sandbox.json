@@ -2,7 +2,7 @@
     "Sandbox_MaxTimeInServer": "Max Time In Server (multiplayer)",
     "Sandbox_MaxTimeInServer_CapMinutes": "Minute pe cont pe săptămână",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Câte minute reale poate petrece conectat fiecare cont într-o săptămână. 600 înseamnă zece ore.",
-    "Sandbox_MaxTimeInServer_ResetDay": "Ziua în care săptămâna o ia de la capăt",
+    "Sandbox_MaxTimeInServer_ResetDay": "Ziua în care contorul se resetează",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Minutele tuturor conturilor revin la zero la 00:00 în această zi, în noaptea dintre ziua dinainte și ea. Dacă schimbi această setare, toată lumea revine la zero în mai puțin de un minut, fără să aștepte ziua respectivă.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Luni",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Marți",

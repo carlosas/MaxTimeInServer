@@ -2,7 +2,7 @@
     "Sandbox_MaxTimeInServer": "Max Time In Server (multiplayer)",
     "Sandbox_MaxTimeInServer_CapMinutes": "Weekly minutes per account",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "How many real minutes each account may spend connected in one week. 600 is ten hours.",
-    "Sandbox_MaxTimeInServer_ResetDay": "Day the week resets",
+    "Sandbox_MaxTimeInServer_ResetDay": "Day the counter resets",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Every account's minutes go back to zero at 00:00 on this day, in the night between the day before and it. Change this setting and everyone is back to zero within a minute, without waiting for that day to come round.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Monday",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Tuesday",

@@ -2,7 +2,7 @@
     "Sandbox_MaxTimeInServer": "Max Time In Server (flerspiller)",
     "Sandbox_MaxTimeInServer_CapMinutes": "Minutter per konto per uke",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Hvor mange virkelige minutter hver konto kan være tilkoblet på en uke. 600 er ti timer.",
-    "Sandbox_MaxTimeInServer_ResetDay": "Dagen uken begynner på nytt",
+    "Sandbox_MaxTimeInServer_ResetDay": "Dagen telleren nullstilles",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Minuttene til alle kontoer går tilbake til null kl. 00:00 denne dagen, natten mellom dagen før og den. Endrer du denne innstillingen, står alle på null igjen i løpet av et minutt, uten å vente på den dagen.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Mandag",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Tirsdag",

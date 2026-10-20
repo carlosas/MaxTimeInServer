@@ -2,7 +2,7 @@
     "Sandbox_MaxTimeInServer": "Max Time In Server (çok oyunculu)",
     "Sandbox_MaxTimeInServer_CapMinutes": "Hesap başına haftalık dakika",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Her hesabın bir haftada sunucuda geçirebileceği gerçek dakika sayısı. 600 on saat eder.",
-    "Sandbox_MaxTimeInServer_ResetDay": "Haftanın yeniden başladığı gün",
+    "Sandbox_MaxTimeInServer_ResetDay": "Sayacın sıfırlandığı gün",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Bütün hesapların dakikaları bu günün 00:00'ında sıfırlanır, bir önceki günden bu güne geçen gece. Bu ayarı değiştirirsen herkes o günü beklemeden bir dakika içinde sıfıra döner.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Pazartesi",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Salı",

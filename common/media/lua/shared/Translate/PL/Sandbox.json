@@ -2,7 +2,7 @@
     "Sandbox_MaxTimeInServer": "Max Time In Server (tryb wieloosobowy)",
     "Sandbox_MaxTimeInServer_CapMinutes": "Minuty na konto tygodniowo",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Ile rzeczywistych minut każde konto może spędzić na serwerze w ciągu tygodnia. 600 to dziesięć godzin.",
-    "Sandbox_MaxTimeInServer_ResetDay": "Dzień, w którym tydzień zaczyna się od nowa",
+    "Sandbox_MaxTimeInServer_ResetDay": "Dzień zerowania licznika",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Minuty wszystkich kont wracają do zera o 00:00 tego dnia, w nocy z dnia poprzedniego na ten. Jeśli zmienisz to ustawienie, wszyscy wracają do zera w niecałą minutę, bez czekania na ten dzień.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Poniedziałek",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Wtorek",

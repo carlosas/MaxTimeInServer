@@ -2,7 +2,7 @@
     "Sandbox_MaxTimeInServer": "Max Time In Server (multijugador)",
     "Sandbox_MaxTimeInServer_CapMinutes": "Minuts setmanals per compte",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Quants minuts reals pot estar connectat cada compte en una setmana. 600 són deu hores.",
-    "Sandbox_MaxTimeInServer_ResetDay": "Dia en què comença la setmana",
+    "Sandbox_MaxTimeInServer_ResetDay": "Dia en què es reinicia el comptador",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Els minuts de tots els comptes tornen a zero a les 00:00 d'aquest dia, la nit entre el dia anterior i aquest. Si canvies aquesta opció, tothom torna a zero en menys d'un minut, sense esperar aquest dia.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Dilluns",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "Dimarts",

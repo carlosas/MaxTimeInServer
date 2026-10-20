@@ -2,7 +2,7 @@
     "Sandbox_MaxTimeInServer": "Max Time In Server (ผู้เล่นหลายคน)",
     "Sandbox_MaxTimeInServer_CapMinutes": "นาทีต่อบัญชีต่อสัปดาห์",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "จำนวนนาทีจริงที่แต่ละบัญชีเชื่อมต่อได้ในหนึ่งสัปดาห์ 600 เท่ากับสิบชั่วโมง",
-    "Sandbox_MaxTimeInServer_ResetDay": "วันที่สัปดาห์เริ่มใหม่",
+    "Sandbox_MaxTimeInServer_ResetDay": "วันที่รีเซ็ตตัวนับ",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "นาทีของทุกบัญชีจะกลับเป็นศูนย์เวลา 00:00 ของวันนี้ ในคืนระหว่างวันก่อนหน้ากับวันนี้ ถ้าเปลี่ยนการตั้งค่านี้ ทุกคนจะกลับเป็นศูนย์ภายในหนึ่งนาที โดยไม่ต้องรอวันนั้น",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "วันจันทร์",
     "Sandbox_MaxTimeInServer_ResetDay_option2": "วันอังคาร",
