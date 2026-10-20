@@ -95,8 +95,36 @@ local function defaultShowWarning(text)
     if not ok then HaloTextHelper.addBadText(player, text) end
 end
 
+-- ISModalDialog draws its text at a fixed 20 pixels from the top and leaves the
+-- rest of the box to a button. With no button there is nothing under the words,
+-- so the box is cut to the words: the same margin below as above.
+local TEXT_TOP = 20
+
+local function noticeHeight(text)
+    local lines = 1
+    for _ in string.gmatch(tostring(text), "\n") do lines = lines + 1 end
+
+    local measured = nil
+    local ok, value = pcall(function()
+        return getTextManager():MeasureStringY(UIFont.Small, text)
+    end)
+    if ok and tonumber(value) ~= nil and tonumber(value) > 0 then measured = tonumber(value) end
+
+    local byLine = nil
+    local okFont, fontHeight = pcall(function()
+        return getTextManager():getFontHeight(UIFont.Small)
+    end)
+    if okFont and tonumber(fontHeight) ~= nil then byLine = lines * tonumber(fontHeight) end
+
+    -- Whichever says more, so a font this has not met cannot clip the text.
+    local body = measured or byLine or (lines * 16)
+    if byLine ~= nil and byLine > body then body = byLine end
+    return math.floor(TEXT_TOP * 2 + body)
+end
+
 local function defaultShowNotice(text)
-    local width, height = 440, 240
+    local width = 440
+    local height = noticeHeight(text)
     local x = (getCore():getScreenWidth() - width) / 2
     local y = (getCore():getScreenHeight() - height) / 2
     local modal = ISModalDialog:new(x, y, width, height, text, false, nil,
