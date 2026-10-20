@@ -58,4 +58,34 @@ H.test("an unknown key comes back as itself rather than as nothing", function()
     H.assertEqual(T.format("noSuchKey"), "noSuchKey", "visible mistake")
 end)
 
+-- The date a player reads --------------------------------------------------
+
+H.test("a timestamp is read out as a date, not as a stamp", function()
+    _G.Translator = nil
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "October 23",
+        "month first in English")
+
+    _G.Translator = { getLanguage = function() return { name = function() return "ES" end } end }
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "23 de October",
+        "day first in Spanish")
+    _G.Translator = nil
+end)
+
+H.test("the month comes from the game when the game knows it", function()
+    _G.getTextOrNull = function(key)
+        if key == "Farming_Month_10" then return "Octubre" end
+        return nil
+    end
+    _G.Translator = { getLanguage = function() return { name = function() return "ES" end } end }
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "23 de Octubre",
+        "the game's own name for it")
+    _G.getTextOrNull = nil
+    _G.Translator = nil
+end)
+
+H.test("something that is not a date comes back as it arrived", function()
+    H.assertEqual(MaxTimeInServerText.date("whenever"), "whenever", "untouched")
+    H.assertEqual(MaxTimeInServerText.date(nil), "", "and nil is not an error")
+end)
+
 H.run("text")

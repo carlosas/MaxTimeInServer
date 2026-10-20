@@ -22,6 +22,8 @@ local STRINGS = {
         limitReached = "Weekly play limit reached.",
         timeUp = "Your time for this week is up.",
         warning = "%1 minutes of play left this week.",
+        -- %1 is the day of the month, %2 the name of the month.
+        date = "%2 %1",
     },
     ES = {
         used = "Has jugado %1 de tus %2 minutos de esta semana.",
@@ -30,10 +32,17 @@ local STRINGS = {
         limitReached = "Has alcanzado tu limite de juego semanal.",
         timeUp = "Se te ha acabado el tiempo de esta semana.",
         warning = "Te quedan %1 minutos de juego esta semana.",
+        date = "%1 de %2",
     },
 }
 
 local FALLBACK = "EN"
+
+-- Only reached when the base game cannot name a month: see date() below.
+local MONTHS_EN = {
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+}
 
 --- The language the player is reading the game in, as a code like "ES".
 function MaxTimeInServerText.language()
@@ -69,6 +78,28 @@ function MaxTimeInServerText.format(key, ...)
 end
 
 --- Every language this mod carries, for tests and for the log.
+--- A timestamp as a player would say it: "October 23", "23 de Octubre".
+-- The month's name comes from the base game, which has one in every language
+-- it ships (Farming_Month_1 to 12), so this reads properly for a player whose
+-- language the mod itself does not speak. Anything that cannot be read comes
+-- back untouched: a stamp is ugly, a blank line is worse.
+function MaxTimeInServerText.date(stamp)
+    local text = tostring(stamp or "")
+    local _, _, _, month, day = string.find(text, "(%d%d%d%d)%-(%d%d)%-(%d%d)")
+    if day == nil then return text end
+
+    local number = tonumber(month)
+    local name = nil
+    if getTextOrNull ~= nil and number ~= nil then
+        local ok, value = pcall(getTextOrNull, "Farming_Month_" .. tostring(number))
+        if ok and value ~= nil and tostring(value) ~= "" then name = tostring(value) end
+    end
+    if name == nil and number ~= nil then name = MONTHS_EN[number] end
+    if name == nil then return text end
+
+    return MaxTimeInServerText.format("date", tostring(tonumber(day)), name)
+end
+
 function MaxTimeInServerText.languages()
     local codes = {}
     for code in pairs(STRINGS) do table.insert(codes, code) end

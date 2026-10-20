@@ -112,7 +112,7 @@ H.test("a refusal is shown with the numbers in it", function()
     H.assertEqual(#world.notices, 1, "one notice")
     H.assertMatch(world.notices[1], "612", "minutes used")
     H.assertMatch(world.notices[1], "600", "the cap")
-    H.assertMatch(world.notices[1], "2026%-10%-19", "when it resets")
+    H.assertMatch(world.notices[1], "October 19", "when it resets, in words")
 end)
 
 H.test("the mod speaks the player's language when the operator said nothing", function()
@@ -147,7 +147,7 @@ H.test("the numbers are the mod's own, whatever the operator writes", function()
     local notice = world.notices[1]
     H.assertMatch(notice, "612", "minutes used")
     H.assertMatch(notice, "600", "the cap")
-    H.assertMatch(notice, "2026%-10%-19", "when it resets")
+    H.assertMatch(notice, "October 19", "when it resets, in words")
 end)
 
 H.test("the connection is dropped once the grace period is over", function()

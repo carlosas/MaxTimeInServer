@@ -60,7 +60,8 @@ local function noticeText(message, minutes, cap, resetsAt, graceSeconds, reason)
         table.insert(blocks,
             MaxTimeInServerText.format("used", math.floor(minutes or 0), math.floor(cap)) ..
             "\n" ..
-            MaxTimeInServerText.format("resets", tostring(resetsAt or "?")))
+            MaxTimeInServerText.format("resets",
+                MaxTimeInServerText.date(resetsAt or "?")))
     end
 
     table.insert(blocks,
