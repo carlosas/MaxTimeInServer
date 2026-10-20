@@ -1,9 +1,7 @@
 {
     "Sandbox_MaxTimeInServer": "Max Time In Server (multiplayer)",
-
     "Sandbox_MaxTimeInServer_CapMinutes": "Weekly minutes per account",
     "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "How many real minutes each account may spend connected in one week. 600 is ten hours.",
-
     "Sandbox_MaxTimeInServer_ResetDay": "Day the week resets",
     "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Every account's minutes go back to zero at 00:00 on this day, in the night between the day before and it. Change this setting and everyone is back to zero within a minute, without waiting for that day to come round.",
     "Sandbox_MaxTimeInServer_ResetDay_option1": "Monday",
@@ -13,16 +11,39 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "Friday",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Saturday",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Sunday",
-
     "Sandbox_MaxTimeInServer_WarnMinutes": "Warn when this much is left",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minutes of play left, separated by semicolons, at which a player is warned that their time is running out. Each one is said once per session. Empty means they hear nothing until their time is up and they are disconnected.",
-
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roles that are never limited",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Role names separated by semicolons. These accounts are never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included.",
-
     "Sandbox_MaxTimeInServer_BlockedMessage": "What a refused player is told",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Leave this empty and the mod says it in each player's own language. Write something and every player reads exactly that instead. It cannot contain a comma. Either way the numbers follow underneath.",
-
     "Sandbox_MaxTimeInServer_GraceSeconds": "Seconds to read the notice",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "How long a refused player gets to read why before their game disconnects itself."
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "How long a refused player gets to read why before their game disconnects itself.",
+    "MaxTimeInServer_limitReached": "Weekly play limit reached.",
+    "MaxTimeInServer_timeUp": "Your time for this week is up.",
+    "MaxTimeInServer_used": "You have used %1 of your %2 minutes this week.",
+    "MaxTimeInServer_resets": "Your allowance resets on %1.",
+    "MaxTimeInServer_leaving": "Disconnecting in %1 seconds.",
+    "MaxTimeInServer_warning": "%1 minutes of play left this week.",
+    "MaxTimeInServer_date": "%2 %1",
+    "MaxTimeInServer_dateWithDay": "%3 %2 %1",
+    "MaxTimeInServer_day1": "Monday",
+    "MaxTimeInServer_day2": "Tuesday",
+    "MaxTimeInServer_day3": "Wednesday",
+    "MaxTimeInServer_day4": "Thursday",
+    "MaxTimeInServer_day5": "Friday",
+    "MaxTimeInServer_day6": "Saturday",
+    "MaxTimeInServer_day7": "Sunday",
+    "MaxTimeInServer_month1": "January",
+    "MaxTimeInServer_month2": "February",
+    "MaxTimeInServer_month3": "March",
+    "MaxTimeInServer_month4": "April",
+    "MaxTimeInServer_month5": "May",
+    "MaxTimeInServer_month6": "June",
+    "MaxTimeInServer_month7": "July",
+    "MaxTimeInServer_month8": "August",
+    "MaxTimeInServer_month9": "September",
+    "MaxTimeInServer_month10": "October",
+    "MaxTimeInServer_month11": "November",
+    "MaxTimeInServer_month12": "December"
 }

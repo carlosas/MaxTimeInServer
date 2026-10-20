@@ -121,16 +121,27 @@ above, rather than letting everybody in or nobody.
 
 ### Languages
 
-The mod's own lines follow each player's game language. English and Spanish ship
-with it; any other language falls back to English, line by line. Adding one is a
-single block in `common/media/lua/shared/MaxTimeInServer/MaxTimeInServerText.lua`,
-keyed by the code `Translator.getLanguage():name()` returns, and a test fails if
-a language is missing a line.
+Everything a player or an operator reads — the notice, the warnings, the names
+of the settings, their descriptions, the weekdays and the months — is translated
+into **every language the game ships**, which is 28 of them including the four
+Spanish and two Portuguese variants. They live one file per language in
+`common/media/lua/shared/Translate/<LANG>/Sandbox.json`, which is the engine's
+own path: the client loads a mod's translations when it scans the mods.
 
-The names of the settings themselves, their tooltips and the weekday list come
-from `common/media/lua/shared/Translate/<LANG>/Sandbox.json`, which is what makes
-them read as sentences instead of as raw keys. A test fails if an option, a
-tooltip or one of the seven days has no label in a language the mod ships.
+Correcting one is editing one file; the translations are machine work and no
+native speaker has read them. A test holds every language to the same set of
+keys as English, so a line that goes missing fails the suite instead of
+reaching somebody's screen blank.
+
+Two things are deliberately the mod's own rather than the game's. The month
+names: the game's `Farming_Month_1` to `12` are shifted by one in French,
+Chinese, Dutch, Portuguese and Hungarian, so a mod reusing them would name the
+wrong month. And the mod's name, which is not translated anywhere — only the
+"(multiplayer)" after it.
+
+`MaxTimeInServerText.lua` keeps an English copy of the mod's own lines, with
+Spanish beside it, as the last resort for a client that cannot reach the
+engine's translations.
 
 ## The counter file
 

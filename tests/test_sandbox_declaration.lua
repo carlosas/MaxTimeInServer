@@ -1,11 +1,32 @@
 local H = dofile("tests/harness.lua")
+local S = dofile("tests/pz_stubs.lua")
 
--- The settings the operator sees are declared in one file and named in another.
--- A name that is missing shows up as a raw key in the admin panel, or as a bare
--- number where a weekday should be, and nothing else complains about it.
+-- Everything a player or an operator reads is declared in one place and worded
+-- in another: the settings in sandbox-options.txt, the mod's own lines in the
+-- Lua table, and the words for both in one file per language. A key missing
+-- from one language shows up as a raw key in somebody's settings page, or as a
+-- bare number where a weekday should be, and nothing else complains.
+
+S.loadModules({ "shared/MaxTimeInServer/MaxTimeInServerText.lua" })
 
 local OPTIONS_FILE = "common/media/sandbox-options.txt"
-local LANGUAGES = { "EN", "ES" }
+local TRANSLATE = "common/media/lua/shared/Translate"
+
+-- Whatever the mod actually ships, rather than a list that goes stale.
+local function shippedLanguages()
+    local codes = {}
+    local pipe = io.popen("ls " .. TRANSLATE .. " 2>/dev/null")
+    if pipe ~= nil then
+        for line in pipe:lines() do
+            local code = (line:gsub("%s+$", ""))
+            if code ~= "" then table.insert(codes, code) end
+        end
+        pipe:close()
+    end
+    return codes
+end
+
+local LANGUAGES = shippedLanguages()
 
 local function read(path)
     local handle = io.open(path, "r")
@@ -16,7 +37,7 @@ local function read(path)
 end
 
 local function translationPath(language)
-    return "common/media/lua/shared/Translate/" .. language .. "/Sandbox.json"
+    return TRANSLATE .. "/" .. language .. "/Sandbox.json"
 end
 
 -- Every `option Name { ... }` block, as a table of its properties.
@@ -39,9 +60,11 @@ local function declaredOptions(text)
     return options
 end
 
+-- Both prefixes: Sandbox_ for what the settings page shows, MaxTimeInServer_
+-- for the lines the mod says to a player.
 local function jsonKeys(text)
     local keys = {}
-    for key in string.gmatch(text, '"(Sandbox_[%w_]+)"%s*:') do keys[key] = true end
+    for key in string.gmatch(text, '"([%w_]+)"%s*:') do keys[key] = true end
     return keys
 end
 
@@ -68,8 +91,22 @@ local function expectedKeys()
             end
         end
     end
+    -- And every line the mod says to a player. The Lua table is the English
+    -- fallback and therefore the list of what each language has to carry.
+    for _, key in ipairs(MaxTimeInServerText.keys()) do
+        expected["MaxTimeInServer_" .. key] = true
+    end
     return expected
 end
+
+H.test("the mod ships the languages the game has, and no stray folder", function()
+    H.assertTrue(#LANGUAGES >= 20, "found " .. #LANGUAGES .. " languages")
+    local seen = {}
+    for _, code in ipairs(LANGUAGES) do seen[code] = true end
+    for _, code in ipairs({ "EN", "ES", "FR", "DE", "RU", "JP", "CN", "PTBR", "ES_MX" }) do
+        H.assertTrue(seen[code], "ships " .. code)
+    end
+end)
 
 H.test("the options file declares something to begin with", function()
     local count = 0
@@ -108,12 +145,14 @@ H.test("and ships no label for a setting that does not exist", function()
     end
 end)
 
-H.test("the two languages carry the same keys", function()
-    for key in pairs(translations.EN) do
-        H.assertTrue(translations.ES[key], "ES is missing " .. key)
-    end
-    for key in pairs(translations.ES) do
-        H.assertTrue(translations.EN[key], "EN is missing " .. key)
+H.test("every language carries exactly the same keys as English", function()
+    for _, language in ipairs(LANGUAGES) do
+        for key in pairs(translations.EN) do
+            H.assertTrue(translations[language][key], language .. " is missing " .. key)
+        end
+        for key in pairs(translations[language]) do
+            H.assertTrue(translations.EN[key], language .. " has a stray " .. key)
+        end
     end
 end)
 

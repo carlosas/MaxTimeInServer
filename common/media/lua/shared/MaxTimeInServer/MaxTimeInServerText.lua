@@ -1,10 +1,19 @@
 --[[
 The mod's own strings, in the player's language.
 
-These are the lines the mod says to a player, so they are kept here rather than
-in the engine's translation files: a mod's Translate/<LANG>/Sandbox.json is read
-by the client's mod scan, which is right for the names of settings, while this
-table is read by our own code wherever it runs and is covered by a test.
+Every line the mod says to a player, in whatever language they are reading the
+game in.
+
+The translations themselves live in media/lua/shared/Translate/<LANG>/Sandbox.json,
+one file per language, keyed MaxTimeInServer_<name>. That is the engine's own
+path - a mod's translations are read when the client scans the mods - so the
+text is UTF-8 in a format the game already renders, rather than a Lua literal
+whose encoding nobody has measured.
+
+The table below is the last resort: what a player reads if the engine cannot
+answer, which is why it is English, complete, and covered by a test. Spanish is
+kept beside it because this mod was written for a Spanish server and it costs
+four lines.
 
 Adding a language is one block below. Anything missing falls back to English,
 per key, so a half-finished translation degrades to English rather than to a
@@ -33,6 +42,18 @@ local STRINGS = {
         day5 = "Friday",
         day6 = "Saturday",
         day7 = "Sunday",
+        month1 = "January",
+        month2 = "February",
+        month3 = "March",
+        month4 = "April",
+        month5 = "May",
+        month6 = "June",
+        month7 = "July",
+        month8 = "August",
+        month9 = "September",
+        month10 = "October",
+        month11 = "November",
+        month12 = "December",
     },
     ES = {
         used = "Has jugado %1 de tus %2 minutos de esta semana.",
@@ -50,16 +71,33 @@ local STRINGS = {
         day5 = "viernes",
         day6 = "sabado",
         day7 = "domingo",
+        month1 = "enero",
+        month2 = "febrero",
+        month3 = "marzo",
+        month4 = "abril",
+        month5 = "mayo",
+        month6 = "junio",
+        month7 = "julio",
+        month8 = "agosto",
+        month9 = "septiembre",
+        month10 = "octubre",
+        month11 = "noviembre",
+        month12 = "diciembre",
     },
 }
 
 local FALLBACK = "EN"
 
--- Only reached when the base game cannot name a month: see date() below.
-local MONTHS_EN = {
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+-- Where the engine keeps our lines, so they cannot collide with anyone else's.
+local ENGINE_PREFIX = "MaxTimeInServer_"
+
+-- Codes that read the same language as far as these lines are concerned. The
+-- game ships four Spanish variants and a player set to any of them would
+-- otherwise fall back to English with Spanish sitting right there.
+local ALIASES = {
+    AR = "ES", ES_CL = "ES", ES_MX = "ES",
 }
+
 
 --- The language the player is reading the game in, as a code like "ES".
 function MaxTimeInServerText.language()
@@ -71,7 +109,15 @@ function MaxTimeInServerText.language()
 end
 
 local function lookup(key)
+    -- The engine knows every language the mod ships a file for, and which one
+    -- this player is reading. Ask it first.
+    if getTextOrNull ~= nil then
+        local ok, value = pcall(getTextOrNull, ENGINE_PREFIX .. key)
+        if ok and value ~= nil and tostring(value) ~= "" then return tostring(value) end
+    end
+
     local code = MaxTimeInServerText.language()
+    code = ALIASES[code] or code
     local table_ = STRINGS[code]
     if table_ ~= nil and table_[key] ~= nil then return table_[key] end
     return STRINGS[FALLBACK][key]
@@ -96,23 +142,19 @@ end
 
 --- Every language this mod carries, for tests and for the log.
 --- A timestamp as a player would say it: "Friday October 23".
--- The month's name comes from the base game, which has one in every language
--- it ships (Farming_Month_1 to 12). The weekday is optional and ours, so it is
--- in whatever language the rest of the sentence is in. Anything that cannot be
--- read comes back untouched: a stamp is ugly, a blank line is worse.
+-- The month's name is the mod's own rather than the base game's: the game's
+-- Farming_Month_1 to 12 are shifted by one in several languages - French names
+-- October "Novembre", and so do Chinese, Dutch, Portuguese and Hungarian - so
+-- reusing them would put the wrong month in front of a player. Anything that
+-- cannot be read comes back untouched: a stamp is ugly, a blank line is worse.
 function MaxTimeInServerText.date(stamp, weekday)
     local text = tostring(stamp or "")
     local _, _, _, month, day = string.find(text, "(%d%d%d%d)%-(%d%d)%-(%d%d)")
     if day == nil then return text end
 
     local number = tonumber(month)
-    local name = nil
-    if getTextOrNull ~= nil and number ~= nil then
-        local ok, value = pcall(getTextOrNull, "Farming_Month_" .. tostring(number))
-        if ok and value ~= nil and tostring(value) ~= "" then name = tostring(value) end
-    end
-    if name == nil and number ~= nil then name = MONTHS_EN[number] end
-    if name == nil then return text end
+    if number == nil or number < 1 or number > 12 then return text end
+    local name = MaxTimeInServerText.format("month" .. tostring(math.floor(number)))
 
     local dayNumber = tonumber(weekday)
     if dayNumber ~= nil and dayNumber >= 1 and dayNumber <= 7 then

@@ -66,7 +66,7 @@ H.test("a timestamp is read out as a date, not as a stamp", function()
         "month first in English")
 
     _G.Translator = { getLanguage = function() return { name = function() return "ES" end } end }
-    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "23 de October",
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "23 de octubre",
         "day first in Spanish")
     _G.Translator = nil
 end)
@@ -78,7 +78,7 @@ H.test("the weekday is said too, each language in its own order", function()
 
     _G.Translator = { getLanguage = function() return { name = function() return "ES" end } end }
     H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000", 5),
-        "viernes 23 de October", "weekday first in Spanish too, the rest in its order")
+        "viernes 23 de octubre", "weekday first in Spanish too, the rest in its order")
     _G.Translator = nil
 end)
 
@@ -88,16 +88,27 @@ H.test("a weekday that is not one of the seven is simply left out", function()
     H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "October 23", "none")
 end)
 
-H.test("the month comes from the game when the game knows it", function()
+H.test("the engine's answer wins over the table, which is the fallback", function()
     _G.getTextOrNull = function(key)
-        if key == "Farming_Month_10" then return "Octubre" end
+        if key == "MaxTimeInServer_month10" then return "lokakuuta" end
+        if key == "MaxTimeInServer_date" then return "%1. %2" end
         return nil
     end
-    _G.Translator = { getLanguage = function() return { name = function() return "ES" end } end }
-    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "23 de Octubre",
-        "the game's own name for it")
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "23. lokakuuta",
+        "a language the Lua table has never heard of")
     _G.getTextOrNull = nil
-    _G.Translator = nil
+end)
+
+H.test("the month names the mod ships are its own, not the game's", function()
+    -- The game's Farming_Month_1..12 are shifted by one in FR, CN, NL, PT and
+    -- HU, so a mod reusing them shows the wrong month.
+    _G.getTextOrNull = function(key)
+        if key == "Farming_Month_10" then return "Novembre" end
+        return nil
+    end
+    H.assertEqual(MaxTimeInServerText.date("2026-10-23T00:00:00+0000"), "October 23",
+        "the game's shifted list is not consulted")
+    _G.getTextOrNull = nil
 end)
 
 H.test("something that is not a date comes back as it arrived", function()
