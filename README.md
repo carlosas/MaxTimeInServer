@@ -99,9 +99,9 @@ Time In Server*. Set them from the admin panel or by editing
 | Weekly minutes per account | `600` | the budget, in real minutes, per account per week |
 | Day the counter resets | `Friday` | everyone's minutes go back to zero at 00:00, in the night between the day before and this one. A dropdown of the seven days. Changing the setting resets the counters as they stand, without waiting for that day |
 | Roles that are never limited | `admin;moderator;gm` | semicolon-separated; never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included |
-| Extra message on being turned out | *(empty)* | empty means the mod says it in each player's own language; set it to use your own wording instead, the same for everyone. It cannot contain a comma, because the sandbox file splits on them |
+| Extra message when a player is kicked | *(empty)* | empty means the mod says it in each player's own language; set it to use your own wording instead, the same for everyone. It cannot contain a comma, because the sandbox file splits on them |
 | Minutes of warning | `30;5` | minutes left, separated by semicolons, at which a player is warned so they can get ready. Each mark is said once per session; empty means no warning until their time is up |
-| Seconds to read the notice | `5` | how long a player who is turned out gets before their game disconnects itself |
+| Seconds to read the notice | `5` | how long a kicked player gets before their game disconnects itself |
 
 Whatever you write goes on top, and the numbers follow underneath in the
 player's own language, so a message of yours cannot hide what the player needs
