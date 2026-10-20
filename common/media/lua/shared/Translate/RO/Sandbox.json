@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Mesaj suplimentar la excludere",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Text suplimentar la mesajul de bază cu cifrele. Mesajul de bază apare în limba fiecărui jucător. Dacă scrii ceva aici, toți vor citi exact asta. Nu poate conține virgulă.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Secunde pentru a citi mesajul",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Cât timp are un jucător refuzat să citească motivul înainte ca jocul său să se deconecteze.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Cât timp are un jucător dat afară să citească motivul înainte ca jocul său să se deconecteze.",
     "Sandbox_MaxTimeInServer_used": "Ai folosit %1 din cele %2 minute ale tale din această săptămână.",
     "Sandbox_MaxTimeInServer_resets": "Timpul tău se reînnoiește pe %1.",
     "Sandbox_MaxTimeInServer_leaving": "Deconectare în %1 secunde.",

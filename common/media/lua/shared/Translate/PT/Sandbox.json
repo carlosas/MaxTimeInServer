@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Mensagem extra de expulsão",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Texto adicional à mensagem base de expulsão com os números. A mensagem base aparece na língua de cada jogador. Se escreveres algo, todos lerão exatamente isso. Não pode conter vírgulas.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Segundos para ler o aviso",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Quanto tempo tem um jogador recusado para ler o motivo antes de o jogo se desligar.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Quanto tempo tem quem é expulso para ler o motivo antes de o jogo se desligar.",
     "Sandbox_MaxTimeInServer_used": "Jogaste %1 dos teus %2 minutos desta semana.",
     "Sandbox_MaxTimeInServer_resets": "O teu tempo renova-se a %1.",
     "Sandbox_MaxTimeInServer_leaving": "A desligar em %1 segundos.",

@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Extra message on being turned out",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Extra text on top of the base refusal message with the numbers. The base message appears in each player's own language. Write something here and everyone reads exactly that. It cannot contain a comma.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Seconds to read the notice",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "How long a refused player gets to read why before their game disconnects itself.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "How long a player who is turned out gets to read why before their game disconnects itself.",
     "Sandbox_MaxTimeInServer_used": "You have used %1 of your %2 minutes this week.",
     "Sandbox_MaxTimeInServer_resets": "Your allowance resets on %1.",
     "Sandbox_MaxTimeInServer_leaving": "Disconnecting in %1 seconds.",

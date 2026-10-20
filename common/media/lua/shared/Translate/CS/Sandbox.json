@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Zpráva navíc při vyhození",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Text navíc k základní zprávě s čísly. Základní zpráva se zobrazí v jazyce každého hráče. Když sem něco napíšeš, všichni přečtou přesně to. Nesmí obsahovat čárku.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Sekundy na přečtení zprávy",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Kolik času má odmítnutý hráč na přečtení důvodu, než se jeho hra odpojí.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Kolik času má vyhozený hráč na přečtení důvodu, než se jeho hra odpojí.",
     "Sandbox_MaxTimeInServer_used": "Využil jsi %1 z %2 minut tohoto týdne.",
     "Sandbox_MaxTimeInServer_resets": "Tvůj čas se obnoví %1.",
     "Sandbox_MaxTimeInServer_leaving": "Odpojení za %1 sekund.",

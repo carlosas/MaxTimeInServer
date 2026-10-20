@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Extra üzenet kidobáskor",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Kiegészítő szöveg a számokat tartalmazó alapüzenethez. Az alapüzenet minden játékos saját nyelvén jelenik meg. Ha ide írsz valamit, mindenki pontosan azt olvassa. Nem tartalmazhat vesszőt.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Másodpercek az üzenet elolvasására",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Mennyi ideje van egy elutasított játékosnak elolvasni az okot, mielőtt a játéka lecsatlakozik.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Mennyi ideje van egy kidobott játékosnak elolvasni az okot, mielőtt a játéka lecsatlakozik.",
     "Sandbox_MaxTimeInServer_used": "Ezen a héten %1 percet használtál el a %2 percedből.",
     "Sandbox_MaxTimeInServer_resets": "Az időd ekkor újul meg: %1.",
     "Sandbox_MaxTimeInServer_leaving": "Lecsatlakozás %1 másodperc múlva.",

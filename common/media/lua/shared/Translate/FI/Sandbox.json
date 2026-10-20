@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Lisäviesti poistettaessa",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Lisäteksti perusviestiin, jossa ovat luvut. Perusviesti näkyy kunkin pelaajan omalla kielellä. Jos kirjoitat tähän jotain, kaikki lukevat täsmälleen sen. Ei saa sisältää pilkkua.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Sekunteja ilmoituksen lukemiseen",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Kuinka kauan käännytetyllä pelaajalla on aikaa lukea syy, ennen kuin peli katkaisee yhteyden.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Kuinka kauan pelistä poistetulla pelaajalla on aikaa lukea syy, ennen kuin peli katkaisee yhteyden.",
     "Sandbox_MaxTimeInServer_used": "Olet käyttänyt %1 minuuttia %2 minuutistasi tällä viikolla.",
     "Sandbox_MaxTimeInServer_resets": "Aikasi uusiutuu %1.",
     "Sandbox_MaxTimeInServer_leaving": "Yhteys katkaistaan %1 sekunnin kuluttua.",

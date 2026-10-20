@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "ข้อความเพิ่มเติมตอนถูกเตะออก",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "ข้อความเพิ่มเติมจากข้อความหลักที่มีตัวเลข ข้อความหลักจะแสดงในภาษาของผู้เล่นแต่ละคน ถ้าเขียนอะไรไว้ที่นี่ ทุกคนจะอ่านข้อความนั้นตรงตัว ห้ามมีเครื่องหมายจุลภาค",
     "Sandbox_MaxTimeInServer_GraceSeconds": "วินาทีสำหรับอ่านข้อความ",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "ผู้เล่นที่ถูกปฏิเสธมีเวลาอ่านเหตุผลนานเท่าใดก่อนที่เกมจะตัดการเชื่อมต่อ",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "ผู้เล่นที่ถูกเตะออกมีเวลาอ่านเหตุผลนานเท่าใดก่อนที่เกมจะตัดการเชื่อมต่อ",
     "Sandbox_MaxTimeInServer_used": "สัปดาห์นี้คุณใช้ไปแล้ว %1 จาก %2 นาที",
     "Sandbox_MaxTimeInServer_resets": "เวลาของคุณจะเริ่มใหม่วันที่ %1",
     "Sandbox_MaxTimeInServer_leaving": "จะตัดการเชื่อมต่อใน %1 วินาที",

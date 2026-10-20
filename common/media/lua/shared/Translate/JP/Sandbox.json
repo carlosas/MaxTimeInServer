@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "切断時の追加メッセージ",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "数字が入る基本メッセージに追加する文面です。基本メッセージは各プレイヤーの言語で表示されます。ここに書くと全員がそのとおりに読みます。カンマは使えません。",
     "Sandbox_MaxTimeInServer_GraceSeconds": "通知を読むための秒数",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "拒否されたプレイヤーが、ゲームが切断されるまでに理由を読める時間。",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "切断されるプレイヤーが、ゲームが接続を切るまでに理由を読める時間。",
     "Sandbox_MaxTimeInServer_used": "今週は %2 分のうち %1 分を使いました。",
     "Sandbox_MaxTimeInServer_resets": "持ち時間は %1 に回復します。",
     "Sandbox_MaxTimeInServer_leaving": "%1 秒後に切断します。",

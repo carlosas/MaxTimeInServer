@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Pesan tambahan saat dikeluarkan",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Teks tambahan untuk pesan dasar yang berisi angka-angkanya. Pesan dasar muncul dalam bahasa masing-masing pemain. Jika kamu menulis sesuatu di sini, semua orang membaca persis itu. Tidak boleh mengandung koma.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Detik untuk membaca pemberitahuan",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Berapa lama pemain yang ditolak dapat membaca alasannya sebelum permainannya memutus koneksi.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Berapa lama pemain yang dikeluarkan dapat membaca alasannya sebelum permainannya memutus koneksi.",
     "Sandbox_MaxTimeInServer_used": "Kamu telah memakai %1 dari %2 menitmu minggu ini.",
     "Sandbox_MaxTimeInServer_resets": "Waktumu diperbarui pada %1.",
     "Sandbox_MaxTimeInServer_leaving": "Memutus koneksi dalam %1 detik.",

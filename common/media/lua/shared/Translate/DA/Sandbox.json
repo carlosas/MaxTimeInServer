@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Ekstra besked ved udsmidning",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Ekstra tekst til standardbeskeden med tallene. Standardbeskeden vises på hver spillers eget sprog. Skriver du noget her, læser alle præcis det. Må ikke indeholde komma.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Sekunder til at læse beskeden",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Hvor lang tid en afvist spiller får til at læse hvorfor, før spillet afbryder forbindelsen.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Hvor lang tid en spiller, der bliver smidt ud, får til at læse hvorfor, før spillet afbryder forbindelsen.",
     "Sandbox_MaxTimeInServer_used": "Du har brugt %1 af dine %2 minutter i denne uge.",
     "Sandbox_MaxTimeInServer_resets": "Din tid fornyes den %1.",
     "Sandbox_MaxTimeInServer_leaving": "Afbryder om %1 sekunder.",

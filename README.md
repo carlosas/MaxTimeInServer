@@ -101,7 +101,7 @@ Time In Server*. Set them from the admin panel or by editing
 | Roles that are never limited | `admin;moderator;gm` | semicolon-separated; never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included |
 | Extra message on being turned out | *(empty)* | empty means the mod says it in each player's own language; set it to use your own wording instead, the same for everyone. It cannot contain a comma, because the sandbox file splits on them |
 | Minutes of warning | `30;5` | minutes left, separated by semicolons, at which a player is warned so they can get ready. Each mark is said once per session; empty means no warning until their time is up |
-| Seconds to read the notice | `5` | how long a refused player gets before their game disconnects itself |
+| Seconds to read the notice | `5` | how long a player who is turned out gets before their game disconnects itself |
 
 Whatever you write goes on top, and the numbers follow underneath in the
 player's own language, so a message of yours cannot hide what the player needs

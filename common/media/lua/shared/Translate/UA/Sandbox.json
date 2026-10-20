@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Додаткове повідомлення при від'єднанні",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Додатковий текст до основного повідомлення з цифрами. Основне повідомлення показується мовою кожного гравця. Якщо напишеш щось тут, усі прочитають саме це. Не може містити кому.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Секунд на прочитання повідомлення",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Скільки часу має відхилений гравець, щоб прочитати причину, перш ніж гра від'єднається.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Скільки часу має гравець, якого від'єднують, щоб прочитати причину, перш ніж гра від'єднається.",
     "Sandbox_MaxTimeInServer_used": "Ти використав %1 із своїх %2 хвилин цього тижня.",
     "Sandbox_MaxTimeInServer_resets": "Твій час поновиться %1.",
     "Sandbox_MaxTimeInServer_leaving": "Від'єднання через %1 секунд.",

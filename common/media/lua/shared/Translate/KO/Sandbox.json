@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "접속 종료 시 추가 메시지",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "숫자가 들어가는 기본 메시지에 덧붙이는 문구입니다. 기본 메시지는 각 플레이어의 언어로 표시됩니다. 여기에 쓰면 모두가 그대로 읽습니다. 쉼표는 쓸 수 없습니다.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "안내를 읽을 수 있는 초",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "거부된 플레이어가 게임 연결이 끊기기 전에 이유를 읽을 수 있는 시간.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "접속이 끊기는 플레이어가 게임이 연결을 끊기 전에 이유를 읽을 수 있는 시간.",
     "Sandbox_MaxTimeInServer_used": "이번 주에 %2분 중 %1분을 사용했습니다.",
     "Sandbox_MaxTimeInServer_resets": "시간은 %1에 다시 채워집니다.",
     "Sandbox_MaxTimeInServer_leaving": "%1초 후에 연결이 끊어집니다.",

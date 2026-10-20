@@ -18,7 +18,7 @@
     "Sandbox_MaxTimeInServer_BlockedMessage": "Dodatkowa wiadomość przy wyrzuceniu",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Dodatkowy tekst do podstawowej wiadomości z liczbami. Podstawowa wiadomość pojawia się w języku każdego gracza. Jeśli coś tu wpiszesz, wszyscy przeczytają dokładnie to. Nie może zawierać przecinka.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Sekundy na przeczytanie komunikatu",
-    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Ile czasu ma odrzucony gracz na przeczytanie powodu, zanim jego gra się rozłączy.",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Ile czasu ma wyrzucony gracz na przeczytanie powodu, zanim jego gra się rozłączy.",
     "Sandbox_MaxTimeInServer_used": "Wykorzystałeś %1 z %2 minut w tym tygodniu.",
     "Sandbox_MaxTimeInServer_resets": "Twój czas odnawia się %1.",
     "Sandbox_MaxTimeInServer_leaving": "Rozłączanie za %1 sekund.",
