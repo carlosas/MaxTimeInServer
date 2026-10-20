@@ -17,6 +17,12 @@ server restart.
 local DEFAULT_CAP_MINUTES = 600
 local DEFAULT_EXEMPT_ROLES = { "admin", "moderator", "gm" }
 local DEFAULT_GRACE_SECONDS = 12
+-- The weekday the week turns over on, 1 = Monday .. 7 = Sunday, which is the
+-- contract MaxTimeInServerClock works in. 5 is Friday.
+local DEFAULT_RESET_DAY = 5
+local DAY_NAMES = {
+    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+}
 -- An empty default means "say nothing of your own", and the client then shows
 -- its own translated line instead. That way a server that never touches the
 -- setting still speaks to each player in their language.
@@ -30,6 +36,7 @@ MaxTimeInServerConfig = {
     exemptRoles = { "admin", "moderator", "gm" },
     graceSeconds = DEFAULT_GRACE_SECONDS,
     blockedMessage = DEFAULT_BLOCKED_MESSAGE,
+    resetDay = DEFAULT_RESET_DAY,
 
     -- Not worth a server setting: changing either breaks the data file or the
     -- handshake rather than tuning anything.
@@ -72,7 +79,7 @@ end
 
 -- Sandbox integers arrive as numbers, but a hand-edited SandboxVars.lua can
 -- hold anything at all.
-local function wholeNumberAtLeast(value, minimum, name)
+local function wholeNumberInRange(value, minimum, maximum, name)
     local number = tonumber(value)
     if number == nil then
         log("sandbox option " .. name .. " is not a number (" .. tostring(value) ..
@@ -86,7 +93,17 @@ local function wholeNumberAtLeast(value, minimum, name)
             "; keeping the default")
         return nil
     end
+    if maximum ~= nil and number > maximum then
+        log("sandbox option " .. name .. " is " .. tostring(number) ..
+            ", which is above the maximum of " .. tostring(maximum) ..
+            "; keeping the default")
+        return nil
+    end
     return number
+end
+
+local function dayName(number)
+    return DAY_NAMES[tonumber(number) or 0] or ("day " .. tostring(number))
 end
 
 local function parseRoleList(text)
@@ -116,6 +133,7 @@ function MaxTimeInServerConfig.applySandboxOptions(vars)
     MaxTimeInServerConfig.capMinutes = DEFAULT_CAP_MINUTES
     MaxTimeInServerConfig.graceSeconds = DEFAULT_GRACE_SECONDS
     MaxTimeInServerConfig.blockedMessage = DEFAULT_BLOCKED_MESSAGE
+    MaxTimeInServerConfig.resetDay = DEFAULT_RESET_DAY
     MaxTimeInServerConfig.exemptRoles = {}
     for _, role in ipairs(DEFAULT_EXEMPT_ROLES) do
         table.insert(MaxTimeInServerConfig.exemptRoles, role)
@@ -130,13 +148,20 @@ function MaxTimeInServerConfig.applySandboxOptions(vars)
     if page == nil then return false end
 
     if page.CapMinutes ~= nil then
-        local minutes = wholeNumberAtLeast(page.CapMinutes, 1, "CapMinutes")
+        local minutes = wholeNumberInRange(page.CapMinutes, 1, nil, "CapMinutes")
         if minutes ~= nil then MaxTimeInServerConfig.capMinutes = minutes end
     end
 
     if page.GraceSeconds ~= nil then
-        local seconds = wholeNumberAtLeast(page.GraceSeconds, 0, "GraceSeconds")
+        local seconds = wholeNumberInRange(page.GraceSeconds, 0, nil, "GraceSeconds")
         if seconds ~= nil then MaxTimeInServerConfig.graceSeconds = seconds end
+    end
+
+    -- An enum, so the engine and the admin panel both hand this over as the
+    -- index of the day: 1 = Monday .. 7 = Sunday.
+    if page.ResetDay ~= nil then
+        local day = wholeNumberInRange(page.ResetDay, 1, 7, "ResetDay")
+        if day ~= nil then MaxTimeInServerConfig.resetDay = day end
     end
 
     -- An empty message is a deliberate answer too: show the numbers alone.
@@ -190,7 +215,13 @@ function MaxTimeInServerConfig.describe()
     local roles = table.concat(MaxTimeInServerConfig.exemptRoles, ", ")
     if roles == "" then roles = "none" end
     return "cap " .. tostring(MaxTimeInServerConfig.capMinutes) ..
-        " minutes per week, exempt roles: " .. roles ..
+        " minutes per week resetting " .. dayName(MaxTimeInServerConfig.resetDay) ..
+        "s at 00:00, exempt roles: " .. roles ..
         ", " .. tostring(MaxTimeInServerConfig.graceSeconds) ..
         " seconds to read the notice"
+end
+
+--- The configured reset day in words, for a log line or a message.
+function MaxTimeInServerConfig.resetDayName()
+    return dayName(MaxTimeInServerConfig.resetDay)
 end

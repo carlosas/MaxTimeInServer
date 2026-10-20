@@ -7,6 +7,8 @@ local S = dofile("tests/pz_stubs.lua")
 -- so sharing one would not interleave the counts but overwrite them.
 
 S.loadModules()
+-- Anchored on a Monday, so both servers are asked for Monday weeks.
+_G.SandboxVars = { MaxTimeInServer = { ResetDay = 1 } }
 local clock = MaxTimeInServerClock
 clock.backend = S.utcCalendarBackend()
 

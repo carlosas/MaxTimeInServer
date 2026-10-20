@@ -8,7 +8,7 @@ MaxTimeInServerClock.backend = S.utcCalendarBackend()
 MaxTimeInServerClock.backend.now = function() return S.MONDAY + 3600 end
 
 _G.SandboxVars = { MaxTimeInServer = {
-    CapMinutes = 250, ExemptRoles = "overseer", GraceSeconds = 4 } }
+    CapMinutes = 250, ExemptRoles = "overseer", GraceSeconds = 4, ResetDay = 1 } }
 
 local files = S.fakeFiles()
 MaxTimeInServerQuota.configure({
@@ -30,6 +30,7 @@ H.test("start-up reads the server's settings and says what it will enforce", fun
     H.assertMatch(log, "250", "the cap from the sandbox options")
     H.assertMatch(log, "overseer", "the exempt roles from the sandbox options")
     H.assertMatch(log, "4 seconds", "the grace from the sandbox options")
+    H.assertMatch(log, "Mondays at 00:00", "the reset day from the sandbox options")
 end)
 
 H.test("and those settings are what the quota then enforces", function()
@@ -48,6 +49,7 @@ H.test("with no settings page it falls back and says so", function()
     fireServerStarted()
     H.assertMatch(S.logText(), "built%-in defaults", "warned")
     H.assertEqual(MaxTimeInServerConfig.capMinutes, 600, "the shipped default")
+    H.assertEqual(MaxTimeInServerConfig.resetDay, 5, "and friday weeks")
 end)
 
 H.run("startup")

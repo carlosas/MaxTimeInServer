@@ -1,0 +1,25 @@
+{
+    "Sandbox_MaxTimeInServer": "Max Time In Server",
+
+    "Sandbox_MaxTimeInServer_CapMinutes": "Weekly minutes per account",
+    "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "How many real minutes each account may spend connected in one week. 600 is ten hours.",
+
+    "Sandbox_MaxTimeInServer_ResetDay": "Day the week resets",
+    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Every account's minutes go back to zero at 00:00 on this day, overnight between the day before and this one. Changing it starts a new week within a minute.",
+    "Sandbox_MaxTimeInServer_ResetDay_option1": "Monday",
+    "Sandbox_MaxTimeInServer_ResetDay_option2": "Tuesday",
+    "Sandbox_MaxTimeInServer_ResetDay_option3": "Wednesday",
+    "Sandbox_MaxTimeInServer_ResetDay_option4": "Thursday",
+    "Sandbox_MaxTimeInServer_ResetDay_option5": "Friday",
+    "Sandbox_MaxTimeInServer_ResetDay_option6": "Saturday",
+    "Sandbox_MaxTimeInServer_ResetDay_option7": "Sunday",
+
+    "Sandbox_MaxTimeInServer_ExemptRoles": "Roles that are never limited",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Role names separated by semicolons. These accounts are never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included.",
+
+    "Sandbox_MaxTimeInServer_BlockedMessage": "What a refused player is told",
+    "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Leave this empty and the mod says it in each player's own language. Write something and every player reads exactly that instead. It cannot contain a comma. Either way the numbers follow underneath.",
+
+    "Sandbox_MaxTimeInServer_GraceSeconds": "Seconds to read the notice",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "How long a refused player gets to read why before their game disconnects itself."
+}

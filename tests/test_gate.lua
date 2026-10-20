@@ -34,6 +34,7 @@ local function makeGate(opts)
     gate.config = {}
     for key, value in pairs(MaxTimeInServerConfig) do gate.config[key] = value end
     gate.config.capMinutes = opts.capMinutes or 600
+    gate.config.resetDay = 1  -- these fixtures are anchored on a Monday
 
     MaxTimeInServerQuota.configure({
         config = gate.config,

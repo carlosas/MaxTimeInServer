@@ -113,7 +113,7 @@ function MaxTimeInServerQuota.verdict(username, roleName)
     local ok, result = pcall(function()
         local state = d.store.load(d.files, d.config.dataFile)
         local now = d.clock.now()
-        local weekStart = d.clock.getWeekStartEpoch(now)
+        local weekStart = d.clock.getWeekStartEpoch(now, d.config.resetDay)
         local record = state.players[username]
 
         local minutes, bonus, flagged = 0, 0, false
@@ -246,7 +246,7 @@ local function sweepBody(now)
         log(d.config.dataFile .. ": " .. warning)
     end
 
-    local weekStart = d.clock.getWeekStartEpoch(now)
+    local weekStart = d.clock.getWeekStartEpoch(now, d.config.resetDay)
     if weekStart ~= state.weekStartEpoch then
         startNewWeek(state, weekStart, d)
         changed = true

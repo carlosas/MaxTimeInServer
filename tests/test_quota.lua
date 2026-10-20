@@ -22,6 +22,8 @@ local function makeWorld(opts)
     world.config = {}
     for key, value in pairs(MaxTimeInServerConfig) do world.config[key] = value end
     world.config.capMinutes = opts.capMinutes or 600
+    -- These fixtures are anchored on a Monday, so they ask for Monday weeks.
+    world.config.resetDay = opts.resetDay or 1
     if opts.exemptRoles then world.config.exemptRoles = opts.exemptRoles end
 
     MaxTimeInServerQuota.configure({
@@ -180,6 +182,28 @@ H.test("a sweep that straddles the boundary only credits the part in the new wee
     world.sweepAfter(180)      -- and again a minute into the new week
     H.assertEqual(world.state().weekStartEpoch, MONDAY + WEEK, "new week stored")
     H.assertEqual(world.minutes("darkkz"), 1, "only the new week's minute")
+end)
+
+H.test("moving the reset day starts a new week there and then", function()
+    -- Wednesday of a Monday-based week, with minutes already spent. The
+    -- operator switches the reset to Friday: the week the counters belong to
+    -- no longer exists, so the next sweep opens the one that does.
+    local wednesday = MONDAY + 2 * 24 * 3600 + 3600
+    local world = makeWorld({
+        online = {}, startEpoch = wednesday, resetDay = 5,
+        files = { [DATA] = "version=1\nweekStartEpoch=" .. MONDAY ..
+            "\n\n[darkkz]\nminutes=420\nbonusMinutes=60\n" },
+    })
+    world.sweepAfter(60)
+
+    H.assertEqual(world.state().weekStartEpoch, MONDAY - 3 * 24 * 3600,
+        "the friday that opened this week")
+    H.assertEqual(world.minutes("darkkz"), 0, "counter reset")
+    H.assertEqual(world.record("darkkz").bonusMinutes, 0, "bonus cleared")
+
+    S.logLines = {}
+    world.sweepAfter(60)
+    H.assertFalse(S.logText():find("new week"), "and it settles, rather than resetting every sweep")
 end)
 
 H.test("a week that passed while the server was down resets on the next sweep", function()

@@ -2,8 +2,9 @@
 
 A mod for **Project Zomboid Build 42** dedicated servers. It counts the real
 minutes each account spends connected during the week and turns away accounts
-that have used up their budget. The default is **600 minutes (10 hours)** per
-week, Monday 00:00 to Sunday 23:59 in the server's timezone.
+that have used up their budget. By default that is **600 minutes (10 hours)** a
+week, and the week turns over at **00:00 every Friday** in the server's
+timezone. Both are settings.
 
 It is there to keep the pace of a server shared. When a few players put in many
 more hours than everyone else, the map around the group's base is already picked
@@ -86,6 +87,7 @@ Time In Server*. Set them from the admin panel or by editing
 | Setting | Default | What it is |
 |---|---|---|
 | Weekly minutes per account | `600` | the budget, in real minutes, per account per week |
+| Day the week resets | `Friday` | everyone's minutes go back to zero at 00:00 on this day, overnight between the day before and this one. A dropdown of the seven days; changing it starts a new week within a minute, which zeroes the counters |
 | Roles that are never limited | `admin;moderator;gm` | semicolon-separated; never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included |
 | What a refused player is told | *(empty)* | empty means the mod says it in each player's own language; set it to use your own wording instead, the same for everyone. It cannot contain a comma, because the sandbox file splits on them |
 | Seconds to read the notice | `12` | how long a refused player gets before their game disconnects itself |
@@ -107,7 +109,7 @@ Sandbox options are read when the server boots, so a change takes a restart. On
 start-up the mod logs what it is enforcing:
 
 ```
-[MaxTimeInServer] ready: cap 600 minutes per week, exempt roles: admin, moderator, gm, 12 seconds to read the notice, counting in MaxTimeInServer_MyServer.txt, week starting 2026-10-19T00:00:00+0000, 3 accounts on record
+[MaxTimeInServer] ready: cap 600 minutes per week resetting Fridays at 00:00, exempt roles: admin, moderator, gm, 12 seconds to read the notice, counting in MaxTimeInServer_MyServer.txt, week starting 2026-10-16T00:00:00+0000, 3 accounts on record
 ```
 
 If it cannot find its settings page it says so and falls back to the defaults
@@ -121,6 +123,11 @@ single block in `common/media/lua/shared/MaxTimeInServer/MaxTimeInServerText.lua
 keyed by the code `Translator.getLanguage():name()` returns, and a test fails if
 a language is missing a line.
 
+The names of the settings themselves, their tooltips and the weekday list come
+from `common/media/lua/shared/Translate/<LANG>/Sandbox.json`, which is what makes
+them read as sentences instead of as raw keys. A test fails if an option, a
+tooltip or one of the seven days has no label in a language the mod ships.
+
 ## The counter file
 
 `~/Zomboid/Lua/MaxTimeInServer_<ServerName>.txt` on the server, named after the
@@ -129,8 +136,8 @@ re-read every minute, so changes take effect by themselves.
 
 ```
 version=1
-weekStart=2026-10-12T00:00:00+0000
-weekStartEpoch=1791763200
+weekStart=2026-10-16T00:00:00+0000
+weekStartEpoch=1792108800
 savedAt=2026-10-18T16:22:07+0000
 
 [someplayer]
@@ -240,6 +247,7 @@ MaxTimeInServer/
   42/mod.info                               <- here, and with no versionMin
   42/poster.png
   common/media/lua/shared/MaxTimeInServer/  <- config and text, both sides need it
+  common/media/lua/shared/Translate/        <- the settings' names in each language
   common/media/lua/client/MaxTimeInServer/  <- the notice and the disconnect
   common/media/lua/server/MaxTimeInServer/  <- the counting and the decision
 ```

@@ -156,7 +156,7 @@ function MaxTimeInServerStore.serialize(state)
     local function put(line) table.insert(out, line) end
 
     put("# MaxTimeInServer - weekly connected-time quota. Minutes are real minutes.")
-    put("# A week runs from Monday 00:00:00 to Sunday 23:59:59, server timezone.")
+    put("# A week runs for seven days from weekStart below, server timezone.")
     put("# The weekly cap is a server sandbox option, not a setting in here.")
     put("# Safe to edit while the server runs: changes are picked up within a minute.")
     put("#   minutes       real minutes spent on the server this week")

@@ -37,6 +37,48 @@ H.test("every second of a week maps to that week's Monday", function()
     end
 end)
 
+-- The week can start on any weekday; 1 = Monday .. 7 = Sunday. MONDAY + (d-1)
+-- days is 00:00 of day d in the same calendar week, which is what these use as
+-- the expected boundary.
+local DAY = 24 * 3600
+
+H.test("every weekday can open the week", function()
+    for day = 1, 7 do
+        local boundary = MONDAY + (day - 1) * DAY
+        H.assertEqual(MaxTimeInServerClock.getWeekStartEpoch(boundary, day), boundary,
+            "day " .. day .. " 00:00 maps to itself")
+        H.assertEqual(MaxTimeInServerClock.getWeekStartEpoch(boundary + DAY + 3600, day),
+            boundary, "the day after still belongs to it")
+        H.assertEqual(MaxTimeInServerClock.getWeekStartEpoch(boundary - 1, day),
+            boundary - WEEK, "one second earlier is the week before")
+    end
+end)
+
+H.test("with Friday weeks, Thursday night is still the old week", function()
+    local friday = MONDAY + 4 * DAY
+    H.assertEqual(MaxTimeInServerClock.getWeekStartEpoch(friday, 5), friday, "friday 00:00")
+    H.assertEqual(MaxTimeInServerClock.getWeekStartEpoch(friday - 1, 5), friday - WEEK,
+        "thursday 23:59:59 belongs to the previous friday")
+    H.assertEqual(MaxTimeInServerClock.getWeekStartEpoch(friday + 6 * DAY + 86399, 5),
+        friday, "the following thursday is the last day of it")
+end)
+
+H.test("every second of a Friday week maps to that Friday", function()
+    local friday = MONDAY + 4 * DAY
+    for offset = 0, WEEK - 1, 997 do
+        local got = MaxTimeInServerClock.getWeekStartEpoch(friday + offset, 5)
+        if got ~= friday then
+            error("offset " .. offset .. " mapped to " .. tostring(got))
+        end
+    end
+end)
+
+H.test("omitting the day means Monday, so an old caller is unaffected", function()
+    local thursday = MONDAY + 3 * DAY
+    H.assertEqual(MaxTimeInServerClock.getWeekStartEpoch(thursday),
+        MaxTimeInServerClock.getWeekStartEpoch(thursday, 1), "same answer")
+end)
+
 H.test("formatIso renders a readable UTC stamp", function()
     H.assertEqual(MaxTimeInServerClock.formatIso(MONDAY), "2026-10-12T00:00:00+0000", "iso")
 end)

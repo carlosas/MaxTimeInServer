@@ -1,0 +1,25 @@
+{
+    "Sandbox_MaxTimeInServer": "Tiempo máximo en el servidor",
+
+    "Sandbox_MaxTimeInServer_CapMinutes": "Minutos semanales por cuenta",
+    "Sandbox_MaxTimeInServer_CapMinutes_tooltip": "Cuántos minutos reales puede pasar conectada cada cuenta en una semana. 600 son diez horas.",
+
+    "Sandbox_MaxTimeInServer_ResetDay": "Día en que empieza la semana",
+    "Sandbox_MaxTimeInServer_ResetDay_tooltip": "Los minutos de todas las cuentas vuelven a cero a las 00:00 de este día, en la noche entre el día anterior y este. Cambiarlo empieza una semana nueva en menos de un minuto.",
+    "Sandbox_MaxTimeInServer_ResetDay_option1": "Lunes",
+    "Sandbox_MaxTimeInServer_ResetDay_option2": "Martes",
+    "Sandbox_MaxTimeInServer_ResetDay_option3": "Miércoles",
+    "Sandbox_MaxTimeInServer_ResetDay_option4": "Jueves",
+    "Sandbox_MaxTimeInServer_ResetDay_option5": "Viernes",
+    "Sandbox_MaxTimeInServer_ResetDay_option6": "Sábado",
+    "Sandbox_MaxTimeInServer_ResetDay_option7": "Domingo",
+
+    "Sandbox_MaxTimeInServer_ExemptRoles": "Roles sin límite",
+    "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nombres de roles separados por punto y coma. Estas cuentas no se cuentan ni se rechazan nunca, así que siempre podrás entrar tú. Vacío significa que nadie queda exento, tampoco los administradores.",
+
+    "Sandbox_MaxTimeInServer_BlockedMessage": "Qué se le dice a quien es rechazado",
+    "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Si lo dejas vacío, el mod lo dice en el idioma de cada jugador. Si escribes algo, todos leerán exactamente eso. No puede contener comas. En ambos casos los números aparecen debajo.",
+
+    "Sandbox_MaxTimeInServer_GraceSeconds": "Segundos para leer el aviso",
+    "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Cuánto tiempo tiene quien es rechazado para leer el motivo antes de que su juego se desconecte."
+}

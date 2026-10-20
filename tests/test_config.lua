@@ -16,7 +16,31 @@ H.test("without the sandbox page the shipped defaults stand", function()
     H.assertFalse(C.applySandboxOptions({}), "nothing applied")
     H.assertEqual(C.capMinutes, 600, "capMinutes")
     H.assertEqual(C.graceSeconds, 12, "graceSeconds")
+    H.assertEqual(C.resetDay, 5, "resetDay is friday")
     H.assertEqual(roleList(), "admin,gm,moderator", "exemptRoles")
+end)
+
+H.test("the reset day is taken as the index of a weekday", function()
+    C.applySandboxOptions({ MaxTimeInServer = { ResetDay = 1 } })
+    H.assertEqual(C.resetDay, 1, "monday")
+    H.assertEqual(C.resetDayName(), "Monday", "named in the log")
+
+    C.applySandboxOptions({ MaxTimeInServer = { ResetDay = 7 } })
+    H.assertEqual(C.resetDay, 7, "sunday")
+    H.assertEqual(C.resetDayName(), "Sunday", "named in the log")
+end)
+
+H.test("a day outside the week is refused and friday stands", function()
+    for _, bad in ipairs({ 0, 8, -3, "friday", "" }) do
+        C.applySandboxOptions({ MaxTimeInServer = { ResetDay = bad } })
+        H.assertEqual(C.resetDay, 5, "refused " .. tostring(bad))
+    end
+    H.assertMatch(S.logText(), "ResetDay", "and said which option it was")
+end)
+
+H.test("the start-up line says when the week turns over", function()
+    C.applySandboxOptions({ MaxTimeInServer = { ResetDay = 3 } })
+    H.assertMatch(C.describe(), "Wednesdays at 00:00", "in words, not as a number")
 end)
 
 H.test("a missing SandboxVars altogether is survivable", function()

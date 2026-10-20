@@ -4,9 +4,9 @@ VERSION = 1,
  * Server settings for MaxTimeInServer. They appear under their own page in the
  * server's sandbox options, so they can be set from the admin panel or by
  * editing <World>_SandboxVars.lua, and are read when the server boots: changing
- * one takes a restart. They show as these raw keys because the file that would
- * give them readable names belongs to the base game, and a mod shipping it
- * shadows hundreds of the game's own entries.
+ * one takes a restart. Their readable names, their tooltips and the names of the
+ * weekdays below come from lua/shared/Translate/<LANG>/Sandbox.json, next to
+ * this file.
  */
 
 option MaxTimeInServer.CapMinutes
@@ -17,6 +17,22 @@ option MaxTimeInServer.CapMinutes
     default = 600,
     page = MaxTimeInServer,
     translation = MaxTimeInServer_CapMinutes,
+}
+
+/*
+ * The weekday the week turns over on: every account's minutes go back to zero at
+ * 00:00 of this day. An enum, so it reads as a list of days in the panel, but it
+ * is stored in SandboxVars as the number: 1 = Monday, 2 = Tuesday, 3 = Wednesday,
+ * 4 = Thursday, 5 = Friday, 6 = Saturday, 7 = Sunday.
+ */
+option MaxTimeInServer.ResetDay
+{
+    type = enum,
+    numValues = 7,
+    default = 5,
+    page = MaxTimeInServer,
+    translation = MaxTimeInServer_ResetDay,
+    valueTranslation = MaxTimeInServer_ResetDay,
 }
 
 option MaxTimeInServer.ExemptRoles
