@@ -15,7 +15,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "セミコロンで区切った残りプレイ分数。この時点で、備えられるようプレイヤーに通知します。各通知は1セッションにつき1回だけです。空欄にすると、時間切れまで通知しません。",
     "Sandbox_MaxTimeInServer_ExemptRoles": "制限を受けないロール",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "セミコロンで区切ったロール名。これらのロールを持つアカウントは切断されません。空欄にすると誰も除外されず、管理者も対象になります。",
-    "Sandbox_MaxTimeInServer_BlockedMessage": "拒否されたプレイヤーに伝える文面",
+    "Sandbox_MaxTimeInServer_BlockedMessage": "切断時の追加メッセージ",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "空欄にすると、Modが各プレイヤーの言語で伝えます。何か書くと全員がそのとおりに読みます。カンマは使えません。どちらの場合も数字がその下に続きます。",
     "Sandbox_MaxTimeInServer_GraceSeconds": "通知を読むための秒数",
     "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "拒否されたプレイヤーが、ゲームが切断されるまでに理由を読める時間。",

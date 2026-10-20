@@ -15,7 +15,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minutos de jogo restantes, separados por ponto e vírgula, em que o jogador é avisado para se preparar. Cada aviso é dado uma vez por sessão. Vazio significa que não há aviso até o tempo acabar.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Funções sem limite",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nomes de funções separados por ponto e vírgula. As contas com uma dessas funções nunca são expulsas. Vazio significa que ninguém fica isento, nem os administradores.",
-    "Sandbox_MaxTimeInServer_BlockedMessage": "O que é dito a quem é recusado",
+    "Sandbox_MaxTimeInServer_BlockedMessage": "Mensagem extra de expulsão",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Deixe vazio e o mod diz na língua de cada jogador. Escreva algo e todos lerão exatamente isso. Não pode conter vírgulas. De qualquer forma os números aparecem embaixo.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Segundos para ler o aviso",
     "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Quanto tempo um jogador recusado tem para ler o motivo antes de o jogo desconectar.",

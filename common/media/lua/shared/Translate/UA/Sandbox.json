@@ -15,7 +15,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Залишок хвилин гри через крапку з комою, на яких гравець отримує попередження, щоб устигнути підготуватися. Кожне попередження дається один раз за сесію. Порожньо — попереджень немає, доки час не скінчиться.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Ролі без обмеження",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Назви ролей через крапку з комою. Акаунти з однією з цих ролей ніколи не від'єднують. Порожньо — ніхто не звільнений, включно з адміністраторами.",
-    "Sandbox_MaxTimeInServer_BlockedMessage": "Що скажуть відхиленому гравцеві",
+    "Sandbox_MaxTimeInServer_BlockedMessage": "Додаткове повідомлення при від'єднанні",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Залиш порожнім, і мод скаже це мовою кожного гравця. Напиши щось, і всі прочитають саме це. Не може містити кому. В обох випадках цифри йдуть нижче.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Секунд на прочитання повідомлення",
     "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Скільки часу має відхилений гравець, щоб прочитати причину, перш ніж гра від'єднається.",

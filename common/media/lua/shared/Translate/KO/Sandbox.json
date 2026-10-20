@@ -15,7 +15,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "세미콜론으로 구분한 남은 플레이 분. 플레이어가 준비할 수 있도록 이 지점에서 알립니다. 각 알림은 접속 한 번당 한 번만 나옵니다. 비워 두면 시간이 다 될 때까지 알리지 않습니다.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "제한받지 않는 역할",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "세미콜론으로 구분한 역할 이름. 이 역할을 가진 계정은 접속이 끊기지 않습니다. 비워 두면 관리자를 포함해 아무도 예외가 아닙니다.",
-    "Sandbox_MaxTimeInServer_BlockedMessage": "거부된 플레이어에게 보여줄 문구",
+    "Sandbox_MaxTimeInServer_BlockedMessage": "접속 종료 시 추가 메시지",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "비워 두면 모드가 각 플레이어의 언어로 알려줍니다. 무언가 쓰면 모두가 그대로 읽습니다. 쉼표는 쓸 수 없습니다. 어느 쪽이든 숫자가 그 아래에 이어집니다.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "안내를 읽을 수 있는 초",
     "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "거부된 플레이어가 게임 연결이 끊기기 전에 이유를 읽을 수 있는 시간.",

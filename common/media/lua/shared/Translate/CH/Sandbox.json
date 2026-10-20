@@ -15,7 +15,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "用分號分隔的剩餘遊戲分鐘數，到達這些數值時提醒玩家，好讓他做準備。每個提醒每次遊戲只出現一次。留空表示在時間用完之前不提醒。",
     "Sandbox_MaxTimeInServer_ExemptRoles": "不受限制的角色",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "用分號分隔的角色名稱。擁有這些角色之一的帳號永遠不會被請出伺服器。留空表示沒有人例外，管理員也一樣。",
-    "Sandbox_MaxTimeInServer_BlockedMessage": "對被拒絕的玩家說什麼",
+    "Sandbox_MaxTimeInServer_BlockedMessage": "被請出時的額外訊息",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "留空時，模組會用每位玩家自己的語言來說明。寫了內容，所有人讀到的就是這段話。不能包含逗號。無論哪種情況，數字都會顯示在下面。",
     "Sandbox_MaxTimeInServer_GraceSeconds": "閱讀提示的秒數",
     "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "被拒絕的玩家在遊戲斷線之前，有多少時間閱讀原因。",

@@ -15,7 +15,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minuti di gioco rimasti, separati da punto e virgola, ai quali il giocatore viene avvisato per potersi preparare. Ogni avviso viene dato una volta per sessione. Vuoto significa nessun avviso finché il tempo non finisce.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Ruoli senza limite",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nomi di ruolo separati da punto e virgola. Gli account con uno di questi ruoli non vengono mai espulsi. Vuoto significa che nessuno è esente, amministratori compresi.",
-    "Sandbox_MaxTimeInServer_BlockedMessage": "Cosa si dice a chi viene respinto",
+    "Sandbox_MaxTimeInServer_BlockedMessage": "Messaggio aggiuntivo di espulsione",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Lascialo vuoto e il mod lo dirà nella lingua di ogni giocatore. Scrivi qualcosa e tutti leggeranno esattamente quello. Non può contenere virgole. In entrambi i casi i numeri seguono sotto.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Secondi per leggere l'avviso",
     "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Quanto tempo ha un giocatore respinto per leggere il motivo prima che il gioco si disconnetta.",

@@ -15,7 +15,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minutos de juego restantes, separados por punto y coma, a los que se avisa al jugador para que se prepare. Cada aviso se da una vez por sesión. Vacío significa que no se avisa hasta que se le acaba el tiempo.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roles sin límite",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nombres de roles separados por punto y coma. Las cuentas con uno de estos roles no serán expulsadas. Vacío significa que nadie queda exento, tampoco los administradores.",
-    "Sandbox_MaxTimeInServer_BlockedMessage": "Qué se le dice a quien es rechazado",
+    "Sandbox_MaxTimeInServer_BlockedMessage": "Mensaje extra de expulsión",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Si lo dejas vacío, el mod lo dice en el idioma de cada jugador. Si escribes algo, todos leerán exactamente eso. No puede contener comas. En ambos casos los números aparecen debajo.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Segundos para leer el aviso",
     "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Cuánto tiempo tiene quien es rechazado para leer el motivo antes de que su juego se desconecte.",

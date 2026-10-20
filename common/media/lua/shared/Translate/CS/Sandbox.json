@@ -15,7 +15,7 @@
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Zbývající minuty hry oddělené středníky, při kterých hráč dostane varování, aby se stihl připravit. Každé varování zazní jednou za sezení. Prázdné znamená žádné varování, dokud čas nedojde.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Role bez omezení",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Názvy rolí oddělené středníky. Účty s některou z těchto rolí nejsou nikdy vyhozeny. Prázdné znamená, že nikdo není vyjmut, ani administrátoři.",
-    "Sandbox_MaxTimeInServer_BlockedMessage": "Co se řekne odmítnutému hráči",
+    "Sandbox_MaxTimeInServer_BlockedMessage": "Zpráva navíc při vyhození",
     "Sandbox_MaxTimeInServer_BlockedMessage_tooltip": "Nech prázdné a mod to řekne v jazyce každého hráče. Napiš sem něco a všichni přečtou přesně to. Nesmí obsahovat čárku. Tak či tak čísla následují pod tím.",
     "Sandbox_MaxTimeInServer_GraceSeconds": "Sekundy na přečtení zprávy",
     "Sandbox_MaxTimeInServer_GraceSeconds_tooltip": "Kolik času má odmítnutý hráč na přečtení důvodu, než se jeho hra odpojí.",
