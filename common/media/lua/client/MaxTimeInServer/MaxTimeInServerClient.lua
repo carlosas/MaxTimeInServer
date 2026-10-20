@@ -102,6 +102,15 @@ local function defaultShowNotice(text)
     local modal = ISModalDialog:new(x, y, width, height, text, false, nil,
         MaxTimeInServerClient.onNoticeDismissed)
     modal:initialise()
+
+    -- No button on it. There is nothing for the player to decide: the notice
+    -- goes when the connection does, a few seconds later. ISModalDialog always
+    -- builds one in initialise(), so it is hidden rather than taken away - the
+    -- dialog keeps a reference to it for its joypad handling.
+    pcall(function()
+        if modal.ok ~= nil then modal.ok:setVisible(false) end
+    end)
+
     modal:addToUIManager()
     if modal.setAlwaysOnTop ~= nil then modal:setAlwaysOnTop(true) end
 end
