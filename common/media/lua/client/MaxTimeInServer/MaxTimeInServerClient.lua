@@ -289,8 +289,16 @@ function MaxTimeInServerClient.onServerCommand(module, command, args)
     local cap = tonumber(args.cap) or 0
     local graceSeconds = tonumber(args.graceSeconds) or MaxTimeInServerConfig.graceSeconds or 10
 
-    -- The disconnect is armed before the notice: a UI that refuses to open
-    -- must not leave the player in a world they are not allowed to be in.
+    -- The notice has to come before the disconnect, and that was measured
+    -- rather than assumed: a dialog opened right after forceDisconnect is
+    -- created without error and never drawn, because the engine takes the
+    -- screen for its own "Connection to server lost", and this mod's Lua stops
+    -- running with the session - neither OnDisconnect nor OnMainMenuEnter fire
+    -- after it. There is no later moment in which to explain anything.
+    --
+    -- The disconnect is armed before the notice is shown, though: a UI that
+    -- refuses to open must not leave the player in a world they are not
+    -- allowed to be in.
     local moment = now()
     disconnectAtMs = moment + graceSeconds * 1000
 
