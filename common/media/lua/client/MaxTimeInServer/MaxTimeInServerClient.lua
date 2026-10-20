@@ -74,10 +74,13 @@ end
 
 MaxTimeInServerClient.hooks = {
     -- The character matters: the base game always sends client commands with
-    -- one, and the form without it does not reach the server from here.
+    -- one, and the form without it does not reach the server from here. The
+    -- arguments are empty on purpose: the server takes the account from the
+    -- connection it arrived on and the minutes from its own file, so there is
+    -- nothing for a client to say here.
     sendHello = function(character)
         sendClientCommand(character, MaxTimeInServerConfig.netModule,
-            MaxTimeInServerConfig.netHello, { version = 1 })
+            MaxTimeInServerConfig.netHello, {})
     end,
     showNotice = defaultShowNotice,
     disconnect = function() forceDisconnect() end,
