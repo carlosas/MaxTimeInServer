@@ -14,10 +14,8 @@ ZOMBOID     ?= $$HOME/Zomboid
 CLIENT_ZOMBOID ?= $(HOME)/Zomboid
 MODS_DIR    ?= $(ZOMBOID)/mods
 CONSOLE     ?= $(ZOMBOID)/server-console.txt
-# The counter file is named after the server. The bare name is what it was
-# called before that, and what a server still running an older build writes.
+# The counter file is named after the server.
 DATA_FILE   ?= $(ZOMBOID)/Lua/MaxTimeInServer_$(WORLD).txt
-OLD_DATA    ?= $(ZOMBOID)/Lua/MaxTimeInServer.txt
 DB_FILE     ?= $(ZOMBOID)/db/$(WORLD).db
 SERVER_INI  ?= $(ZOMBOID)/Server/$(WORLD).ini
 
@@ -109,7 +107,7 @@ ini: ## Show the mod-related server ini lines
 
 demo-block: ## Push a player over the cap so their next join is refused (PLAYER=name)
 	@test -n "$(PLAYER)" || { echo "usage: make demo-block PLAYER=<account name>"; exit 1; }
-	@$(SSH) 'f=$(DATA_FILE); [ -f "$$f" ] || f=$(OLD_DATA); \
+	@$(SSH) 'f=$(DATA_FILE); \
 		grep -q "^\[$(PLAYER)\]$$" "$$f" 2>/dev/null || { \
 			echo "$(PLAYER) is not in $$f yet - they have to connect once first"; exit 1; }; \
 		sed -i "/^\[$(PLAYER)\]$$/,/^$$/ s/^minutes=.*/minutes=999999/" "$$f" && \
@@ -118,7 +116,7 @@ demo-block: ## Push a player over the cap so their next join is refused (PLAYER=
 
 demo-restore: ## Put a player's counter back to zero (PLAYER=name)
 	@test -n "$(PLAYER)" || { echo "usage: make demo-restore PLAYER=<account name>"; exit 1; }
-	@$(SSH) 'f=$(DATA_FILE); [ -f "$$f" ] || f=$(OLD_DATA); \
+	@$(SSH) 'f=$(DATA_FILE); \
 		sed -i "/^\[$(PLAYER)\]$$/,/^$$/ s/^minutes=.*/minutes=0/" "$$f" && \
 		sed -n "/^\[$(PLAYER)\]$$/,/^$$/p" "$$f"'
 

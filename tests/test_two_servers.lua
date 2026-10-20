@@ -76,28 +76,6 @@ H.test("neither server answers with the other's minutes", function()
         "still welcome on Bravo")
 end)
 
-H.test("the file from before this change is carried over to the server's own", function()
-    local fs = S.fakeFiles({ ["MaxTimeInServer.txt"] = weekFile(300) })
-    S.logLines = {}
-    bootServer("Alpha", {}, fs)
-
-    H.assertEqual(minutesIn("MaxTimeInServer_Alpha.txt", "someplayer", fs), 300,
-        "nobody starts the week again")
-    H.assertMatch(S.logText(), "carried the counters over", "and it says so")
-end)
-
-H.test("a server with a file of its own ignores the old shared one", function()
-    local fs = S.fakeFiles({
-        ["MaxTimeInServer.txt"] = weekFile(300),
-        ["MaxTimeInServer_Alpha.txt"] = weekFile(7),
-    })
-    S.logLines = {}
-    bootServer("Alpha", {}, fs)
-
-    H.assertEqual(minutesIn("MaxTimeInServer_Alpha.txt", "someplayer", fs), 7, "its own count stands")
-    H.assertFalse(S.logText():find("carried the counters over"), "nothing was copied over it")
-end)
-
 H.test("a server name that is no use as a file name still gets its own file", function()
     local eu = MaxTimeInServerConfig.resolveDataFile("Carlos' server (EU)")
     local us = MaxTimeInServerConfig.resolveDataFile("Carlos' server (US)")
@@ -108,7 +86,7 @@ end)
 H.test("a server that will not say its name keeps the old file, and warns", function()
     S.logLines = {}
     local name, named = MaxTimeInServerConfig.resolveDataFile("")
-    H.assertEqual(name, MaxTimeInServerConfig.legacyDataFile, "the name it always had")
+    H.assertEqual(name, "MaxTimeInServer.txt", "the one shared name")
     H.assertFalse(named, "and it admits it cannot tell servers apart")
 
     bootServer("", {}, S.fakeFiles())

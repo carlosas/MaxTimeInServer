@@ -224,28 +224,6 @@ local function creditOnlinePlayers(state, now, weekStart, d, exemptRoles)
     return changed
 end
 
--- The counter file used to carry one name for every server. If this server has
--- its own now and has not written it yet, carry the old file over rather than
--- starting everybody at zero. Reading it is the only use it has from here on.
-local function adoptLegacyFile(d)
-    local legacy = d.config.legacyDataFile
-    if legacy == nil or legacy == "" or legacy == d.config.dataFile then return end
-
-    local existing = d.files.read(d.files, d.config.dataFile)
-    if existing ~= nil and existing ~= "" then return end
-
-    local old = d.files.read(d.files, legacy)
-    if old == nil or old == "" then return end
-
-    if d.files.write(d.files, d.config.dataFile, old) then
-        log("carried the counters over from " .. legacy .. " to " .. d.config.dataFile ..
-            "; the old file is no longer read and can be deleted")
-    else
-        log("could not copy " .. legacy .. " into " .. d.config.dataFile ..
-            ", so this server starts its counters from scratch")
-    end
-end
-
 local function rescueName(dataFile)
     local base = tostring(dataFile):gsub("%.txt$", "")
     return base .. ".broken.txt"
@@ -349,12 +327,6 @@ local function onServerStarted()
                 "; if a second server runs out of the same Zomboid folder, give " ..
                 "each one its own -cachedir or they will share these counters")
         end
-        local adopted, adoptErr = pcall(adoptLegacyFile, d)
-        if not adopted then
-            log("could not look at " .. tostring(d.config.legacyDataFile) .. ": " ..
-                tostring(adoptErr))
-        end
-
         local state = MaxTimeInServerQuota.loadState()
         local accounts = #state.order
         log("ready: " .. d.config.describe() ..

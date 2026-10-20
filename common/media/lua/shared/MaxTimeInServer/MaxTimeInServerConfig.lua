@@ -21,6 +21,8 @@ local DEFAULT_GRACE_SECONDS = 12
 -- its own translated line instead. That way a server that never touches the
 -- setting still speaks to each player in their language.
 local DEFAULT_BLOCKED_MESSAGE = ""
+-- Fallback for a server that will not say its name; see resolveDataFile.
+local DEFAULT_DATA_FILE = "MaxTimeInServer.txt"
 
 MaxTimeInServerConfig = {
     -- Set from the sandbox options; see applySandboxOptions below.
@@ -36,11 +38,8 @@ MaxTimeInServerConfig = {
     -- shared by every server run out of one data folder while Server/ and
     -- Saves/ are not. Two servers writing one file would not interleave their
     -- counters, they would overwrite them: each sweep rewrites the whole file.
-    -- The server fills this in at start-up from resolveDataFile;
-    -- legacyDataFile is what the file was called before that, and is read once
-    -- to carry the counters over.
-    dataFile = "MaxTimeInServer.txt",
-    legacyDataFile = "MaxTimeInServer.txt",
+    -- The server fills this in at start-up from resolveDataFile.
+    dataFile = DEFAULT_DATA_FILE,
     netModule = "MaxTimeInServer",
     netHello = "hello",
     netBlocked = "blocked",
@@ -167,9 +166,9 @@ end
 
 --- Names this server's own counter file, without storing it anywhere.
 -- Returns the name and whether the server could be identified at all; the
--- caller is the one that owns a config table and assigns it. The fallback is
--- the old shared name, so a single server behaves exactly as before and only a
--- second server in the same folder is at risk, which is what the caller logs.
+-- caller is the one that owns a config table and assigns it. Unidentified, it
+-- falls back to one shared name, which only costs anything if a second server
+-- runs out of the same folder - and that is what the caller logs.
 -- getServerName() is what the base game itself builds its per-server file
 -- names from, inside an isServer() branch (media/lua/shared/SpawnRegions.lua).
 function MaxTimeInServerConfig.resolveDataFile(serverName)
@@ -179,7 +178,7 @@ function MaxTimeInServerConfig.resolveDataFile(serverName)
     end
 
     local safe = fileSafe(serverName)
-    if safe == "" then return MaxTimeInServerConfig.legacyDataFile, false end
+    if safe == "" then return DEFAULT_DATA_FILE, false end
     return "MaxTimeInServer_" .. safe .. ".txt", true
 end
 
