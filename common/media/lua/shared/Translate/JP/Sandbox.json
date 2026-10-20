@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "金曜日",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "土曜日",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "日曜日",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "残りがこの分数になったら警告",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "事前通知の分数",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "セミコロンで区切った残りプレイ分数。この時点でプレイヤーに時間が少なくなっていると警告します。各区切りは1セッションにつき1回だけ伝えます。空欄にすると、時間切れで切断されるまで何も伝えません。",
     "Sandbox_MaxTimeInServer_ExemptRoles": "制限を受けないロール",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "セミコロンで区切ったロール名。これらのアカウントは数えられず、拒否されることもないので、自分はいつでも入れます。空欄にすると誰も除外されず、管理者も対象になります。",

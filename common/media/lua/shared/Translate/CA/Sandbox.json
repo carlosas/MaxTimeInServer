@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "Divendres",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Dissabte",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Diumenge",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "Avisa quan quedi això",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "Minuts d'avís previ",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minuts de joc restants, separats per punt i coma, en què s'avisa el jugador que se li acaba el temps. Cada marca es diu un cop per sessió. Buit vol dir que no sent res fins que se li acaba el temps i se'l desconnecta.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Rols sense límit",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Noms de rols separats per punt i coma. Aquests comptes no es compten mai ni es rebutgen, així sempre hi podràs entrar tu. Buit vol dir que ningú no queda exempt, tampoc els administradors.",

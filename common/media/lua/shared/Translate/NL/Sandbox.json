@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "Vrijdag",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Zaterdag",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Zondag",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "Waarschuwen als dit nog over is",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "Minuten vooraf waarschuwen",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Resterende speelminuten, gescheiden door puntkomma's, waarbij een speler wordt gewaarschuwd dat zijn tijd opraakt. Elke grens wordt één keer per sessie gezegd. Leeg betekent dat hij niets hoort tot zijn tijd op is en de verbinding wordt verbroken.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Rollen zonder limiet",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Rolnamen gescheiden door puntkomma's. Deze accounts worden nooit geteld en nooit geweigerd, dus je komt er zelf altijd in. Leeg betekent dat niemand is vrijgesteld, beheerders inbegrepen.",

@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "Viernes",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Sábado",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Domingo",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "Avisar cuando quede esto",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "Minutos de preaviso",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minutos de juego restantes, separados por punto y coma, a los que se avisa al jugador de que se le acaba el tiempo. Cada aviso se da una vez por sesión. Vacío significa que no se le dice nada hasta que se le acaba el tiempo y se le desconecta.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roles sin límite",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nombres de roles separados por punto y coma. Estas cuentas no se cuentan ni se rechazan nunca, así que siempre podrás entrar tú. Vacío significa que nadie queda exento, tampoco los administradores.",

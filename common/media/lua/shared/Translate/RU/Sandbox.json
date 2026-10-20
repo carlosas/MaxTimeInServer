@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "Пятница",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Суббота",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Воскресенье",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "Предупреждать, когда остаётся столько",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "Минуты предупреждения",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Оставшиеся минуты игры через точку с запятой, на которых игрок получает предупреждение, что время заканчивается. Каждый порог называется один раз за сессию. Пусто — он ничего не услышит, пока время не кончится и его не отключит.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Роли без ограничения",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Названия ролей через точку с запятой. Эти аккаунты никогда не считаются и никогда не отклоняются, так что сам ты всегда войдёшь. Пусто — никто не освобождён, включая администраторов.",

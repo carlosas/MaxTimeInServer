@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "Friday",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Saturday",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Sunday",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "Warn when this much is left",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "Minutes of warning",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Minutes of play left, separated by semicolons, at which a player is warned that their time is running out. Each one is said once per session. Empty means they hear nothing until their time is up and they are disconnected.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roles that are never limited",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Role names separated by semicolons. These accounts are never counted and never turned away, so you can always get in yourself. Empty means nobody is exempt, operators included.",

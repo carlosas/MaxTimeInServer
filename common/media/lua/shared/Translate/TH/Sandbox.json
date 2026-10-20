@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "วันศุกร์",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "วันเสาร์",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "วันอาทิตย์",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "เตือนเมื่อเหลือเท่านี้",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "นาทีที่เตือนล่วงหน้า",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "นาทีเล่นที่เหลือ คั่นด้วยเครื่องหมายอัฒภาค ซึ่งผู้เล่นจะได้รับคำเตือนว่าเวลากำลังจะหมด แต่ละจุดจะบอกครั้งเดียวต่อหนึ่งรอบการเล่น ปล่อยว่างหมายความว่าเขาจะไม่ได้ยินอะไรเลยจนกว่าเวลาจะหมดและถูกตัดการเชื่อมต่อ",
     "Sandbox_MaxTimeInServer_ExemptRoles": "บทบาทที่ไม่ถูกจำกัด",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "ชื่อบทบาทคั่นด้วยเครื่องหมายอัฒภาค บัญชีเหล่านี้จะไม่ถูกนับและไม่ถูกปฏิเสธ คุณจึงเข้าได้เสมอ ปล่อยว่างหมายความว่าไม่มีใครได้รับการยกเว้น รวมถึงผู้ดูแลระบบ",

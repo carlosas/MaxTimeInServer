@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "Cuma",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Cumartesi",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Pazar",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "Bu kadar kalınca uyar",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "Uyarı dakikaları",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Noktalı virgülle ayrılmış kalan oyun dakikaları; oyuncu bu noktalarda süresinin tükendiği konusunda uyarılır. Her eşik oturum başına bir kez söylenir. Boş bırakılırsa süresi bitip bağlantısı kesilene kadar hiçbir şey duymaz.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Sınırsız roller",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Noktalı virgülle ayrılmış rol adları. Bu hesaplar asla sayılmaz ve asla geri çevrilmez, böylece sen her zaman girebilirsin. Boş bırakılırsa kimse muaf değildir, yöneticiler de dahil.",

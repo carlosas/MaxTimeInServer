@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "Perjantai",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Lauantai",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Sunnuntai",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "Varoita, kun jäljellä on tämän verran",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "Varoitusminuutit",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Jäljellä olevat peliminuutit puolipistein eroteltuina, joissa pelaajaa varoitetaan ajan loppumisesta. Kukin raja sanotaan kerran istuntoa kohden. Tyhjä tarkoittaa, ettei hän kuule mitään ennen kuin aika loppuu ja yhteys katkaistaan.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Roolit ilman rajaa",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Roolien nimet puolipistein eroteltuina. Näitä tilejä ei lasketa eikä käännytetä koskaan, joten pääset itse aina sisään. Tyhjä tarkoittaa, ettei kukaan ole vapautettu, eivät myöskään ylläpitäjät.",

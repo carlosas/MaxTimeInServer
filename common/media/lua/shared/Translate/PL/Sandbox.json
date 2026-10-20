@@ -11,7 +11,7 @@
     "Sandbox_MaxTimeInServer_ResetDay_option5": "Piątek",
     "Sandbox_MaxTimeInServer_ResetDay_option6": "Sobota",
     "Sandbox_MaxTimeInServer_ResetDay_option7": "Niedziela",
-    "Sandbox_MaxTimeInServer_WarnMinutes": "Ostrzegaj, gdy zostanie tyle",
+    "Sandbox_MaxTimeInServer_WarnMinutes": "Minuty ostrzeżenia",
     "Sandbox_MaxTimeInServer_WarnMinutes_tooltip": "Pozostałe minuty gry, oddzielone średnikami, przy których gracz dostaje ostrzeżenie, że kończy mu się czas. Każdy próg jest podawany raz na sesję. Puste oznacza, że nie usłyszy nic, dopóki czas się nie skończy i nie zostanie rozłączony.",
     "Sandbox_MaxTimeInServer_ExemptRoles": "Role bez limitu",
     "Sandbox_MaxTimeInServer_ExemptRoles_tooltip": "Nazwy ról oddzielone średnikami. Te konta nigdy nie są liczone ani odrzucane, więc sam zawsze wejdziesz. Puste oznacza, że nikt nie jest zwolniony, łącznie z administratorami.",
