@@ -295,12 +295,13 @@ Three constraints worth knowing before editing the Lua:
   side you are on are not dependable that early.
 
 The layout is not a matter of taste either: Build 42 finds a mod by its version
-directory, and a `versionMin` line in the manifest makes a server skip the mod
-entirely.
+directory, so `mod.info` lives in `42/`. `versionMin` wants three numbers —
+`42.0.0`, the way the published mods write it. A bare `42` is not a version, and
+a server given one skips the mod without a word about it.
 
 ```
 MaxTimeInServer/
-  42/mod.info                               <- here, and with no versionMin
+  42/mod.info                               <- here, not at the root
   42/poster.png
   common/media/lua/shared/MaxTimeInServer/  <- config and text, both sides need it
   common/media/lua/shared/Translate/        <- the settings' names in each language
